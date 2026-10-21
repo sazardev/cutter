@@ -2,6 +2,7 @@
 // provides `@immutable` is not a declared dependency of the domain.
 // ignore_for_file: avoid_equals_and_hash_code_on_mutable_classes
 
+import 'package:cutter/features/editor/domain/canvas.dart';
 import 'package:cutter/features/editor/domain/clip.dart';
 import 'package:cutter/features/editor/domain/layer.dart';
 
@@ -14,6 +15,7 @@ class Project {
     required this.name,
     List<Layer> layers = const [],
     this.templateId,
+    this.canvas = defaultCanvas,
   }) : layers = List.unmodifiable(layers);
 
   /// Unique id of the project.
@@ -27,6 +29,9 @@ class Project {
 
   /// Id of the template the project was created from, if any.
   final String? templateId;
+
+  /// The frame the project renders to.
+  final Canvas canvas;
 
   /// The layer with [id], or null when the project has none.
   Layer? layerById(String id) {
@@ -72,6 +77,40 @@ class Project {
       name: name,
       layers: newLayers,
       templateId: templateId,
+      canvas: canvas,
+    );
+  }
+
+  /// The project without layers that hold no clip: a layer exists for what
+  /// is on it, so an emptied one (or a template's unused one) goes away.
+  /// Returns this project when every layer has a clip.
+  Project withoutEmptyLayers() {
+    if (layers.every((layer) => layer.clips.isNotEmpty)) return this;
+    return withLayers([
+      for (final layer in layers)
+        if (layer.clips.isNotEmpty) layer,
+    ]);
+  }
+
+  /// Returns a copy called [newName].
+  Project withName(String newName) {
+    return Project(
+      id: id,
+      name: newName,
+      layers: layers,
+      templateId: templateId,
+      canvas: canvas,
+    );
+  }
+
+  /// Returns a copy rendering to [newCanvas].
+  Project withCanvas(Canvas newCanvas) {
+    return Project(
+      id: id,
+      name: name,
+      layers: layers,
+      templateId: templateId,
+      canvas: newCanvas,
     );
   }
 
@@ -94,6 +133,7 @@ class Project {
           other.id == id &&
           other.name == name &&
           other.templateId == templateId &&
+          other.canvas == canvas &&
           _sameLayers(other.layers);
 
   bool _sameLayers(List<Layer> other) {
@@ -109,6 +149,7 @@ class Project {
         id,
         name,
         templateId,
+        canvas,
         Object.hashAll(layers),
       );
 

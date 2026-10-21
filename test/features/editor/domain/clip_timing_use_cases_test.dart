@@ -97,7 +97,7 @@ void main() {
         projectId: 'p1',
         clipId: 'c1',
         inPointMs: 1000,
-        outPointMs: 1050,
+        outPointMs: 1020,
       );
 
       expect(_failureOf(result), const ZeroDuration());

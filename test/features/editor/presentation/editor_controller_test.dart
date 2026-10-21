@@ -1,10 +1,16 @@
 import 'package:cutter/core/db/app_database.dart';
+import 'package:cutter/core/engine/media_engine.dart';
+import 'package:cutter/features/editor/data/engine_media_inspector.dart';
 import 'package:cutter/features/editor/domain/clip.dart';
+import 'package:cutter/features/editor/domain/media_asset.dart';
+import 'package:cutter/features/editor/presentation/checkpoint_labels.dart';
 import 'package:cutter/features/editor/presentation/editor_controller.dart';
 import 'package:cutter/features/editor/presentation/editor_providers.dart';
 import 'package:drift/drift.dart' show Value;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+import '../../../core/engine/fake_media_engine.dart';
 
 const _projectId = 'p1';
 const _videoLayerId = 'l1';
@@ -112,8 +118,33 @@ void main() {
   setUp(() async {
     database = AppDatabase.inMemory();
     await _seedProject(database);
+    final engine = FakeMediaEngine(
+      media: {
+        '/media/clip.mp4': fakeVideo,
+        '/media/song.m4a': fakeSound,
+        '/media/blip.wav': const MediaInfo(
+          kind: EngineMediaKind.audio,
+          durationMs: 20,
+          width: 0,
+          height: 0,
+          hasAudio: true,
+          frameRate: 0,
+          rotation: 0,
+        ),
+      },
+    );
     container = ProviderContainer(
-      overrides: [appDatabaseProvider.overrideWithValue(database)],
+      overrides: [
+        appDatabaseProvider.overrideWithValue(database),
+        mediaEngineProvider.overrideWithValue(engine),
+        mediaInspectorProvider.overrideWith(
+          (ref) => EngineMediaInspector(
+            engine,
+            ref.watch(idGeneratorProvider),
+            keep: (path) async => path,
+          ),
+        ),
+      ],
     )..listen(editorControllerProvider, (_, __) {});
     await controller().load(_projectId);
   });
@@ -123,9 +154,9 @@ void main() {
     await database.close();
   });
 
-  test('load shows the stored project with the playhead at zero', () {
+  test('load shows the stored project with nothing to undo', () {
     expect(uiState().project.id, _projectId);
-    expect(uiState().playheadMs, 0);
+    expect(uiState().canUndo, isFalse);
     expect(uiState().selectedClipId, isNull);
     expect(layerClips(_videoLayerId), hasLength(2));
   });
@@ -136,21 +167,11 @@ void main() {
     expect(container.read(editorControllerProvider).hasError, isTrue);
   });
 
-  test('seek clamps the playhead to zero', () {
-    controller().seek(-500);
-    expect(uiState().playheadMs, 0);
-
-    controller().seek(1234);
-    expect(uiState().playheadMs, 1234);
-  });
-
   test('splits the selected clip into two adjacent clips', () async {
-    controller()
-      ..selectClip('c1')
-      ..seek(1000);
-    expect(controller().canSplit, isTrue);
+    controller().selectClip('c1');
+    expect(controller().canSplitAt(1000), isTrue);
 
-    await controller().splitAtPlayhead();
+    await controller().splitAt(1000);
 
     expect(uiState().failure, isNull);
     final clips = layerClips(_videoLayerId);
@@ -164,45 +185,37 @@ void main() {
 
   test('split at the clip start is rejected and changes nothing', () async {
     controller().selectClip('c1');
-    expect(controller().canSplit, isFalse);
+    expect(controller().canSplitAt(0), isFalse);
 
-    await controller().splitAtPlayhead();
+    await controller().splitAt(0);
 
     expect(uiState().failure, isNotNull);
     expect(layerClips(_videoLayerId), hasLength(2));
   });
 
   test('split with the playhead outside the clip is rejected', () async {
-    controller()
-      ..selectClip('c1')
-      ..seek(_clipDurationMs + 500);
-    expect(controller().canSplit, isFalse);
+    controller().selectClip('c1');
+    expect(controller().canSplitAt(_clipDurationMs + 500), isFalse);
 
-    await controller().splitAtPlayhead();
+    await controller().splitAt(_clipDurationMs + 500);
 
     expect(uiState().failure, isNotNull);
     expect(layerClips(_videoLayerId), hasLength(2));
   });
 
-  test('canSplit is false without a selected clip', () {
-    controller().seek(1000);
-
-    expect(controller().canSplit, isFalse);
+  test('canSplitAt is false without a selected clip', () {
+    expect(controller().canSplitAt(1000), isFalse);
   });
 
   test('moves the selected clip later when the range is free', () async {
-    controller().selectClip('c2');
-
-    await controller().nudgeSelected(500);
+    await controller().moveClip('c2', _videoLayerId, _clipDurationMs + 2500);
 
     expect(uiState().failure, isNull);
     expect(clipById('c2').startMs, _clipDurationMs + 2000 + 500);
   });
 
   test('move onto an occupied range fails and keeps both clips', () async {
-    controller().selectClip('c2');
-
-    await controller().nudgeSelected(-3000);
+    await controller().moveClip('c2', _videoLayerId, _clipDurationMs - 1000);
 
     expect(uiState().failure, isNotNull);
     expect(clipById('c2').startMs, _clipDurationMs + 2000);
@@ -211,7 +224,7 @@ void main() {
 
   test('selecting a clip clears the previous failure', () async {
     controller().selectClip('c1');
-    await controller().splitAtPlayhead();
+    await controller().splitAt(0);
     expect(uiState().failure, isNotNull);
 
     controller().selectClip('c2');
@@ -221,7 +234,7 @@ void main() {
 
   test('clearFailure removes the recorded failure', () async {
     controller().selectClip('c1');
-    await controller().splitAtPlayhead();
+    await controller().splitAt(0);
     expect(uiState().failure, isNotNull);
 
     controller().clearFailure();
@@ -261,9 +274,7 @@ void main() {
   });
 
   test('trims the selected clip to the given source range', () async {
-    controller().selectClip('c1');
-
-    await controller().trimSelectedClip(inPointMs: 0, outPointMs: 2000);
+    await controller().trimClip('c1', inPointMs: 0, outPointMs: 2000);
 
     expect(uiState().failure, isNull);
     final clip = clipById('c1');
@@ -274,22 +285,18 @@ void main() {
 
   test('a trim that leaves no duration is rejected and keeps the clip',
       () async {
-    controller().selectClip('c1');
-
-    await controller().trimSelectedClip(inPointMs: 0, outPointMs: 50);
+    await controller().trimClip('c1', inPointMs: 0, outPointMs: 20);
 
     expect(uiState().failure, isNotNull);
     expect(clipById('c1').outPointMs, _clipDurationMs);
   });
 
-  test('setting one adjustment keeps the other ones', () async {
+  test('saves the adjustments of the selected clip', () async {
     controller().selectClip('c1');
 
-    await controller().setAdjustment('brightness', 0.5);
+    await controller().setAdjustments({'brightness': 0.5, 'contrast': -0.25});
+
     expect(uiState().failure, isNull);
-
-    await controller().setAdjustment('contrast', -0.25);
-
     final clip = clipById('c1');
     expect(clip.adjustments, {'brightness': 0.5, 'contrast': -0.25});
   });
@@ -297,7 +304,7 @@ void main() {
   test('an unknown adjustment key is rejected and changes nothing', () async {
     controller().selectClip('c1');
 
-    await controller().setAdjustment('sepia', 0.5);
+    await controller().setAdjustments({'sepia': 0.5});
 
     expect(uiState().failure, isNotNull);
     expect(clipById('c1').adjustments, isEmpty);
@@ -310,5 +317,200 @@ void main() {
     await controller().load(_projectId);
 
     expect(clipById('c1').reversed, isTrue);
+  });
+
+  test('undo and redo walk through the edits and are saved', () async {
+    controller().selectClip('c1');
+    await controller().toggleReverse();
+    await controller().setClipVolume(0.25);
+    expect(uiState().canUndo, isTrue);
+
+    await controller().undo();
+    expect(clipById('c1').volume, 1);
+    expect(clipById('c1').reversed, isTrue);
+    expect(uiState().canRedo, isTrue);
+
+    await controller().undo();
+    expect(clipById('c1').reversed, isFalse);
+    expect(uiState().canUndo, isFalse);
+
+    await controller().redo();
+    expect(clipById('c1').reversed, isTrue);
+
+    await controller().load(_projectId);
+    expect(clipById('c1').reversed, isTrue);
+  });
+
+  test('a rejected edit records nothing to undo', () async {
+    controller().selectClip('c1');
+    await controller().splitAt(0);
+
+    expect(uiState().canUndo, isFalse);
+  });
+
+  test('deleting on the main layer closes the gap', () async {
+    controller().selectClip('c1');
+
+    await controller().deleteSelected();
+
+    expect(uiState().selectedClipId, isNull);
+    final clips = layerClips(_videoLayerId);
+    expect(clips.map((c) => (c.id, c.startMs)), [('c2', 2000)]);
+  });
+
+  test('duplicating selects the copy placed right after the original',
+      () async {
+    controller().selectClip('c1');
+
+    await controller().duplicateSelected();
+
+    final copyId = uiState().selectedClipId!;
+    expect(copyId, isNot('c1'));
+    expect(clipById(copyId).startMs, _clipDurationMs);
+    expect(clipById('c2').startMs, _clipDurationMs * 2 + 2000);
+  });
+
+  test('mutes a layer', () async {
+    await controller().setLayerMuted(_audioLayerId, muted: true);
+
+    final layer =
+        uiState().project.layers.firstWhere((l) => l.id == _audioLayerId);
+    expect(layer.muted, isTrue);
+  });
+
+  test('imports playable files and reports the others', () async {
+    final outcome = await controller().importFiles(
+      ['/media/clip.mp4', '/media/notes.txt', '/media/song.m4a'],
+      atMs: 1000,
+    );
+
+    expect(outcome.imported, 2);
+    expect(outcome.rejected, ['/media/notes.txt']);
+    final video = layerClips(_videoLayerId);
+    expect(video.last.sourceUri, '/media/clip.mp4');
+    expect(video.last.startMs, _clipDurationMs * 2 + 2000);
+    final sounds = [
+      for (final layer in uiState().project.layers)
+        if (layer.kind == MediaKind.audio)
+          for (final clip in layer.clips)
+            if (clip.sourceUri == '/media/song.m4a') clip,
+    ];
+    expect(sounds.single.startMs, 1000);
+    expect(uiState().selectedClipId, sounds.single.id);
+    expect(uiState().importing, isFalse);
+  });
+
+  test('an import of only unreadable files changes nothing', () async {
+    final outcome =
+        await controller().importFiles(['/media/notes.txt'], atMs: 0);
+
+    expect(outcome.imported, 0);
+    expect(uiState().canUndo, isFalse);
+  });
+
+  test('a file too short to be a clip is reported, the rest imports', () async {
+    final outcome = await controller().importFiles(
+      ['/media/clip.mp4', '/media/blip.wav'],
+      atMs: 0,
+    );
+
+    expect(outcome.imported, 1);
+    expect(outcome.rejected, ['/media/blip.wav']);
+  });
+
+  group('restore points', () {
+    final labels = CheckpointLabels(
+      start: 'Start',
+      auto: (at) => 'Auto',
+      beforeRestore: (name) => 'Before $name',
+    );
+
+    Future<List<String>> names() async => [
+          for (final v
+              in await container.read(versionRepositoryProvider).versionsOf(
+                    _projectId,
+                  ))
+            v.name,
+        ];
+
+    test('opening a project saves a first point, only once', () async {
+      await controller().load(_projectId, labels: labels);
+      await controller().load(_projectId, labels: labels);
+
+      expect(await names(), ['Start']);
+    });
+
+    test('without labels nothing is saved by itself', () async {
+      expect(await names(), isEmpty);
+    });
+
+    test('restoring first saves the state it replaces', () async {
+      await controller().load(_projectId, labels: labels);
+      final start = (await container
+              .read(versionRepositoryProvider)
+              .versionsOf(_projectId))
+          .single;
+      controller().selectClip('c1');
+      await controller().splitAt(1000);
+
+      await controller().restoreVersion(start.id);
+
+      expect(await names(), containsAll(['Start', 'Before Start']));
+      expect(layerClips(_videoLayerId), hasLength(2));
+      // The point saved before is the split state, so it can come back.
+      final before = (await container
+              .read(versionRepositoryProvider)
+              .versionsOf(_projectId))
+          .firstWhere((v) => v.name == 'Before Start');
+      await controller().restoreVersion(before.id);
+      expect(layerClips(_videoLayerId), hasLength(3));
+    });
+  });
+
+  test('renaming keeps the name, can be undone and ignores blanks', () async {
+    expect(await controller().rename('  Summer trip '), isTrue);
+    expect(uiState().project.name, 'Summer trip');
+    final stored = await container.read(projectRepositoryProvider).find(
+          _projectId,
+        );
+    expect(stored!.name, 'Summer trip');
+
+    expect(await controller().rename('   '), isFalse);
+    expect(uiState().project.name, 'Summer trip');
+
+    await controller().undo();
+    expect(uiState().project.name, 'Test project');
+  });
+
+  test('a layer left without clips is removed and stays removed', () async {
+    controller().selectClip('a1');
+    await controller().deleteSelected();
+
+    final layerIds = [for (final l in uiState().project.layers) l.id];
+    expect(layerIds, [_videoLayerId]);
+    final stored = await container.read(projectRepositoryProvider).find(
+          _projectId,
+        );
+    expect(stored!.layers.map((l) => l.id), [_videoLayerId]);
+
+    await controller().undo();
+    expect(uiState().project.layers, hasLength(2));
+  });
+
+  test('layers can be moved among the others and the order is kept', () async {
+    expect(await controller().moveLayer(_audioLayerId, -1), isTrue);
+    expect(
+      [for (final l in uiState().project.layers) l.id],
+      [_audioLayerId, _videoLayerId],
+    );
+    final stored = await container.read(projectRepositoryProvider).find(
+          _projectId,
+        );
+    expect(stored!.layers.first.id, _audioLayerId);
+
+    // Past either end there is nowhere to go.
+    expect(await controller().moveLayer(_audioLayerId, -1), isFalse);
+    await controller().undo();
+    expect(uiState().project.layers.first.id, _videoLayerId);
   });
 }

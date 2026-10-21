@@ -2,11 +2,15 @@ import 'dart:convert';
 
 import 'package:cutter/core/db/app_database.dart';
 import 'package:cutter/features/editor/data/editor_dao.dart';
+import 'package:cutter/features/editor/domain/canvas.dart';
 import 'package:cutter/features/editor/domain/clip.dart';
+import 'package:cutter/features/editor/domain/clip_crop.dart';
+import 'package:cutter/features/editor/domain/clip_transform.dart';
 import 'package:cutter/features/editor/domain/editor_ports.dart';
 import 'package:cutter/features/editor/domain/layer.dart';
 import 'package:cutter/features/editor/domain/media_asset.dart';
 import 'package:cutter/features/editor/domain/project.dart';
+import 'package:cutter/features/editor/domain/project_summary.dart';
 
 /// Drift-backed [ProjectRepository]: maps stored rows to the immutable
 /// domain entities and back.
@@ -15,10 +19,6 @@ class DriftProjectRepository implements ProjectRepository {
   DriftProjectRepository(this._dao);
 
   final EditorDao _dao;
-
-  static const _defaultCanvasWidth = 1080;
-  static const _defaultCanvasHeight = 1920;
-  static const _defaultFps = 30;
 
   // Layer names are not stored; the timeline labels layers by position.
   static const _unnamedLayer = '';
@@ -33,6 +33,9 @@ class DriftProjectRepository implements ProjectRepository {
   }
 
   @override
+  Future<void> delete(String id) => _dao.deleteProject(id);
+
+  @override
   Future<void> save(Project project) async {
     final existing = await _dao.loadProjectRows(project.id);
     final nowMs = DateTime.now().millisecondsSinceEpoch;
@@ -41,8 +44,8 @@ class DriftProjectRepository implements ProjectRepository {
     );
   }
 
-  /// The oldest stored project id, or null when nothing is stored.
-  Future<String?> firstProjectId() => _dao.firstProjectId();
+  @override
+  Future<List<ProjectSummary>> summaries() => _dao.summaries();
 
   Project _projectFromRows(ProjectRows rows) {
     final clipsByLayer = <String, List<EditorClip>>{};
@@ -60,6 +63,11 @@ class DriftProjectRepository implements ProjectRepository {
       id: header.id,
       name: header.name,
       layers: layers,
+      canvas: Canvas(
+        width: header.canvasWidth,
+        height: header.canvasHeight,
+        fps: header.fps,
+      ),
     );
   }
 
@@ -98,6 +106,26 @@ class DriftProjectRepository implements ProjectRepository {
         for (final entry in decoded.entries)
           entry.key: (entry.value as num).toDouble(),
       },
+      transform: ClipTransform(
+        x: row.posX,
+        y: row.posY,
+        scale: row.scale,
+        rotation: row.rotation,
+        opacity: row.opacity,
+        flipX: row.flipX,
+        fit: ClipFit.values.byName(row.fit),
+      ),
+      sourceWidth: row.sourceWidth,
+      sourceHeight: row.sourceHeight,
+      crop: ClipCrop(
+        left: row.cropLeft,
+        top: row.cropTop,
+        right: row.cropRight,
+        bottom: row.cropBottom,
+      ),
+      speed: row.speed,
+      fadeInMs: row.fadeInMs,
+      fadeOutMs: row.fadeOutMs,
     );
   }
 
@@ -135,9 +163,10 @@ class DriftProjectRepository implements ProjectRepository {
         name: project.name,
         createdAtMs: existing?.createdAtMs ?? nowMs,
         updatedAtMs: nowMs,
-        canvasWidth: existing?.canvasWidth ?? _defaultCanvasWidth,
-        canvasHeight: existing?.canvasHeight ?? _defaultCanvasHeight,
-        fps: existing?.fps ?? _defaultFps,
+        canvasWidth: project.canvas.width,
+        canvasHeight: project.canvas.height,
+        fps: project.canvas.fps,
+        savedAtMs: existing?.savedAtMs,
       ),
       layers: layerRows,
       clips: clipRows,
@@ -159,6 +188,22 @@ class DriftProjectRepository implements ProjectRepository {
       filterId: clip.filterId,
       adjustmentsJson: jsonEncode(clip.adjustments),
       sourceDurationMs: clip.sourceDurationMs,
+      posX: clip.transform.x,
+      posY: clip.transform.y,
+      scale: clip.transform.scale,
+      rotation: clip.transform.rotation,
+      opacity: clip.transform.opacity,
+      flipX: clip.transform.flipX,
+      fit: clip.transform.fit.name,
+      sourceWidth: clip.sourceWidth,
+      sourceHeight: clip.sourceHeight,
+      cropLeft: clip.crop.left,
+      cropTop: clip.crop.top,
+      cropRight: clip.crop.right,
+      cropBottom: clip.crop.bottom,
+      speed: clip.speed,
+      fadeInMs: clip.fadeInMs,
+      fadeOutMs: clip.fadeOutMs,
     );
   }
 }

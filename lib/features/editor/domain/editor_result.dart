@@ -249,3 +249,45 @@ final class MissingTemplateMedia extends EditorFailure {
   @override
   List<Object?> get props => slotIds;
 }
+
+/// A clip transform is outside its allowed ranges (scale, opacity).
+final class InvalidTransform extends EditorFailure {
+  /// Creates the failure.
+  const InvalidTransform();
+}
+
+/// A canvas size or frame rate is not usable.
+final class InvalidCanvas extends EditorFailure {
+  /// Creates the failure.
+  const InvalidCanvas();
+}
+
+/// No saved version exists with the given id.
+final class VersionNotFound extends EditorFailure {
+  /// Creates the failure for version [id].
+  const VersionNotFound(this.id);
+
+  /// The unknown version id.
+  final String id;
+
+  @override
+  List<Object?> get props => [id];
+}
+
+/// A speed outside 0.25x to 4x.
+final class InvalidSpeed extends EditorFailure {
+  /// Creates the failure.
+  const InvalidSpeed();
+}
+
+/// A fade longer than half the clip, or negative.
+final class InvalidFade extends EditorFailure {
+  /// Creates the failure.
+  const InvalidFade();
+}
+
+/// A crop that cuts too much or reaches past the picture.
+final class InvalidCrop extends EditorFailure {
+  /// Creates the failure.
+  const InvalidCrop();
+}

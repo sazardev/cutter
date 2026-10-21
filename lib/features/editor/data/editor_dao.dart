@@ -1,4 +1,5 @@
 import 'package:cutter/core/db/app_database.dart';
+import 'package:cutter/features/editor/domain/project_summary.dart';
 import 'package:drift/drift.dart';
 
 /// The stored rows of one project: its header, layers and clips.
@@ -69,13 +70,83 @@ class EditorDao {
     });
   }
 
-  /// The oldest project id, or null when no project is stored.
-  Future<String?> firstProjectId() async {
-    final project = await (_db.select(_db.editorProjects)
-          ..orderBy([(row) => OrderingTerm.asc(row.createdAtMs)])
-          ..limit(1))
-        .getSingleOrNull();
-    return project?.id;
+  /// One summary per stored project, the most recently saved first.
+  ///
+  /// Reads the three tables once each, so the cost does not grow with the
+  /// number of projects.
+  Future<List<ProjectSummary>> summaries() async {
+    final projects = await (_db.select(_db.editorProjects)
+          ..orderBy([(row) => OrderingTerm.desc(row.updatedAtMs)]))
+        .get();
+    final layers = await _db.select(_db.editorLayers).get();
+    final clips = await _db.select(_db.editorClips).get();
+
+    final projectOfLayer = {
+      for (final layer in layers) layer.id: layer.projectId,
+    };
+    final layerCount = <String, int>{};
+    for (final layer in layers) {
+      layerCount[layer.projectId] = (layerCount[layer.projectId] ?? 0) + 1;
+    }
+    final layerById = {for (final layer in layers) layer.id: layer};
+    final clipCount = <String, int>{};
+    final durationMs = <String, int>{};
+    // The first picture or video clip of each project is its cover: the
+    // earliest on the timeline, then the lowest layer.
+    final cover = <String, EditorClip>{};
+    for (final clip in clips) {
+      final projectId = projectOfLayer[clip.layerId];
+      if (projectId == null) continue;
+      final layer = layerById[clip.layerId]!;
+      if (layer.kind != 'audio') {
+        final best = cover[projectId];
+        final bestLayer = best == null ? null : layerById[best.layerId]!;
+        if (best == null ||
+            clip.startMs < best.startMs ||
+            (clip.startMs == best.startMs &&
+                layer.position < bestLayer!.position)) {
+          cover[projectId] = clip;
+        }
+      }
+      clipCount[projectId] = (clipCount[projectId] ?? 0) + 1;
+      final end = clip.startMs + clip.durationMs;
+      if (end > (durationMs[projectId] ?? 0)) durationMs[projectId] = end;
+    }
+
+    return [
+      for (final project in projects)
+        ProjectSummary(
+          id: project.id,
+          name: project.name,
+          layerCount: layerCount[project.id] ?? 0,
+          clipCount: clipCount[project.id] ?? 0,
+          durationMs: durationMs[project.id] ?? 0,
+          updatedAtMs: project.updatedAtMs,
+          savedAtMs: project.savedAtMs,
+          coverUri: cover[project.id]?.sourceUri,
+          coverMs: cover[project.id]?.inPointMs ?? 0,
+        ),
+    ];
+  }
+
+  /// Deletes the project with its layers, clips and saved versions, and
+  /// unlinks its exports and media-bank rows, in one transaction. Done by
+  /// hand so it does not depend on the foreign keys being enforced.
+  Future<void> deleteProject(String id) {
+    return _db.transaction(() async {
+      await _deleteLayersAndClips(id);
+      await (_db.delete(_db.editorVersions)
+            ..where((row) => row.projectId.equals(id)))
+          .go();
+      await (_db.update(_db.editorExports)
+            ..where((row) => row.projectId.equals(id)))
+          .write(const EditorExportsCompanion(projectId: Value(null)));
+      await (_db.update(_db.editorMedia)
+            ..where((row) => row.projectId.equals(id)))
+          .write(const EditorMediaCompanion(projectId: Value(null)));
+      await (_db.delete(_db.editorProjects)..where((row) => row.id.equals(id)))
+          .go();
+    });
   }
 
   Future<void> _deleteLayersAndClips(String projectId) async {

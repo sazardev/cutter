@@ -45,14 +45,17 @@ class TrimClip {
     final layer = project.layerOfClip(clipId);
     if (clip == null || layer == null) return Err(ClipNotFound(clipId));
 
-    if (outPointMs - inPointMs < minClipDurationMs) {
+    if ((outPointMs - inPointMs) / clip.speed < minClipDurationMs) {
       return const Err(ZeroDuration());
     }
     if (inPointMs < 0 || outPointMs > clip.sourceDurationMs) {
       return const Err(TrimOutOfSource());
     }
 
-    final newStart = clip.startMs + (inPointMs - clip.inPointMs);
+    // The frames that remain keep their timeline position, at the clip's
+    // speed.
+    final newStart =
+        clip.startMs + ((inPointMs - clip.inPointMs) / clip.speed).round();
     if (newStart < 0) return const Err(NegativeStart());
 
     final trimmed = clip.copyWith(
@@ -92,7 +95,7 @@ class SplitClip {
       return const Err(PlayheadOutsideClip());
     }
 
-    final firstDurationMs = atMs - clip.startMs;
+    final firstDurationMs = clip.sourceSpanOf(atMs - clip.startMs);
     // A reversed clip plays its source backwards, so the first timeline half
     // holds the end of the source range.
     final sourceCutMs = clip.reversed

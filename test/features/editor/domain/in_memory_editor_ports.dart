@@ -4,6 +4,8 @@ import 'package:cutter/features/editor/domain/layer.dart';
 import 'package:cutter/features/editor/domain/media_asset.dart';
 import 'package:cutter/features/editor/domain/preset.dart';
 import 'package:cutter/features/editor/domain/project.dart';
+import 'package:cutter/features/editor/domain/project_summary.dart';
+import 'package:cutter/features/editor/domain/project_version.dart';
 import 'package:cutter/features/editor/domain/template.dart';
 
 /// Project storage in a map; [saveCount] lets tests assert that a rejected
@@ -29,6 +31,25 @@ class InMemoryProjectRepository implements ProjectRepository {
     saveCount++;
     projects[project.id] = project;
   }
+
+  @override
+  Future<void> delete(String id) async => projects.remove(id);
+
+  @override
+  Future<List<ProjectSummary>> summaries() async => [
+        for (final project in projects.values)
+          ProjectSummary(
+            id: project.id,
+            name: project.name,
+            layerCount: project.layers.length,
+            clipCount: project.layers.fold(
+              0,
+              (count, layer) => count + layer.clips.length,
+            ),
+            durationMs: project.durationMs,
+            updatedAtMs: 0,
+          ),
+      ];
 }
 
 /// Preset storage in a map, listed in insertion order.
@@ -64,6 +85,9 @@ class InMemoryTemplateCatalog implements TemplateCatalog {
 
   /// The available templates by id.
   final Map<String, Template> templates = {};
+
+  @override
+  Future<List<Template>> all() async => templates.values.toList();
 
   @override
   Future<Template?> find(String id) async => templates[id];
@@ -135,4 +159,28 @@ Project buildFixtureProject() {
       ),
     ],
   );
+}
+
+/// Version storage in maps, newest first, with the snapshots kept whole.
+class InMemoryVersionRepository implements VersionRepository {
+  /// The stored versions, in the order they were saved.
+  final List<ProjectVersion> versions = [];
+
+  /// The snapshots by version id.
+  final Map<String, Project> snapshots = {};
+
+  @override
+  Future<List<ProjectVersion>> versionsOf(String projectId) async => [
+        for (final version in versions.reversed)
+          if (version.projectId == projectId) version,
+      ];
+
+  @override
+  Future<void> save(ProjectVersion version, Project snapshot) async {
+    versions.add(version);
+    snapshots[version.id] = snapshot;
+  }
+
+  @override
+  Future<Project?> snapshotOf(String versionId) async => snapshots[versionId];
 }

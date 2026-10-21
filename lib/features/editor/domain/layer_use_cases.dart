@@ -1,6 +1,7 @@
 import 'package:cutter/features/editor/domain/clip.dart';
 import 'package:cutter/features/editor/domain/editor_ports.dart';
 import 'package:cutter/features/editor/domain/editor_result.dart';
+import 'package:cutter/features/editor/domain/layer.dart';
 import 'package:cutter/features/editor/domain/media_asset.dart';
 import 'package:cutter/features/editor/domain/project.dart';
 import 'package:cutter/features/editor/domain/time_range.dart';
@@ -54,6 +55,29 @@ class AddClipToLayer {
     );
     final updated =
         project.replaceLayer(layer.withClips([...layer.clips, clip]));
+    await _projects.save(updated);
+    return Ok(updated);
+  }
+}
+
+/// Adds an empty layer of one kind in front of the other layers.
+class AddLayer {
+  /// Creates the use case over the given project storage and id source.
+  AddLayer(this._projects, this._ids);
+
+  final ProjectRepository _projects;
+  final IdGenerator _ids;
+
+  /// Adds a layer holding [kind] media to project [projectId].
+  Future<EditorResult<Project>> call({
+    required String projectId,
+    required MediaKind kind,
+  }) async {
+    final project = await _projects.find(projectId);
+    if (project == null) return Err(ProjectNotFound(projectId));
+
+    final layer = Layer(id: _ids.next(), name: '', kind: kind);
+    final updated = project.withLayers([layer, ...project.layers]);
     await _projects.save(updated);
     return Ok(updated);
   }

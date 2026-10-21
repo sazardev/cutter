@@ -1,28 +1,42 @@
 import 'package:cutter/core/db/app_database.dart';
+import 'package:cutter/core/engine/media_engine.dart';
+import 'package:cutter/core/settings/settings_store.dart';
+import 'package:cutter/features/editor/data/drift_media_bank.dart';
+import 'package:cutter/features/editor/data/engine_media_inspector.dart';
+import 'package:cutter/features/editor/presentation/clip_tools.dart';
 import 'package:cutter/features/editor/presentation/editor_page.dart';
 import 'package:cutter/features/editor/presentation/editor_providers.dart';
-import 'package:cutter/features/editor/presentation/timeline_view.dart';
+import 'package:cutter/features/editor/presentation/import_flow.dart';
+import 'package:cutter/features/editor/presentation/timeline/timeline_painters.dart';
+import 'package:cutter/features/editor/presentation/timeline/timeline_view.dart';
 import 'package:cutter/l10n/app_localizations.dart';
-import 'package:drift/drift.dart' show Value;
+import 'package:drift/drift.dart' show OrderingTerm, Value;
+import 'package:flutter/gestures.dart' show PointerDeviceKind;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../../../core/engine/fake_media_engine.dart';
+
 const _projectId = 'project-1';
 const _clipDurationMs = 10000;
 
-Future<void> _seed(AppDatabase db, {required String layerKind}) async {
-  await db.into(db.editorProjects).insert(
+Future<void> _seedEmptyProject(AppDatabase db) {
+  return db.into(db.editorProjects).insert(
         const EditorProjectsCompanion(
           id: Value(_projectId),
           name: Value('Test'),
           createdAtMs: Value(1),
           updatedAtMs: Value(1),
-          canvasWidth: Value(1920),
-          canvasHeight: Value(1080),
-          fps: Value(60),
+          canvasWidth: Value(1080),
+          canvasHeight: Value(1920),
+          fps: Value(30),
         ),
       );
+}
+
+Future<void> _seed(AppDatabase db, {required String layerKind}) async {
+  await _seedEmptyProject(db);
   await db.into(db.editorLayers).insert(
         EditorLayersCompanion(
           id: const Value('layer-1'),
@@ -38,7 +52,7 @@ Future<void> _seed(AppDatabase db, {required String layerKind}) async {
           id: Value('clip-1'),
           layerId: Value('layer-1'),
           sortKey: Value(0),
-          sourceUri: Value('file:///clip.mp4'),
+          sourceUri: Value('/media/clip.mp4'),
           startMs: Value(0),
           durationMs: Value(_clipDurationMs),
           inPointMs: Value(0),
@@ -51,29 +65,7 @@ Future<void> _seed(AppDatabase db, {required String layerKind}) async {
       );
 }
 
-Future<void> _pumpPage(
-  WidgetTester tester,
-  AppDatabase db,
-  Locale locale, {
-  List<Override> overrides = const [],
-}) async {
-  tester.view.physicalSize = const Size(900, 900);
-  tester.view.devicePixelRatio = 1;
-  addTearDown(tester.view.reset);
-  await tester.pumpWidget(
-    ProviderScope(
-      overrides: [
-        appDatabaseProvider.overrideWithValue(db),
-        ...overrides,
-      ],
-      child: MaterialApp(
-        locale: locale,
-        localizationsDelegates: AppLocalizations.localizationsDelegates,
-        supportedLocales: AppLocalizations.supportedLocales,
-        home: const EditorPage(),
-      ),
-    ),
-  );
+Future<void> _settle(WidgetTester tester) async {
   await tester.runAsync(
     () => Future<void>.delayed(const Duration(milliseconds: 200)),
   );
@@ -81,120 +73,852 @@ Future<void> _pumpPage(
   await tester.pump(const Duration(milliseconds: 100));
 }
 
+Future<FakeMediaEngine> _pumpPage(
+  WidgetTester tester,
+  AppDatabase db,
+  Locale locale, {
+  String projectId = _projectId,
+  Size size = const Size(590, 900),
+  List<String> picked = const [],
+}) async {
+  tester.view.physicalSize = size;
+  tester.view.devicePixelRatio = 1;
+  addTearDown(tester.view.reset);
+  final engine = FakeMediaEngine(media: {'/media/new.mp4': fakeVideo});
+  await tester.pumpWidget(
+    ProviderScope(
+      overrides: [
+        appDatabaseProvider.overrideWithValue(db),
+        mediaEngineProvider.overrideWithValue(engine),
+        mediaInspectorProvider.overrideWith(
+          (ref) => EngineMediaInspector(
+            engine,
+            ref.watch(idGeneratorProvider),
+            keep: (path) async => path,
+          ),
+        ),
+        mediaPickerProvider.overrideWithValue((context, kind) async => picked),
+        // The test files only exist in the fake engine.
+        mediaBankProvider.overrideWithValue(
+          DriftMediaBank(db, exists: (_) => true),
+        ),
+      ],
+      child: MaterialApp(
+        locale: locale,
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: EditorPage(projectId: projectId),
+      ),
+    ),
+  );
+  await _settle(tester);
+  return engine;
+}
+
+/// Taps a clip near its start: long clips reach past the screen edge.
+Future<void> _tapClip(WidgetTester tester, String kindLabel) async {
+  final clip = find.bySemanticsLabel(RegExp('$kindLabel, ')).first;
+  await tester.tapAt(tester.getTopLeft(clip) + const Offset(24, 24));
+  await _settle(tester);
+}
+
 Future<AppLocalizations> _strings(Locale locale) =>
     AppLocalizations.delegate.load(locale);
 
 void main() {
-  const locales = [Locale('en'), Locale('es')];
-
-  for (final locale in locales) {
+  for (final locale in const [Locale('en'), Locale('es')]) {
     final tag = locale.languageCode;
 
-    testWidgets('shows the empty state without a project ($tag)',
-        (tester) async {
+    testWidgets('an empty project invites to add media ($tag)', (tester) async {
       final db = AppDatabase.inMemory();
       addTearDown(() => tester.runAsync(db.close));
+      await tester.runAsync(() => _seedEmptyProject(db));
       final l10n = await _strings(locale);
 
       await _pumpPage(tester, db, locale);
 
-      expect(find.text(l10n.emptyTitle), findsOneWidget);
-      expect(find.text(l10n.emptyBody), findsOneWidget);
-      expect(find.byType(TimelineView), findsNothing);
+      expect(find.text(l10n.emptyTimelineTitle), findsOneWidget);
+      expect(find.text(l10n.importMediaAction), findsOneWidget);
+      expect(find.text(l10n.addMediaAction), findsOneWidget);
     });
 
-    testWidgets(
-        'shows the timeline and disabled split without selection ($tag)',
+    testWidgets('imports a picked video onto the timeline ($tag)',
         (tester) async {
       final db = AppDatabase.inMemory();
       addTearDown(() => tester.runAsync(db.close));
-      await tester.runAsync(() => _seed(db, layerKind: 'video'));
+      await tester.runAsync(() => _seedEmptyProject(db));
       final l10n = await _strings(locale);
+      final engine =
+          await _pumpPage(tester, db, locale, picked: ['/media/new.mp4']);
 
-      await _pumpPage(tester, db, locale);
+      await tester.tap(find.text(l10n.importMediaAction));
+      await _settle(tester);
 
-      expect(find.byType(TimelineView), findsOneWidget);
-      expect(find.text(l10n.selectClipHint), findsOneWidget);
-      expect(find.text(l10n.emptyTitle), findsNothing);
+      expect(find.byType(SnackBar), findsNothing);
+      expect(find.text(l10n.emptyTimelineTitle), findsNothing);
+      // The engine was given the new clip to render, and the empty project
+      // took the widescreen shape of the video.
+      final timeline = engine.session!.timelines.last;
+      expect(timeline.layers.single.clips.single.path, '/media/new.mp4');
+      expect((timeline.width, timeline.height), (1920, 1080));
     });
   }
+
+  testWidgets('leaves out files that cannot be imported, without a notice',
+      (tester) async {
+    final db = AppDatabase.inMemory();
+    addTearDown(() => tester.runAsync(db.close));
+    await tester.runAsync(() => _seedEmptyProject(db));
+    final l10n = await _strings(const Locale('en'));
+    await _pumpPage(
+      tester,
+      db,
+      const Locale('en'),
+      picked: ['/media/notes.txt'],
+    );
+
+    await tester.tap(find.text(l10n.importMediaAction));
+    await _settle(tester);
+
+    expect(find.byType(SnackBar), findsNothing);
+    expect(find.text(l10n.emptyTimelineTitle), findsOneWidget);
+  });
 
   testWidgets('shows a retryable error when the project cannot be read',
       (tester) async {
     final db = AppDatabase.inMemory();
     addTearDown(() => tester.runAsync(db.close));
-    const locale = Locale('en');
-    final l10n = await _strings(locale);
+    final l10n = await _strings(const Locale('en'));
 
-    // The provider names a project the database does not hold, so loading it
-    // fails the way an unreadable file does.
-    await _pumpPage(
-      tester,
-      db,
-      locale,
-      overrides: [
-        editorProjectProvider.overrideWith((ref) async => 'missing-project'),
-      ],
-    );
+    await _pumpPage(tester, db, const Locale('en'), projectId: 'missing');
 
     expect(find.text(l10n.loadErrorTitle), findsOneWidget);
-    expect(find.text(l10n.loadErrorBody), findsOneWidget);
     expect(find.text(l10n.retryAction), findsOneWidget);
   });
 
-  testWidgets('disables filter chips for a selected audio clip',
-      (tester) async {
+  testWidgets('selecting a video clip shows the clip tools', (tester) async {
+    final db = AppDatabase.inMemory();
+    addTearDown(() => tester.runAsync(db.close));
+    await tester.runAsync(() => _seed(db, layerKind: 'video'));
+    final l10n = await _strings(const Locale('en'));
+    await _pumpPage(tester, db, const Locale('en'));
+
+    await _tapClip(tester, l10n.layerKindVideo);
+
+    // A tap shows only the short bar.
+    for (final label in [
+      l10n.editClipAction,
+      l10n.duplicateAction,
+      l10n.splitAction,
+      l10n.deleteAction,
+      l10n.moreActions,
+    ]) {
+      expect(find.byTooltip(label), findsWidgets, reason: label);
+    }
+    expect(find.bySemanticsLabel(l10n.filtersLabel), findsNothing);
+
+    // More opens the full options.
+    await tester.tap(find.byTooltip(l10n.moreActions));
+    await _settle(tester);
+    for (final label in [
+      l10n.filtersLabel,
+      l10n.adjustTool,
+      l10n.reverseLabel,
+    ]) {
+      expect(find.bySemanticsLabel(label), findsWidgets, reason: label);
+    }
+  });
+
+  testWidgets('a double tap on a clip opens its full options', (tester) async {
+    final db = AppDatabase.inMemory();
+    addTearDown(() => tester.runAsync(db.close));
+    await tester.runAsync(() => _seed(db, layerKind: 'video'));
+    final l10n = await _strings(const Locale('en'));
+    await _pumpPage(tester, db, const Locale('en'));
+
+    final clip =
+        find.bySemanticsLabel(RegExp('${l10n.layerKindVideo}, ')).first;
+    final spot = tester.getTopLeft(clip) + const Offset(24, 24);
+    await tester.tapAt(spot);
+    await tester.pump(const Duration(milliseconds: 80));
+    // The first tap selected it without waiting.
+    expect(find.byTooltip(l10n.moreActions), findsWidgets);
+    await tester.tapAt(spot);
+    await _settle(tester);
+
+    expect(find.bySemanticsLabel(l10n.filtersLabel), findsWidgets);
+  });
+
+  testWidgets('an audio clip offers volume but no filters', (tester) async {
     final db = AppDatabase.inMemory();
     addTearDown(() => tester.runAsync(db.close));
     await tester.runAsync(() => _seed(db, layerKind: 'audio'));
-    const locale = Locale('en');
-    final l10n = await _strings(locale);
+    final l10n = await _strings(const Locale('en'));
+    await _pumpPage(tester, db, const Locale('en'));
 
-    await _pumpPage(tester, db, locale);
-    final origin = tester.getTopLeft(find.byType(TimelineView));
-    await tester.tapAt(origin + const Offset(60, 76));
-    await tester.pump();
+    await _tapClip(tester, l10n.layerKindAudio);
+    await tester.tap(find.byTooltip(l10n.moreActions));
+    await _settle(tester);
 
-    expect(find.text(l10n.selectClipHint), findsNothing);
-    final chip = find.ancestor(
-      of: find.text(l10n.filterNone),
-      matching: find.byWidgetPredicate(
-        (widget) => widget is ChoiceChip || widget is FilterChip,
-      ),
-    );
-    expect(chip, findsOneWidget);
-    final widget = tester.widget(chip);
-    final onSelected = widget is ChoiceChip
-        ? widget.onSelected
-        : (widget as FilterChip).onSelected;
-    expect(onSelected, isNull);
+    expect(find.bySemanticsLabel(l10n.volumeTool), findsOneWidget);
+    expect(find.bySemanticsLabel(l10n.filtersLabel), findsNothing);
   });
 
-  testWidgets('exposes the clip as a selectable semantics node',
+  testWidgets('deleting a clip can be undone from the top bar', (tester) async {
+    final db = AppDatabase.inMemory();
+    addTearDown(() => tester.runAsync(db.close));
+    await tester.runAsync(() => _seed(db, layerKind: 'video'));
+    final l10n = await _strings(const Locale('en'));
+    await _pumpPage(tester, db, const Locale('en'));
+
+    await _tapClip(tester, l10n.layerKindVideo);
+    await tester.tap(find.byTooltip(l10n.deleteAction));
+    await _settle(tester);
+    expect(find.text(l10n.emptyTimelineTitle), findsOneWidget);
+
+    await tester.tap(find.byTooltip(l10n.undoAction));
+    await _settle(tester);
+    expect(find.text(l10n.emptyTimelineTitle), findsNothing);
+  });
+
+  testWidgets('the play button drives the engine preview', (tester) async {
+    final db = AppDatabase.inMemory();
+    addTearDown(() => tester.runAsync(db.close));
+    await tester.runAsync(() => _seed(db, layerKind: 'video'));
+    final l10n = await _strings(const Locale('en'));
+    final engine = await _pumpPage(tester, db, const Locale('en'));
+
+    await tester.tap(find.byTooltip(l10n.playAction));
+    await tester.pump();
+
+    expect(engine.session!.playing, isTrue);
+    expect(find.byType(Texture), findsOneWidget);
+  });
+
+  testWidgets('wide windows show a side bar that folds, and clip properties',
       (tester) async {
     final db = AppDatabase.inMemory();
     addTearDown(() => tester.runAsync(db.close));
     await tester.runAsync(() => _seed(db, layerKind: 'video'));
-    const locale = Locale('en');
-    // The handle has to be released inside the test body: the framework
-    // checks for leaked handles before the tear-down callbacks run.
-    final handle = tester.ensureSemantics();
+    final l10n = await _strings(const Locale('en'));
+    await _pumpPage(
+      tester,
+      db,
+      const Locale('en'),
+      size: const Size(1280, 800),
+    );
 
-    await _pumpPage(tester, db, locale);
+    expect(find.byType(EditorRail), findsOneWidget);
+    expect(find.text(l10n.addMediaAction), findsOneWidget);
+    expect(tester.getSize(find.byType(EditorRail)).width, greaterThan(150));
+    await tester.tap(find.byTooltip(l10n.railCollapse));
+    await _settle(tester);
+    expect(tester.getSize(find.byType(EditorRail)).width, lessThan(100));
+    expect(find.byTooltip(l10n.railExpand), findsOneWidget);
 
-    final origin = tester.getTopLeft(find.byType(TimelineView));
-    await tester.tapAt(origin + const Offset(60, 76));
-    await tester.pump();
+    expect(find.byType(ClipPropertiesPanel), findsNothing);
+    await _tapClip(tester, l10n.layerKindVideo);
+    await tester.pump(const Duration(milliseconds: 400));
+    // A tap shows the short bar over the timeline, not the side panel.
+    expect(find.text(l10n.inspectorTitle), findsNothing);
+    expect(find.byTooltip(l10n.moreActions), findsWidgets);
+    await tester.tap(find.byTooltip(l10n.moreActions).first);
+    await tester.pump(const Duration(milliseconds: 400));
+    expect(find.text(l10n.inspectorTitle), findsOneWidget);
+  });
 
-    final selectedNodes = find.descendant(
-      of: find.byType(TimelineView),
-      matching: find.byWidgetPredicate(
-        (widget) =>
-            widget is Semantics && (widget.properties.selected ?? false),
+  testWidgets('the timeline moves above or beside the preview', (tester) async {
+    final db = AppDatabase.inMemory();
+    addTearDown(() => tester.runAsync(db.close));
+    await tester.runAsync(() => _seed(db, layerKind: 'video'));
+    final l10n = await _strings(const Locale('en'));
+    await _pumpPage(
+      tester,
+      db,
+      const Locale('en'),
+      size: const Size(1280, 800),
+    );
+    Offset timeline() => tester.getTopLeft(find.byType(TimelineView));
+    Offset preview() => tester.getTopLeft(find.byType(Texture));
+    expect(timeline().dy, greaterThan(preview().dy));
+
+    await tester.tap(find.bySemanticsLabel(l10n.layoutTool));
+    await _settle(tester);
+    await tester.tap(find.bySemanticsLabel(l10n.layoutTop));
+    await _settle(tester);
+    expect(timeline().dy, lessThan(preview().dy));
+
+    await tester.tap(find.bySemanticsLabel(l10n.layoutSide));
+    await _settle(tester);
+    expect(timeline().dx, greaterThan(preview().dx));
+    final saved = await tester.runAsync(
+      () => SettingsStore(db).read('editor.timeline_position'),
+    );
+    expect(saved, 'side');
+  });
+
+  testWidgets('importing into the bank, then a tap places the file',
+      (tester) async {
+    final db = AppDatabase.inMemory();
+    addTearDown(() => tester.runAsync(db.close));
+    await tester.runAsync(() => _seedEmptyProject(db));
+    final l10n = await _strings(const Locale('en'));
+    final engine = await _pumpPage(
+      tester,
+      db,
+      const Locale('en'),
+      picked: ['/media/new.mp4'],
+    );
+
+    await tester.tap(find.bySemanticsLabel(l10n.mediaTool));
+    await _settle(tester);
+    expect(find.byType(Dialog), findsNothing);
+    expect(find.text(l10n.bankEmpty), findsOneWidget);
+    await tester.tap(find.byTooltip(l10n.importAction));
+    await _settle(tester);
+
+    // In the bank, not yet on the timeline.
+    expect(find.byType(SnackBar), findsNothing);
+    expect(find.text(l10n.bankThisProject(1)), findsOneWidget);
+    expect(find.text(l10n.emptyTimelineTitle), findsOneWidget);
+
+    await tester.tap(
+      find.bySemanticsLabel(
+        RegExp(RegExp.escape(l10n.bankPlaceLabel('new.mp4'))),
       ),
     );
-    expect(selectedNodes, findsWidgets);
+    await _settle(tester);
+    final clips = engine.session!.timelines.last.layers.single.clips;
+    expect(clips.single.path, '/media/new.mp4');
+  });
 
-    handle.dispose();
+  testWidgets('the format panel changes the canvas the engine renders',
+      (tester) async {
+    final db = AppDatabase.inMemory();
+    addTearDown(() => tester.runAsync(db.close));
+    await tester.runAsync(() => _seed(db, layerKind: 'video'));
+    final l10n = await _strings(const Locale('en'));
+    final engine = await _pumpPage(tester, db, const Locale('en'));
+
+    await tester.tap(find.bySemanticsLabel(l10n.canvasTool));
+    await _settle(tester);
+    expect(find.byType(BottomSheet), findsNothing);
+    await tester.tap(find.bySemanticsLabel(RegExp('16:9')));
+    await _settle(tester);
+
+    final timeline = engine.session!.timelines.last;
+    expect((timeline.width, timeline.height), (1920, 1080));
+    final row = await tester.runAsync(
+      () => db.select(db.editorProjects).getSingle(),
+    );
+    expect(row!.canvasWidth, 1920);
+  });
+
+  testWidgets('framing a clip sends the transform to the engine and saves it',
+      (tester) async {
+    final db = AppDatabase.inMemory();
+    addTearDown(() => tester.runAsync(db.close));
+    await tester.runAsync(() => _seed(db, layerKind: 'video'));
+    final l10n = await _strings(const Locale('en'));
+    final engine = await _pumpPage(tester, db, const Locale('en'));
+
+    await _tapClip(tester, l10n.layerKindVideo);
+    await tester.tap(find.byTooltip(l10n.moreActions));
+    await _settle(tester);
+    await tester.tap(find.bySemanticsLabel(l10n.transformTool));
+    await _settle(tester);
+    await tester.tap(find.text(l10n.fillAction));
+    await _settle(tester);
+    await tester.tap(find.text(l10n.rotateAction));
+    await _settle(tester);
+
+    final clip = engine.session!.timelines.last.layers.single.clips.single;
+    expect(clip.fill, isTrue);
+    expect(clip.rotation, 90);
+    final row = await tester.runAsync(
+      () => db.select(db.editorClips).getSingle(),
+    );
+    expect((row!.fit, row.rotation), ('fill', 90.0));
+  });
+
+  testWidgets('the project is saved from the start, with a first restore point',
+      (tester) async {
+    final db = AppDatabase.inMemory();
+    addTearDown(() => tester.runAsync(db.close));
+    await tester.runAsync(() => _seed(db, layerKind: 'video'));
+    final l10n = await _strings(const Locale('en'));
+    await _pumpPage(tester, db, const Locale('en'));
+    expect(find.text(l10n.statusSaved), findsOneWidget);
+
+    await tester.tap(find.text(l10n.statusSaved));
+    await _settle(tester);
+    expect(find.text(l10n.checkpointStart), findsOneWidget);
+    await tester.tap(find.text(l10n.saveVersionAction));
+    await _settle(tester);
+
+    expect(find.text(l10n.statusSaved), findsOneWidget);
+    expect(find.text(l10n.defaultVersionName(2)), findsWidgets);
+  });
+
+  testWidgets('tapping the name renames the project in place', (tester) async {
+    final db = AppDatabase.inMemory();
+    addTearDown(() => tester.runAsync(db.close));
+    await tester.runAsync(() => _seed(db, layerKind: 'video'));
+    await _pumpPage(tester, db, const Locale('en'));
+
+    await tester.tap(find.text('Test'));
+    await tester.pump();
+    expect(find.byType(Dialog), findsNothing);
+    await tester.enterText(find.byType(TextField), 'Summer trip');
+    await tester.testTextInput.receiveAction(TextInputAction.done);
+    await _settle(tester);
+
+    expect(find.text('Summer trip'), findsOneWidget);
+    final row = await tester.runAsync(
+      () => db.select(db.editorProjects).getSingle(),
+    );
+    expect(row!.name, 'Summer trip');
+  });
+
+  testWidgets('preview mode hides the timeline and comes back', (tester) async {
+    final db = AppDatabase.inMemory();
+    addTearDown(() => tester.runAsync(db.close));
+    await tester.runAsync(() => _seed(db, layerKind: 'video'));
+    final l10n = await _strings(const Locale('en'));
+    await _pumpPage(tester, db, const Locale('en'));
+
+    await tester.tap(find.byTooltip(l10n.previewModeAction));
+    await _settle(tester);
+    expect(find.byTooltip(l10n.undoAction), findsNothing);
+    expect(find.byType(Slider), findsOneWidget);
+
+    await tester.tap(find.byTooltip(l10n.exitPreviewAction));
+    await _settle(tester);
+    expect(find.byTooltip(l10n.undoAction), findsOneWidget);
+  });
+
+  testWidgets('the clip editor plays only its clip and saves its speed',
+      (tester) async {
+    final db = AppDatabase.inMemory();
+    addTearDown(() => tester.runAsync(db.close));
+    await tester.runAsync(() => _seed(db, layerKind: 'video'));
+    final l10n = await _strings(const Locale('en'));
+    final engine = await _pumpPage(tester, db, const Locale('en'));
+
+    await _tapClip(tester, l10n.layerKindVideo);
+    await tester.tap(find.byTooltip(l10n.editClipAction));
+    await _settle(tester);
+    await _settle(tester);
+    expect(find.text(l10n.studioVideoTitle), findsOneWidget);
+
+    await tester.tap(find.text('2×'));
+    await _settle(tester);
+
+    final clip = engine.session!.timelines.last.layers.single.clips.single;
+    expect((clip.startMs, clip.speed), (0, 2.0));
+    final row = await tester.runAsync(
+      () => db.select(db.editorClips).getSingle(),
+    );
+    expect(row!.speed, 2.0);
+
+    await tester.tap(find.widgetWithText(FilledButton, l10n.doneAction));
+    await _settle(tester);
+    // Let the page transition finish.
+    await tester.pump(const Duration(milliseconds: 600));
+    expect(find.text(l10n.studioVideoTitle), findsNothing);
+  });
+
+  testWidgets('export offers platforms and qualities with a size estimate',
+      (tester) async {
+    final db = AppDatabase.inMemory();
+    addTearDown(() => tester.runAsync(db.close));
+    await tester.runAsync(() => _seed(db, layerKind: 'video'));
+    final l10n = await _strings(const Locale('en'));
+    await _pumpPage(tester, db, const Locale('en'));
+
+    await tester.tap(find.text(l10n.exportAction).first);
+    await _settle(tester);
+    await tester.tap(find.text(l10n.platformWidescreen));
+    await _settle(tester);
+
+    expect(find.textContaining('1920 × 1080'), findsOneWidget);
+    expect(find.text(l10n.exportReframedNote), findsOneWidget);
+  });
+
+  testWidgets('dragging the end handle trims by the distance dragged',
+      (tester) async {
+    final db = AppDatabase.inMemory();
+    addTearDown(() => tester.runAsync(db.close));
+    await tester.runAsync(() => _seed(db, layerKind: 'video'));
+    final l10n = await _strings(const Locale('en'));
+    await _pumpPage(tester, db, const Locale('en'));
+    await _tapClip(tester, l10n.layerKindVideo);
+    await tester.tap(find.byTooltip(l10n.editClipAction));
+    await _settle(tester);
+    await _settle(tester);
+
+    final handle = find.bySemanticsLabel(l10n.trimEndHandle);
+    await tester.drag(handle, const Offset(-60, 0));
+    await _settle(tester);
+
+    final row = await tester.runAsync(
+      () => db.select(db.editorClips).getSingle(),
+    );
+    // The bar shows 10 s plus 10 s of context; 60 px of a ~560 px bar is
+    // roughly 2 s, never the whole clip.
+    expect(row!.outPointMs, inInclusiveRange(6000, 9500));
+  });
+
+  testWidgets('a trim handle stops at the next clip', (tester) async {
+    final db = AppDatabase.inMemory();
+    addTearDown(() => tester.runAsync(db.close));
+    await tester.runAsync(() async {
+      await _seed(db, layerKind: 'video');
+      await db.into(db.editorClips).insert(
+            const EditorClipsCompanion(
+              id: Value('clip-2'),
+              layerId: Value('layer-1'),
+              sortKey: Value(1),
+              sourceUri: Value('/media/clip.mp4'),
+              startMs: Value(11000),
+              durationMs: Value(2000),
+              inPointMs: Value(0),
+              outPointMs: Value(2000),
+              reversed: Value(false),
+              volume: Value(1),
+              filterId: Value(null),
+              adjustmentsJson: Value('{}'),
+            ),
+          );
+      // The first clip's source is longer than what it plays.
+      await (db.update(db.editorClips)..where((c) => c.id.equals('clip-1')))
+          .write(const EditorClipsCompanion(sourceDurationMs: Value(30000)));
+    });
+    final l10n = await _strings(const Locale('en'));
+    await _pumpPage(tester, db, const Locale('en'));
+    await _tapClip(tester, l10n.layerKindVideo);
+    await tester.tap(find.byTooltip(l10n.editClipAction));
+    await _settle(tester);
+    await _settle(tester);
+
+    await tester.drag(
+      find.bySemanticsLabel(l10n.trimEndHandle),
+      const Offset(400, 0),
+    );
+    await _settle(tester);
+
+    final first = await tester.runAsync(
+      () => (db.select(db.editorClips)..where((c) => c.id.equals('clip-1')))
+          .getSingle(),
+    );
+    // There is 1 s of room before clip-2.
+    expect(first!.outPointMs, 11000);
+    expect(find.byType(SnackBar), findsNothing);
+  });
+
+  group('direct manipulation in the preview', () {
+    Future<(FakeMediaEngine, AppDatabase)> openWithPicture(
+      WidgetTester tester,
+    ) async {
+      final db = AppDatabase.inMemory();
+      addTearDown(() => tester.runAsync(db.close));
+      await tester.runAsync(() async {
+        await _seed(db, layerKind: 'video');
+        await (db.update(db.editorClips)..where((c) => c.id.equals('clip-1')))
+            .write(
+          const EditorClipsCompanion(
+            sourceWidth: Value(1920),
+            sourceHeight: Value(1080),
+          ),
+        );
+      });
+      final engine = await _pumpPage(tester, db, const Locale('en'));
+      return (engine, db);
+    }
+
+    testWidgets('a tap on the picture never plays or pauses', (tester) async {
+      final (engine, _) = await openWithPicture(tester);
+
+      await tester.tapAt(tester.getRect(find.byType(Texture)).center);
+      await _settle(tester);
+      await tester.tapAt(
+        tester.getRect(find.byType(Texture)).topLeft + const Offset(4, 4),
+      );
+      await _settle(tester);
+
+      expect(engine.session!.playing, isFalse);
+    });
+
+    testWidgets('dragging a picture selects it and moves it in one motion',
+        (tester) async {
+      final (_, db) = await openWithPicture(tester);
+      final rect = tester.getRect(find.byType(Texture));
+
+      await tester.dragFrom(rect.center, Offset(rect.width * 0.2, 0));
+      await _settle(tester);
+
+      final row = await tester.runAsync(
+        () => db.select(db.editorClips).getSingle(),
+      );
+      expect(row!.posX, greaterThan(0.1));
+    });
+
+    testWidgets('a corner handle scales the picture', (tester) async {
+      final (_, db) = await openWithPicture(tester);
+      final l10n = await _strings(const Locale('en'));
+      await _tapClip(tester, l10n.layerKindVideo);
+      final rect = tester.getRect(find.byType(Texture));
+      // 1920x1080 on a 1080x1920 canvas fits at the full width, so the
+      // bottom right corner sits on the right edge, kept inside by the inset.
+      final k = rect.width / 1080;
+      final corner = Offset(rect.right - 18, rect.center.dy + 303.75 * k);
+
+      await tester.dragFrom(corner, (corner - rect.center) * 0.5);
+      await _settle(tester);
+
+      final row = await tester.runAsync(
+        () => db.select(db.editorClips).getSingle(),
+      );
+      expect(row!.scale, greaterThan(1.15));
+    });
+
+    testWidgets('the rotate handle turns the picture', (tester) async {
+      final (_, db) = await openWithPicture(tester);
+      final l10n = await _strings(const Locale('en'));
+      await _tapClip(tester, l10n.layerKindVideo);
+      final rect = tester.getRect(find.byType(Texture));
+      final k = rect.width / 1080;
+      final handle = Offset(rect.center.dx, rect.center.dy - 303.75 * k - 36);
+
+      // A quarter turn clockwise: from above the picture to its right.
+      await tester.dragFrom(handle, const Offset(120, 120));
+      await _settle(tester);
+
+      final row = await tester.runAsync(
+        () => db.select(db.editorClips).getSingle(),
+      );
+      expect(row!.rotation, isNot(0));
+    });
+  });
+
+  testWidgets('the layer button puts the media on a new layer of its kind',
+      (tester) async {
+    final db = AppDatabase.inMemory();
+    addTearDown(() => tester.runAsync(db.close));
+    await tester.runAsync(() => _seed(db, layerKind: 'video'));
+    final l10n = await _strings(const Locale('en'));
+    final engine = await _pumpPage(
+      tester,
+      db,
+      const Locale('en'),
+      picked: ['/media/new.mp4'],
+    );
+
+    await tester.tap(find.byTooltip(l10n.addLayerAction));
+    await _settle(tester);
+
+    final layers = engine.session!.timelines.last.layers;
+    expect(layers, hasLength(2));
+    expect(layers.first.clips.single.path, '/media/new.mp4');
+  });
+
+  testWidgets('a long press lifts a layer and dragging puts it above another',
+      (tester) async {
+    final db = AppDatabase.inMemory();
+    addTearDown(() => tester.runAsync(db.close));
+    await tester.runAsync(() async {
+      await _seed(db, layerKind: 'video');
+      await db.into(db.editorLayers).insert(
+            const EditorLayersCompanion(
+              id: Value('layer-2'),
+              projectId: Value(_projectId),
+              position: Value(1),
+              kind: Value('audio'),
+              volume: Value(1),
+              muted: Value(false),
+            ),
+          );
+      await db.into(db.editorClips).insert(
+            const EditorClipsCompanion(
+              id: Value('clip-2'),
+              layerId: Value('layer-2'),
+              sortKey: Value(0),
+              sourceUri: Value('/media/song.mp3'),
+              startMs: Value(0),
+              durationMs: Value(4000),
+              inPointMs: Value(0),
+              outPointMs: Value(4000),
+              reversed: Value(false),
+              volume: Value(1),
+              filterId: Value(null),
+              adjustmentsJson: Value('{}'),
+            ),
+          );
+    });
+    final l10n = await _strings(const Locale('en'));
+    await _pumpPage(tester, db, const Locale('en'));
+
+    final header = find.byTooltip(l10n.muteLayerAction).last;
+    final gesture = await tester.startGesture(tester.getCenter(header));
+    await tester.pump(const Duration(milliseconds: 700));
+    await gesture.moveBy(const Offset(0, -40));
+    await tester.pump();
+    await gesture.moveBy(const Offset(0, -40));
+    await tester.pump();
+    await gesture.up();
+    await _settle(tester);
+
+    final rows = await tester.runAsync(
+      () => (db.select(db.editorLayers)
+            ..orderBy([(l) => OrderingTerm.asc(l.position)]))
+          .get(),
+    );
+    expect(rows!.map((l) => l.id), ['layer-2', 'layer-1']);
+  });
+
+  group('timeline panning', () {
+    Future<ScrollableState> pumpAndFindTrackScroller(
+      WidgetTester tester,
+      AppDatabase db,
+    ) async {
+      await _pumpPage(tester, db, const Locale('en'));
+      final horizontal = find.byWidgetPredicate(
+        (widget) =>
+            widget is Scrollable && widget.axisDirection == AxisDirection.right,
+      );
+      return tester.state<ScrollableState>(horizontal.first);
+    }
+
+    testWidgets('a mouse or trackpad can drag the timeline sideways',
+        (tester) async {
+      final db = AppDatabase.inMemory();
+      addTearDown(() => tester.runAsync(db.close));
+      await tester.runAsync(() => _seed(db, layerKind: 'video'));
+      final scroller = await pumpAndFindTrackScroller(tester, db);
+
+      final devices = ScrollConfiguration.of(scroller.context).dragDevices;
+      expect(devices, contains(PointerDeviceKind.mouse));
+      expect(devices, contains(PointerDeviceKind.trackpad));
+    });
+
+    testWidgets('the wheel over the ruler scrolls the timeline sideways',
+        (tester) async {
+      final db = AppDatabase.inMemory();
+      addTearDown(() => tester.runAsync(db.close));
+      await tester.runAsync(() => _seed(db, layerKind: 'video'));
+      final scroller = await pumpAndFindTrackScroller(tester, db);
+      expect(scroller.position.pixels, 0);
+
+      final ruler = tester.getCenter(
+        find.byWidgetPredicate(
+          (widget) => widget is CustomPaint && widget.painter is RulerPainter,
+        ),
+      );
+      final pointer = TestPointer(1, PointerDeviceKind.mouse);
+      await tester.sendEventToBinding(pointer.hover(ruler));
+      // The wheel turns vertically, the timeline moves horizontally.
+      await tester.sendEventToBinding(pointer.scroll(const Offset(0, 120)));
+      await tester.pump();
+
+      expect(scroller.position.pixels, 120);
+
+      await tester.sendEventToBinding(pointer.scroll(const Offset(0, -500)));
+      await tester.pump();
+      expect(scroller.position.pixels, 0);
+    });
+  });
+
+  group('the divider between preview and timeline', () {
+    Future<AppDatabase> open(WidgetTester tester) async {
+      final db = AppDatabase.inMemory();
+      addTearDown(() => tester.runAsync(db.close));
+      await tester.runAsync(() => _seed(db, layerKind: 'video'));
+      await _pumpPage(
+        tester,
+        db,
+        const Locale('en'),
+        size: const Size(1280, 800),
+      );
+      return db;
+    }
+
+    Future<String?> stored(WidgetTester tester, AppDatabase db) async {
+      final value = await tester.runAsync(
+        () => SettingsStore(db).read('editor.preview_share'),
+      );
+      return value;
+    }
+
+    testWidgets('dragging it gives the preview more room and is remembered',
+        (tester) async {
+      final db = await open(tester);
+      final l10n = await _strings(const Locale('en'));
+      final before = tester.getSize(find.byType(Texture)).height;
+
+      final divider = find.bySemanticsLabel(l10n.splitHandleLabel);
+      await tester.drag(divider, const Offset(0, 120));
+      await _settle(tester);
+
+      expect(tester.getSize(find.byType(Texture)).height, greaterThan(before));
+      expect(double.parse((await stored(tester, db))!), greaterThan(0.58));
+    });
+
+    testWidgets(
+        'the button focuses the preview, then the timeline, then '
+        'shows both', (tester) async {
+      final db = await open(tester);
+      final l10n = await _strings(const Locale('en'));
+
+      await tester.tap(find.byTooltip(l10n.splitFocusPreview));
+      await _settle(tester);
+      expect(await stored(tester, db), '1.000');
+      final pane = find
+          .ancestor(
+            of: find.byType(TimelineView),
+            matching: find.byType(ClipRect),
+          )
+          .first;
+      expect(tester.getSize(pane).height, lessThan(1));
+
+      await tester.tap(find.byTooltip(l10n.splitFocusTimeline));
+      await _settle(tester);
+      expect(await stored(tester, db), '0.000');
+      // The play button stays within reach while the timeline is focused.
+      expect(find.byTooltip(l10n.playAction), findsOneWidget);
+
+      await tester.tap(find.byTooltip(l10n.splitBalance));
+      await _settle(tester);
+      expect(await stored(tester, db), '0.580');
+    });
+
+    testWidgets('the time scale menu zooms to seconds, milliseconds and fit',
+        (tester) async {
+      final db = AppDatabase.inMemory();
+      addTearDown(() => tester.runAsync(db.close));
+      await tester.runAsync(() => _seed(db, layerKind: 'video'));
+      final l10n = await _strings(const Locale('en'));
+      await _pumpPage(tester, db, const Locale('en'));
+
+      // The default view marks every second.
+      expect(find.text(l10n.timeUnitSeconds(1)), findsWidgets);
+
+      Future<void> pick(String item) async {
+        await tester.tap(find.byTooltip(l10n.timeScaleTitle).first);
+        await tester.pumpAndSettle();
+        // The menu row takes the tap; its text is only laid over it.
+        await tester.tap(find.text(item), warnIfMissed: false);
+        await tester.pumpAndSettle();
+      }
+
+      await pick(l10n.timeScaleMilliseconds);
+      expect(find.text(l10n.timeUnitMilliseconds(50)), findsWidgets);
+
+      await pick(l10n.timeScaleMinutes);
+      expect(find.text(l10n.timeUnitMinutes(1)), findsWidgets);
+
+      // Fit: the 10 s clip fills the view, so marks come every second or two.
+      await pick(l10n.timeScaleFit);
+      expect(find.text(l10n.timeUnitMinutes(1)), findsNothing);
+    });
   });
 }

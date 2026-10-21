@@ -32,6 +32,8 @@ EditorFailure _failure(EditorResult<Project> result) {
 }
 
 void main() {
+  addLayerTests();
+
   group('AddClipToLayer', () {
     late InMemoryProjectRepository repository;
     late AddClipToLayer addClip;
@@ -259,6 +261,36 @@ void main() {
       );
 
       expect(_failure(result), const InvalidVolume());
+      expect(repository.saveCount, 0);
+    });
+  });
+}
+
+void addLayerTests() {
+  group('AddLayer', () {
+    late InMemoryProjectRepository repository;
+    late AddLayer addLayer;
+
+    setUp(() {
+      repository = InMemoryProjectRepository([buildFixtureProject()]);
+      addLayer = AddLayer(repository, SequentialIdGenerator());
+    });
+
+    test('adds_an_empty_layer_in_front_of_the_others', () async {
+      final project = _okProject(
+        await addLayer(projectId: 'p1', kind: MediaKind.image),
+      );
+
+      expect(project.layers.map((layer) => layer.id), ['id-1', 'v1', 'a1']);
+      expect(project.layers.first.kind, MediaKind.image);
+      expect(project.layers.first.clips, isEmpty);
+      expect(repository.projects['p1'], project);
+    });
+
+    test('rejects_an_unknown_project_without_saving', () async {
+      final result = await addLayer(projectId: 'nope', kind: MediaKind.video);
+
+      expect(_failure(result), const ProjectNotFound('nope'));
       expect(repository.saveCount, 0);
     });
   });

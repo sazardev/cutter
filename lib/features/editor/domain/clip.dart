@@ -2,11 +2,20 @@
 // provides `@immutable` is not a declared dependency of the domain.
 // ignore_for_file: avoid_equals_and_hash_code_on_mutable_classes
 
+import 'package:cutter/features/editor/domain/clip_crop.dart';
+import 'package:cutter/features/editor/domain/clip_transform.dart';
 import 'package:cutter/features/editor/domain/media_asset.dart';
 import 'package:cutter/features/editor/domain/time_range.dart';
 
-/// The shortest duration a clip may have, in milliseconds.
-const minClipDurationMs = 100;
+/// The shortest duration a clip may have, in milliseconds: one frame at 30
+/// fps, so short sound effects (a click, a whoosh) can be used whole.
+const minClipDurationMs = 33;
+
+/// Slowest playback speed of a clip.
+const minClipSpeed = 0.25;
+
+/// Fastest playback speed of a clip.
+const maxClipSpeed = 4.0;
 
 /// A clip placed on a layer, playing the part of its source between
 /// [inPointMs] and [outPointMs]. All times are integer milliseconds.
@@ -26,6 +35,13 @@ class Clip {
     this.volume = 1.0,
     this.filterId,
     this.adjustments = const {},
+    this.transform = const ClipTransform(),
+    this.sourceWidth = 0,
+    this.sourceHeight = 0,
+    this.crop = const ClipCrop(),
+    this.speed = 1,
+    this.fadeInMs = 0,
+    this.fadeOutMs = 0,
   });
 
   /// Unique id of the clip.
@@ -67,8 +83,33 @@ class Clip {
   /// Adjustment values by key.
   final Map<String, double> adjustments;
 
-  /// Duration of the played part of the source.
-  int get durationMs => outPointMs - inPointMs;
+  /// Where and how the picture sits on the canvas; ignored for sound.
+  final ClipTransform transform;
+
+  /// Display width of the source in pixels, 0 when unknown or for sound.
+  final int sourceWidth;
+
+  /// Display height of the source in pixels, 0 when unknown or for sound.
+  final int sourceHeight;
+
+  /// The part of the source picture kept.
+  final ClipCrop crop;
+
+  /// Playback speed: 2 plays twice as fast and lasts half as long.
+  final double speed;
+
+  /// Length of the sound fade at the start, in timeline milliseconds.
+  final int fadeInMs;
+
+  /// Length of the sound fade at the end, in timeline milliseconds.
+  final int fadeOutMs;
+
+  /// How long the clip lasts on the timeline: its source span at its
+  /// speed.
+  int get durationMs => ((outPointMs - inPointMs) / speed).round();
+
+  /// The source milliseconds played during [timelineMs] of the clip.
+  int sourceSpanOf(int timelineMs) => (timelineMs * speed).round();
 
   /// The span the clip occupies on the timeline.
   TimeRange get range => TimeRange(startMs, durationMs);
@@ -85,6 +126,13 @@ class Clip {
     String? filterId,
     bool clearFilter = false,
     Map<String, double>? adjustments,
+    ClipTransform? transform,
+    int? sourceWidth,
+    int? sourceHeight,
+    ClipCrop? crop,
+    double? speed,
+    int? fadeInMs,
+    int? fadeOutMs,
     String? id,
   }) {
     return Clip(
@@ -101,6 +149,13 @@ class Clip {
       volume: volume ?? this.volume,
       filterId: clearFilter ? null : (filterId ?? this.filterId),
       adjustments: adjustments ?? this.adjustments,
+      transform: transform ?? this.transform,
+      sourceWidth: sourceWidth ?? this.sourceWidth,
+      sourceHeight: sourceHeight ?? this.sourceHeight,
+      crop: crop ?? this.crop,
+      speed: speed ?? this.speed,
+      fadeInMs: fadeInMs ?? this.fadeInMs,
+      fadeOutMs: fadeOutMs ?? this.fadeOutMs,
     );
   }
 
@@ -120,6 +175,13 @@ class Clip {
           other.reversed == reversed &&
           other.volume == volume &&
           other.filterId == filterId &&
+          other.transform == transform &&
+          other.sourceWidth == sourceWidth &&
+          other.sourceHeight == sourceHeight &&
+          other.crop == crop &&
+          other.speed == speed &&
+          other.fadeInMs == fadeInMs &&
+          other.fadeOutMs == fadeOutMs &&
           _sameAdjustments(other.adjustments);
 
   bool _sameAdjustments(Map<String, double> other) {
@@ -144,6 +206,10 @@ class Clip {
         reversed,
         volume,
         filterId,
+        transform,
+        sourceWidth,
+        sourceHeight,
+        Object.hash(crop, speed, fadeInMs, fadeOutMs),
         Object.hashAllUnordered(
           adjustments.entries.map((e) => Object.hash(e.key, e.value)),
         ),

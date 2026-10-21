@@ -4,36 +4,6 @@
   "@editorTitle": {
     "description": "Título de la barra superior de la pantalla del editor."
   },
-  "emptyTitle": "Aún no hay capas",
-  "@emptyTitle": {
-    "description": "Título del estado vacío cuando el proyecto no tiene capas."
-  },
-  "emptyBody": "Añade una capa de vídeo, imagen o audio para empezar a editar.",
-  "@emptyBody": {
-    "description": "Explicación de una frase en el estado vacío del editor."
-  },
-  "previewPlaceholder": "Vista previa",
-  "@previewPlaceholder": {
-    "description": "Etiqueta del marcador del lienzo de vista previa hasta que el motor multimedia esté disponible."
-  },
-  "timeLabel": "{time}",
-  "@timeLabel": {
-    "description": "Tiempo del cabezal mostrado sobre la línea de tiempo, con formato mm:ss.mmm.",
-    "placeholders": {
-      "time": {
-        "type": "String",
-        "example": "00:01.250"
-      }
-    }
-  },
-  "playheadStepBackAction": "Retroceder el cabezal",
-  "@playheadStepBackAction": {
-    "description": "Nombre accesible del botón que mueve el cabezal hacia atrás."
-  },
-  "playheadStepForwardAction": "Avanzar el cabezal",
-  "@playheadStepForwardAction": {
-    "description": "Nombre accesible del botón que mueve el cabezal hacia delante."
-  },
   "timelineLabel": "Línea de tiempo",
   "@timelineLabel": {
     "description": "Nombre accesible de la región de la línea de tiempo."
@@ -54,20 +24,6 @@
   "@layerKindAudio": {
     "description": "Nombre de una capa de audio."
   },
-  "layerLabel": "Capa {index}: {kind}",
-  "@layerLabel": {
-    "description": "Etiqueta de una fila de la línea de tiempo.",
-    "placeholders": {
-      "index": {
-        "type": "int",
-        "example": "1"
-      },
-      "kind": {
-        "type": "String",
-        "example": "Vídeo"
-      }
-    }
-  },
   "clipSemanticsLabel": "Clip en {layer}, empieza en {start}, dura {duration}",
   "@clipSemanticsLabel": {
     "description": "Etiqueta para lector de pantalla de un bloque de clip en la línea de tiempo.",
@@ -86,14 +42,6 @@
       }
     }
   },
-  "clipReversedIcon": "Invertido",
-  "@clipReversedIcon": {
-    "description": "Nombre accesible del icono de inversión mostrado en un clip invertido."
-  },
-  "clipMutedIcon": "Silenciado",
-  "@clipMutedIcon": {
-    "description": "Nombre accesible del icono de silencio mostrado en un clip con volumen cero."
-  },
   "selectClipHint": "Selecciona un clip",
   "@selectClipHint": {
     "description": "Pista mostrada en el inspector cuando no hay ningún clip seleccionado."
@@ -105,14 +53,6 @@
   "splitAction": "Dividir",
   "@splitAction": {
     "description": "Botón que divide el clip seleccionado en el cabezal."
-  },
-  "moveEarlierAction": "Mover antes",
-  "@moveEarlierAction": {
-    "description": "Botón que mueve el clip seleccionado antes en el tiempo."
-  },
-  "moveLaterAction": "Mover después",
-  "@moveLaterAction": {
-    "description": "Botón que mueve el clip seleccionado después en el tiempo."
   },
   "reverseLabel": "Invertir",
   "@reverseLabel": {
@@ -127,10 +67,6 @@
         "example": "80"
       }
     }
-  },
-  "muteAction": "Silenciar",
-  "@muteAction": {
-    "description": "Botón que pone el volumen del clip a cero."
   },
   "filtersLabel": "Filtros",
   "@filtersLabel": {
@@ -202,41 +138,1871 @@
   "@retryAction": {
     "description": "Botón que reintenta una carga fallida."
   },
-  "failureSplitOutsideClip": "Mueve el cabezal dentro del clip, lejos de sus bordes, para dividirlo.",
-  "@failureSplitOutsideClip": {
-    "description": "Mensaje cuando se intenta dividir en el borde o fuera del clip."
+  "homeTitle": "Cutter",
+  "@homeTitle": {
+    "description": "Título de la barra superior de la pantalla de inicio."
   },
-  "failureInvalidTrim": "Ese recorte dejaría el clip sin duración. Se mantuvieron los puntos anteriores.",
-  "@failureInvalidTrim": {
-    "description": "Mensaje cuando un recorte produciría una duración cero o negativa."
+  "helpAction": "Cómo funciona Cutter",
+  "@helpAction": {
+    "description": "Nombre accesible del botón de la barra superior que vuelve a mostrar la introducción."
   },
-  "failureOverlap": "Esa posición se solapa con otro clip de esta capa. Elige un hueco libre.",
-  "@failureOverlap": {
-    "description": "Mensaje cuando un movimiento solaparía otro clip de la misma capa."
+  "homeProjectsTitle": "Tus proyectos",
+  "@homeProjectsTitle": {
+    "description": "Encabezado de la lista de proyectos en la pantalla de inicio."
   },
-  "failureNotReversible": "Los clips de audio aún no se pueden invertir.",
-  "@failureNotReversible": {
-    "description": "Mensaje cuando se pide invertir un clip de audio."
+  "homeEmptyTitle": "Aún no hay proyectos",
+  "@homeEmptyTitle": {
+    "description": "Título del estado vacío de la pantalla de inicio cuando no hay proyectos."
   },
-  "failureInvalidVolume": "El volumen debe estar entre 0 y 100 %.",
-  "@failureInvalidVolume": {
-    "description": "Mensaje cuando un valor de volumen está fuera de rango."
+  "homeEmptyBody": "Crea tu primer proyecto para combinar vídeo, imágenes y audio en capas.",
+  "@homeEmptyBody": {
+    "description": "Explicación de una frase en el estado vacío de la pantalla de inicio."
   },
-  "failureInvalidAdjustment": "Ese valor de ajuste está fuera de rango.",
-  "@failureInvalidAdjustment": {
-    "description": "Mensaje cuando un valor de ajuste está fuera de rango."
+  "newProjectAction": "Nuevo proyecto",
+  "@newProjectAction": {
+    "description": "Botón que crea un proyecto vacío."
   },
-  "failureFilterNotSupported": "Los filtros solo se aplican a clips de vídeo e imagen.",
-  "@failureFilterNotSupported": {
-    "description": "Mensaje cuando se pone un filtro a un clip de audio."
+  "defaultProjectName": "Proyecto {number}",
+  "@defaultProjectName": {
+    "description": "Nombre por defecto de un proyecto nuevo.",
+    "placeholders": {
+      "number": {
+        "type": "int",
+        "example": "1"
+      }
+    }
   },
-  "failureClipNotFound": "Ese clip ya no existe. Selecciona otro clip.",
-  "@failureClipNotFound": {
-    "description": "Mensaje cuando no se encuentra el clip objetivo en el proyecto."
+  "projectSummary": "{layers, plural, =0{Sin capas} one{1 capa} other{{layers} capas}} · {duration}",
+  "@projectSummary": {
+    "description": "Subtítulo de la tarjeta de un proyecto: cuántas capas tiene y cuánto dura.",
+    "placeholders": {
+      "layers": {
+        "type": "int",
+        "example": "2"
+      },
+      "duration": {
+        "type": "String",
+        "example": "00:12.000"
+      }
+    }
   },
-  "failureGeneric": "Algo salió mal y el proyecto no cambió. Inténtalo de nuevo.",
-  "@failureGeneric": {
-    "description": "Mensaje de respaldo para un fallo de edición desconocido."
+  "openProjectLabel": "Abrir el proyecto {name}",
+  "@openProjectLabel": {
+    "description": "Nombre accesible de la tarjeta de un proyecto que lo abre en el editor.",
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "example": "Proyecto 1"
+      }
+    }
+  },
+  "templatesTitle": "Empieza con una plantilla",
+  "@templatesTitle": {
+    "description": "Encabezado de la sección de plantillas de la pantalla de inicio."
+  },
+  "templatesBody": "Cada plantilla prepara las capas por ti.",
+  "@templatesBody": {
+    "description": "Explicación de una frase bajo el encabezado de plantillas."
+  },
+  "templateVerticalStoryTitle": "Historia vertical",
+  "@templateVerticalStoryTitle": {
+    "description": "Nombre de la plantilla de historia vertical."
+  },
+  "templateVerticalStoryBody": "Una capa de vídeo sobre una capa de música.",
+  "@templateVerticalStoryBody": {
+    "description": "Descripción de la plantilla de historia vertical."
+  },
+  "templateVoiceOverTitle": "Voz en off",
+  "@templateVoiceOverTitle": {
+    "description": "Nombre de la plantilla de voz en off."
+  },
+  "templateVoiceOverBody": "Capas de imagen y vídeo con una capa de narración.",
+  "@templateVoiceOverBody": {
+    "description": "Descripción de la plantilla de voz en off."
+  },
+  "templatePhotoMontageTitle": "Montaje de fotos",
+  "@templatePhotoMontageTitle": {
+    "description": "Nombre de la plantilla de montaje de fotos."
+  },
+  "templatePhotoMontageBody": "Una capa de fotos sobre una capa de música.",
+  "@templatePhotoMontageBody": {
+    "description": "Descripción de la plantilla de montaje de fotos."
+  },
+  "onboardingSkip": "Omitir",
+  "@onboardingSkip": {
+    "description": "Botón que omite la introducción."
+  },
+  "onboardingNext": "Siguiente",
+  "@onboardingNext": {
+    "description": "Botón que muestra la siguiente página de la introducción."
+  },
+  "onboardingStart": "Empezar",
+  "@onboardingStart": {
+    "description": "Botón de la última página de la introducción que la cierra."
+  },
+  "onboardingStep": "Paso {current} de {total}",
+  "@onboardingStep": {
+    "description": "Etiqueta accesible del indicador de página de la introducción.",
+    "placeholders": {
+      "current": {
+        "type": "int",
+        "example": "1"
+      },
+      "total": {
+        "type": "int",
+        "example": "3"
+      }
+    }
+  },
+  "onboardingLayersTitle": "Combina tu vídeo en capas",
+  "@onboardingLayersTitle": {
+    "description": "Título de la primera página de la introducción."
+  },
+  "onboardingLayersBody": "Apila vídeo, imágenes y audio en capas separadas y míralas juntas en la línea de tiempo.",
+  "@onboardingLayersBody": {
+    "description": "Cuerpo de la primera página de la introducción."
+  },
+  "onboardingCutTitle": "Corta con precisión",
+  "@onboardingCutTitle": {
+    "description": "Título de la segunda página de la introducción."
+  },
+  "onboardingCutBody": "Selecciona un clip, mueve el cabezal y luego divídelo, recórtalo o inviértelo. Cada cambio se guarda en tu dispositivo.",
+  "@onboardingCutBody": {
+    "description": "Cuerpo de la segunda página de la introducción."
+  },
+  "onboardingTuneTitle": "Hazlo tuyo",
+  "@onboardingTuneTitle": {
+    "description": "Título de la tercera página de la introducción."
+  },
+  "onboardingTuneBody": "Ajusta el volumen de cada clip, añade filtros y retoca su aspecto. Empieza con una plantilla para preparar tus capas con un toque.",
+  "@onboardingTuneBody": {
+    "description": "Cuerpo de la tercera página de la introducción."
+  },
+  "undoAction": "Deshacer",
+  "@undoAction": {
+    "description": "Undoes the last edit."
+  },
+  "redoAction": "Rehacer",
+  "@redoAction": {
+    "description": "Redoes the last undone edit."
+  },
+  "exportAction": "Exportar",
+  "@exportAction": {
+    "description": "Starts rendering the project to a video file."
+  },
+  "playAction": "Reproducir",
+  "@playAction": {
+    "description": "Starts preview playback."
+  },
+  "pauseAction": "Pausar",
+  "@pauseAction": {
+    "description": "Pauses preview playback."
+  },
+  "previousFrameAction": "Fotograma anterior",
+  "@previousFrameAction": {
+    "description": "Moves the playhead one frame back."
+  },
+  "nextFrameAction": "Fotograma siguiente",
+  "@nextFrameAction": {
+    "description": "Moves the playhead one frame forward."
+  },
+  "previewLabel": "Vista previa",
+  "@previewLabel": {
+    "description": "Screen reader label of the video preview."
+  },
+  "previewUnavailable": "La vista previa no pudo iniciar en este dispositivo. Tus cambios siguen guardados.",
+  "@previewUnavailable": {
+    "description": "Shown in the preview when the media engine could not open it."
+  },
+  "zoomInAction": "Acercar",
+  "@zoomInAction": {
+    "description": "Makes the timeline show less time in more detail."
+  },
+  "zoomOutAction": "Alejar",
+  "@zoomOutAction": {
+    "description": "Makes the timeline show more time."
+  },
+  "importMediaAction": "Agregar medios",
+  "@importMediaAction": {
+    "description": "Opens the picker to add videos and photos."
+  },
+  "emptyTimelineTitle": "Agrega tu primer clip",
+  "@emptyTimelineTitle": {
+    "description": "Title of the empty timeline."
+  },
+  "emptyTimelineBody": "Elige videos, fotos o música de tu dispositivo para empezar a editar.",
+  "@emptyTimelineBody": {
+    "description": "Body of the empty timeline."
+  },
+  "muteLayerAction": "Silenciar capa",
+  "@muteLayerAction": {
+    "description": "Silences every clip on the layer."
+  },
+  "unmuteLayerAction": "Activar sonido de la capa",
+  "@unmuteLayerAction": {
+    "description": "Restores the sound of a muted layer."
+  },
+  "doneAction": "Listo",
+  "@doneAction": {
+    "description": "Closes the current tool or finishes a flow."
+  },
+  "volumeTool": "Volumen",
+  "@volumeTool": {
+    "description": "Tool that changes the volume of the selected clip."
+  },
+  "adjustTool": "Ajustar",
+  "@adjustTool": {
+    "description": "Tool that changes brightness, contrast and saturation."
+  },
+  "duplicateAction": "Duplicar",
+  "@duplicateAction": {
+    "description": "Copies the selected clip right after itself."
+  },
+  "deleteAction": "Eliminar",
+  "@deleteAction": {
+    "description": "Deletes the selected clip; it can be undone."
+  },
+  "resetAction": "Restablecer",
+  "@resetAction": {
+    "description": "Sets every adjustment back to zero."
+  },
+  "cancelAction": "Cancelar",
+  "@cancelAction": {
+    "description": "Closes a dialog or stops an export without doing anything else."
+  },
+  "importAction": "Importar",
+  "@importAction": {
+    "description": "Confirms the file path to import."
+  },
+  "exportTitle": "Exportar video",
+  "@exportTitle": {
+    "description": "Title of the export sheet."
+  },
+  "exportQualityLabel": "Resolución",
+  "@exportQualityLabel": {
+    "description": "Heading of the resolution choice."
+  },
+  "export720": "720p",
+  "@export720": {
+    "description": "720p resolution option."
+  },
+  "export1080": "1080p",
+  "@export1080": {
+    "description": "1080p resolution option."
+  },
+  "exportFpsLabel": "Cuadros por segundo",
+  "@exportFpsLabel": {
+    "description": "Heading of the frame rate choice."
+  },
+  "exportFpsValue": "{fps} fps",
+  "@exportFpsValue": {
+    "description": "A frame rate option.",
+    "placeholders": {
+      "fps": {
+        "type": "int",
+        "example": "30"
+      }
+    }
+  },
+  "exportProgress": "Renderizando… {percent}%",
+  "@exportProgress": {
+    "description": "Progress of a running export.",
+    "placeholders": {
+      "percent": {
+        "type": "int",
+        "example": "42"
+      }
+    }
+  },
+  "exportDone": "Tu video está listo.",
+  "@exportDone": {
+    "description": "Shown when the export finished; the file path follows."
+  },
+  "exportFailed": "No se pudo exportar el video. Tu proyecto no cambió; inténtalo de nuevo.",
+  "@exportFailed": {
+    "description": "Shown when the export failed."
+  },
+  "transformTool": "Encuadre",
+  "@transformTool": {
+    "description": "Tool that moves, scales, rotates and mirrors the picture of a clip."
+  },
+  "canvasTool": "Formato",
+  "@canvasTool": {
+    "description": "Tool that changes the canvas shape and frame rate."
+  },
+  "versionsTool": "Versiones",
+  "@versionsTool": {
+    "description": "Tool that saves and restores named versions."
+  },
+  "diagnosticsTool": "Rendimiento",
+  "@diagnosticsTool": {
+    "description": "Tool showing engine timings, memory and logs."
+  },
+  "fitAction": "Ajustar",
+  "@fitAction": {
+    "description": "Fit the whole picture inside the canvas."
+  },
+  "fillAction": "Llenar",
+  "@fillAction": {
+    "description": "Make the picture cover the whole canvas."
+  },
+  "rotateAction": "Girar 90°",
+  "@rotateAction": {
+    "description": "Turns the picture a quarter clockwise."
+  },
+  "mirrorAction": "Espejo",
+  "@mirrorAction": {
+    "description": "Mirrors the picture left to right."
+  },
+  "centerAction": "Centrar",
+  "@centerAction": {
+    "description": "Moves the picture back to the centre."
+  },
+  "scaleLabel": "Tamaño {percent}%",
+  "@scaleLabel": {
+    "description": "Label of the scale slider.",
+    "placeholders": {
+      "percent": {
+        "type": "int",
+        "example": "3"
+      }
+    }
+  },
+  "rotationLabel": "Rotación {degrees}°",
+  "@rotationLabel": {
+    "description": "Label of the rotation slider.",
+    "placeholders": {
+      "degrees": {
+        "type": "int",
+        "example": "3"
+      }
+    }
+  },
+  "opacityLabel": "Opacidad {percent}%",
+  "@opacityLabel": {
+    "description": "Label of the opacity slider.",
+    "placeholders": {
+      "percent": {
+        "type": "int",
+        "example": "3"
+      }
+    }
+  },
+  "transformGestureHint": "Tip: arrastra, pellizca o gira la imagen en la vista previa.",
+  "@transformGestureHint": {
+    "description": "Hint about preview gestures."
+  },
+  "canvasPortrait": "Historias",
+  "@canvasPortrait": {
+    "description": "Name of the 9:16 canvas."
+  },
+  "canvasLandscape": "Panorámico",
+  "@canvasLandscape": {
+    "description": "Name of the 16:9 canvas."
+  },
+  "canvasSquare": "Cuadrado",
+  "@canvasSquare": {
+    "description": "Name of the 1:1 canvas."
+  },
+  "canvasFeed": "Publicación",
+  "@canvasFeed": {
+    "description": "Name of the 4:5 canvas."
+  },
+  "canvasSize": "{width} × {height} px",
+  "@canvasSize": {
+    "description": "Canvas size in pixels.",
+    "placeholders": {
+      "width": {
+        "type": "int",
+        "example": "1080"
+      },
+      "height": {
+        "type": "int",
+        "example": "1920"
+      }
+    }
+  },
+  "defaultVersionName": "Versión {number}",
+  "@defaultVersionName": {
+    "description": "Default name of a new version.",
+    "placeholders": {
+      "number": {
+        "type": "int",
+        "example": "3"
+      }
+    }
+  },
+  "statusSaved": "Guardado",
+  "@statusSaved": {
+    "description": "Top bar chip: every change is stored on the device."
+  },
+  "statusSavedBody": "Cada cambio se guarda en tu dispositivo al instante. Las versiones son puntos a los que puedes volver.",
+  "@statusSavedBody": {
+    "description": "Explains the saved status."
+  },
+  "versionNameLabel": "Nombre de la versión",
+  "@versionNameLabel": {
+    "description": "Label of the version name field."
+  },
+  "saveVersionAction": "Guardar",
+  "@saveVersionAction": {
+    "description": "Saves a named version."
+  },
+  "noVersionsYet": "Aún no hay versiones guardadas.",
+  "@noVersionsYet": {
+    "description": "Empty list of versions."
+  },
+  "restoreAction": "Restaurar",
+  "@restoreAction": {
+    "description": "Restores a saved version; it can be undone."
+  },
+  "exportKeepEditing": "Puedes cerrar este panel y seguir editando; la exportación continúa.",
+  "@exportKeepEditing": {
+    "description": "Hint while exporting."
+  },
+  "exportInGallery": "Tu video está listo y en tu galería.",
+  "@exportInGallery": {
+    "description": "Export done on a phone."
+  },
+  "exportAgainAction": "Exportar de nuevo",
+  "@exportAgainAction": {
+    "description": "Back to the export settings."
+  },
+  "diagRenderAvg": "media por cuadro",
+  "@diagRenderAvg": {
+    "description": "Metric: mean preview frame time."
+  },
+  "diagRenderMax": "peor cuadro",
+  "@diagRenderMax": {
+    "description": "Metric: worst preview frame time."
+  },
+  "diagLateFrames": "cuadros tarde",
+  "@diagLateFrames": {
+    "description": "Metric: frames over budget."
+  },
+  "diagDecoders": "decodificadores (video + audio)",
+  "@diagDecoders": {
+    "description": "Metric: open decoders."
+  },
+  "diagCache": "caché de cuadros",
+  "@diagCache": {
+    "description": "Metric: memory of frame caches."
+  },
+  "diagThumbnails": "miniaturas",
+  "@diagThumbnails": {
+    "description": "Metric: cached thumbnails."
+  },
+  "diagLog": "Registro",
+  "@diagLog": {
+    "description": "Heading of the engine and edit log."
+  },
+  "copyAction": "Copiar",
+  "@copyAction": {
+    "description": "Copies text to the clipboard."
+  },
+  "previewModeAction": "Modo vista previa",
+  "@previewModeAction": {
+    "description": "Shows only the preview."
+  },
+  "exitPreviewAction": "Salir de la vista previa",
+  "@exitPreviewAction": {
+    "description": "Leaves preview mode."
+  },
+  "autoAdjustAction": "Auto",
+  "@autoAdjustAction": {
+    "description": "Balances brightness, contrast and colour from the clip's own frames."
+  },
+  "copyPathAction": "Copiar ruta",
+  "@copyPathAction": {
+    "description": "Copies the file path."
+  },
+  "cropTool": "Recortar",
+  "@cropTool": {
+    "description": "Tool that keeps part of the picture."
+  },
+  "cropFree": "Completa",
+  "@cropFree": {
+    "description": "Crop shape: the whole picture."
+  },
+  "cropCanvas": "Lienzo",
+  "@cropCanvas": {
+    "description": "Crop shape: the canvas shape."
+  },
+  "cropLeft": "Izquierda",
+  "@cropLeft": {
+    "description": "Crop slider: left edge."
+  },
+  "cropRight": "Derecha",
+  "@cropRight": {
+    "description": "Crop slider: right edge."
+  },
+  "cropTop": "Arriba",
+  "@cropTop": {
+    "description": "Crop slider: top edge."
+  },
+  "cropBottom": "Abajo",
+  "@cropBottom": {
+    "description": "Crop slider: bottom edge."
+  },
+  "deleteVideoAction": "Eliminar video",
+  "@deleteVideoAction": {
+    "description": "Deletes a rendered video."
+  },
+  "deleteVideoConfirm": "Toca de nuevo para eliminar",
+  "@deleteVideoConfirm": {
+    "description": "Second tap needed to delete a video."
+  },
+  "durationTool": "Duración",
+  "@durationTool": {
+    "description": "Tool that sets how long an image shows."
+  },
+  "editClipAction": "Editar",
+  "@editClipAction": {
+    "description": "Opens the editor of the selected clip on its own."
+  },
+  "exportPlanSummary": "{width} × {height} · {fps} fps · unos {megabytes} MB",
+  "@exportPlanSummary": {
+    "description": "Size and estimated file size of the export.",
+    "placeholders": {
+      "width": {
+        "type": "int",
+        "example": "1080"
+      },
+      "height": {
+        "type": "int",
+        "example": "1920"
+      },
+      "fps": {
+        "type": "int",
+        "example": "30"
+      },
+      "megabytes": {
+        "type": "String",
+        "example": "12.5"
+      }
+    }
+  },
+  "exportPlatformLabel": "Pensado para",
+  "@exportPlatformLabel": {
+    "description": "Heading of the platform choice."
+  },
+  "exportReframedNote": "Las imágenes se ajustan de nuevo a este formato.",
+  "@exportReframedNote": {
+    "description": "Note when the platform shape differs from the project."
+  },
+  "fadeInLabel": "Entrada {seconds} s",
+  "@fadeInLabel": {
+    "description": "Fade in slider label.",
+    "placeholders": {
+      "seconds": {
+        "type": "String",
+        "example": "0.5"
+      }
+    }
+  },
+  "fadeOutLabel": "Salida {seconds} s",
+  "@fadeOutLabel": {
+    "description": "Fade out slider label.",
+    "placeholders": {
+      "seconds": {
+        "type": "String",
+        "example": "0.5"
+      }
+    }
+  },
+  "fadesTool": "Fundidos",
+  "@fadesTool": {
+    "description": "Tool that fades sound in and out."
+  },
+  "imageDurationLabel": "Se muestra {seconds} s",
+  "@imageDurationLabel": {
+    "description": "Image duration slider label.",
+    "placeholders": {
+      "seconds": {
+        "type": "String",
+        "example": "3.0"
+      }
+    }
+  },
+  "inGalleryNote": "También está en tu galería.",
+  "@inGalleryNote": {
+    "description": "Note in the viewer when the video is in the gallery."
+  },
+  "libraryTitle": "Tus videos",
+  "@libraryTitle": {
+    "description": "Heading of the rendered videos on the home screen."
+  },
+  "librarySummary": "{count, plural, one{1 video} other{{count} videos}} · {size}",
+  "@librarySummary": {
+    "description": "How many rendered videos and their total size.",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "3"
+      },
+      "size": {
+        "type": "String",
+        "example": "120 MB"
+      }
+    }
+  },
+  "openVideoLabel": "Reproducir video {name}",
+  "@openVideoLabel": {
+    "description": "Screen reader label of a video card.",
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "example": "Project 2"
+      }
+    }
+  },
+  "platformProject": "Este proyecto",
+  "@platformProject": {
+    "description": "Export for the project's own shape."
+  },
+  "platformVertical": "TikTok · Reels · Shorts",
+  "@platformVertical": {
+    "description": "Export for vertical platforms."
+  },
+  "platformWidescreen": "YouTube",
+  "@platformWidescreen": {
+    "description": "Export for widescreen players."
+  },
+  "platformFeed": "Feed de Instagram",
+  "@platformFeed": {
+    "description": "Export for 4:5 feed posts."
+  },
+  "platformMessaging": "WhatsApp (ligero)",
+  "@platformMessaging": {
+    "description": "Export small files for messaging."
+  },
+  "qualityDraft": "Borrador",
+  "@qualityDraft": {
+    "description": "Quick 720p export."
+  },
+  "qualityStandard": "Estándar",
+  "@qualityStandard": {
+    "description": "1080p export."
+  },
+  "qualityHigh": "Alta",
+  "@qualityHigh": {
+    "description": "High bitrate 1080p export."
+  },
+  "qualityUltra": "4K",
+  "@qualityUltra": {
+    "description": "4K export."
+  },
+  "remixAction": "Editar en un proyecto nuevo",
+  "@remixAction": {
+    "description": "Starts a project with this video."
+  },
+  "remixProjectName": "{name} (edición)",
+  "@remixProjectName": {
+    "description": "Name of a project started from a rendered video.",
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "example": "Project 2"
+      }
+    }
+  },
+  "secondsShort": "{seconds} s",
+  "@secondsShort": {
+    "description": "A duration in seconds.",
+    "placeholders": {
+      "seconds": {
+        "type": "int",
+        "example": "3"
+      }
+    }
+  },
+  "speedMutesSound": "El sonido se silencia a velocidades distintas de 1×.",
+  "@speedMutesSound": {
+    "description": "Note on speed and sound."
+  },
+  "speedSummary": "{speed} · dura {seconds} s",
+  "@speedSummary": {
+    "description": "Current speed and resulting duration.",
+    "placeholders": {
+      "speed": {
+        "type": "String",
+        "example": "2×"
+      },
+      "seconds": {
+        "type": "String",
+        "example": "2.5"
+      }
+    }
+  },
+  "speedTool": "Velocidad",
+  "@speedTool": {
+    "description": "Tool that changes playback speed."
+  },
+  "studioVideoTitle": "Editar video",
+  "@studioVideoTitle": {
+    "description": "Title of the video clip editor."
+  },
+  "studioImageTitle": "Editar imagen",
+  "@studioImageTitle": {
+    "description": "Title of the image clip editor."
+  },
+  "studioAudioTitle": "Editar audio",
+  "@studioAudioTitle": {
+    "description": "Title of the audio clip editor."
+  },
+  "trimRange": "{from} – {to}",
+  "@trimRange": {
+    "description": "The kept part of the source.",
+    "placeholders": {
+      "from": {
+        "type": "String",
+        "example": "0:01.0"
+      },
+      "to": {
+        "type": "String",
+        "example": "0:04.5"
+      }
+    }
+  },
+  "trimStartHandle": "Inicio del clip",
+  "@trimStartHandle": {
+    "description": "Screen reader label of the trim start handle."
+  },
+  "trimEndHandle": "Fin del clip",
+  "@trimEndHandle": {
+    "description": "Screen reader label of the trim end handle."
+  },
+  "addMediaAction": "Agregar",
+  "@addMediaAction": {
+    "description": "Picks videos, photos or music; each goes where it belongs."
+  },
+  "mediaTool": "Medios",
+  "@mediaTool": {
+    "description": "The project's media bank."
+  },
+  "layoutTool": "Diseño",
+  "@layoutTool": {
+    "description": "Where the timeline and tool bar sit."
+  },
+  "bankThisProject": "Este proyecto ({count})",
+  "@bankThisProject": {
+    "description": "Tab: the project's media bank.",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "4"
+      }
+    }
+  },
+  "bankRecent": "Recientes",
+  "@bankRecent": {
+    "description": "Tab: files imported into other projects."
+  },
+  "bankEmpty": "Tu banco está vacío. Importa videos, fotos y música una vez y tócalos para agregarlos.",
+  "@bankEmpty": {
+    "description": "Empty project bank."
+  },
+  "bankRecentEmpty": "Aquí aparecen los archivos que importes en otros proyectos.",
+  "@bankRecentEmpty": {
+    "description": "Empty recent tab."
+  },
+  "bankHint": "Toca para agregar · ⋮ para más",
+  "@bankHint": {
+    "description": "Hint over the bank grid."
+  },
+  "bankPlaceLabel": "Agregar {name} al timeline",
+  "@bankPlaceLabel": {
+    "description": "Screen reader label of a bank tile.",
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "example": "clip.mp4"
+      }
+    }
+  },
+  "bankUsed": "En el timeline",
+  "@bankUsed": {
+    "description": "Mark of a bank file already used."
+  },
+  "bankAddToTimeline": "Agregar al timeline",
+  "@bankAddToTimeline": {
+    "description": "Bank menu: place where it belongs."
+  },
+  "bankAddAsOverlay": "Agregar como superposición",
+  "@bankAddAsOverlay": {
+    "description": "Bank menu: place on a new front layer at the playhead."
+  },
+  "bankRemove": "Quitar del banco",
+  "@bankRemove": {
+    "description": "Bank menu: forget the file (clips stay)."
+  },
+  "browserTitle": "Elegir medios",
+  "@browserTitle": {
+    "description": "Title of the in-app media browser."
+  },
+  "browserAdd": "{count, plural, =0{Agregar} other{Agregar {count}}}",
+  "@browserAdd": {
+    "description": "Confirms the chosen files.",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "3"
+      }
+    }
+  },
+  "browserEmpty": "Aquí no hay videos, fotos ni música.",
+  "@browserEmpty": {
+    "description": "Empty folder in the media browser."
+  },
+  "browserSearch": "Buscar en esta carpeta",
+  "@browserSearch": {
+    "description": "Search field of the media browser."
+  },
+  "browserUp": "Subir una carpeta",
+  "@browserUp": {
+    "description": "Goes to the parent folder."
+  },
+  "filterAllMedia": "Todo",
+  "@filterAllMedia": {
+    "description": "Filter: every kind of media."
+  },
+  "placeHome": "Inicio",
+  "@placeHome": {
+    "description": "Folder shortcut: home."
+  },
+  "placeVideos": "Videos",
+  "@placeVideos": {
+    "description": "Folder shortcut."
+  },
+  "placePictures": "Imágenes",
+  "@placePictures": {
+    "description": "Folder shortcut."
+  },
+  "placeMusic": "Música",
+  "@placeMusic": {
+    "description": "Folder shortcut."
+  },
+  "placeDownloads": "Descargas",
+  "@placeDownloads": {
+    "description": "Folder shortcut."
+  },
+  "placeDesktop": "Escritorio",
+  "@placeDesktop": {
+    "description": "Folder shortcut."
+  },
+  "layoutBottom": "Timeline abajo",
+  "@layoutBottom": {
+    "description": "Layout: timeline under the preview."
+  },
+  "layoutTop": "Timeline arriba",
+  "@layoutTop": {
+    "description": "Layout: timeline over the preview."
+  },
+  "layoutSide": "Timeline al lado",
+  "@layoutSide": {
+    "description": "Layout: timeline to the right of the preview."
+  },
+  "layoutSideWideOnly": "Gira el dispositivo para poner el timeline al lado de la vista previa.",
+  "@layoutSideWideOnly": {
+    "description": "Why the side layout is off on narrow screens."
+  },
+  "layoutRailLabels": "Mostrar nombres en la barra lateral",
+  "@layoutRailLabels": {
+    "description": "Expands the side tool bar."
+  },
+  "railCollapse": "Contraer la barra lateral",
+  "@railCollapse": {
+    "description": "Folds the side tool bar."
+  },
+  "railExpand": "Expandir la barra lateral",
+  "@railExpand": {
+    "description": "Unfolds the side tool bar."
+  },
+  "moreActions": "Más",
+  "@moreActions": {
+    "description": "Menu with more actions."
+  },
+  "settingsTitle": "Ajustes",
+  "@settingsTitle": {
+    "description": "Title of the settings screen."
+  },
+  "settingsAction": "Ajustes",
+  "@settingsAction": {
+    "description": "Accessible name of the home app bar button that opens the settings."
+  },
+  "settingsAppearanceSection": "Apariencia",
+  "@settingsAppearanceSection": {
+    "description": "Heading of the section with the look-and-feel preferences."
+  },
+  "settingsThemeModeTitle": "Tema",
+  "@settingsThemeModeTitle": {
+    "description": "Label of the light/dark/system setting."
+  },
+  "settingsThemeModeHelp": "Claro, oscuro o el del dispositivo.",
+  "@settingsThemeModeHelp": {
+    "description": "Helper text of the theme mode setting."
+  },
+  "themeModeSystem": "Sistema",
+  "@themeModeSystem": {
+    "description": "Option: follow the device brightness."
+  },
+  "themeModeLight": "Claro",
+  "@themeModeLight": {
+    "description": "Option: always light."
+  },
+  "themeModeDark": "Oscuro",
+  "@themeModeDark": {
+    "description": "Option: always dark."
+  },
+  "settingsColorTitle": "Color",
+  "@settingsColorTitle": {
+    "description": "Label of the color scheme setting."
+  },
+  "settingsColorHelp": "Usa los colores de tu fondo de pantalla, una paleta o la tuya.",
+  "@settingsColorHelp": {
+    "description": "Helper text of the color setting."
+  },
+  "colorSourceDynamic": "Material You",
+  "@colorSourceDynamic": {
+    "description": "Option: colors inherited from the device wallpaper."
+  },
+  "colorSourcePreset": "Paleta",
+  "@colorSourcePreset": {
+    "description": "Option: pick one of the built-in colors."
+  },
+  "colorSourceCustom": "Personalizado",
+  "@colorSourceCustom": {
+    "description": "Option: pick any color."
+  },
+  "settingsDynamicUnavailable": "Material You requiere Android 12 o superior. Se usa el color de la paleta.",
+  "@settingsDynamicUnavailable": {
+    "description": "Notice shown when the device has no wallpaper colors."
+  },
+  "colorViolet": "Violeta",
+  "@colorViolet": {
+    "description": "Name of a palette color, read by screen readers."
+  },
+  "colorBlue": "Azul",
+  "@colorBlue": {
+    "description": "Name of a palette color, read by screen readers."
+  },
+  "colorTeal": "Turquesa",
+  "@colorTeal": {
+    "description": "Name of a palette color, read by screen readers."
+  },
+  "colorGreen": "Verde",
+  "@colorGreen": {
+    "description": "Name of a palette color, read by screen readers."
+  },
+  "colorOrange": "Naranja",
+  "@colorOrange": {
+    "description": "Name of a palette color, read by screen readers."
+  },
+  "colorRed": "Rojo",
+  "@colorRed": {
+    "description": "Name of a palette color, read by screen readers."
+  },
+  "colorPink": "Rosa",
+  "@colorPink": {
+    "description": "Name of a palette color, read by screen readers."
+  },
+  "settingsCustomColorLabel": "Tono del color personalizado",
+  "@settingsCustomColorLabel": {
+    "description": "Accessible name of the slider that picks the hue of the custom color."
+  },
+  "settingsCornersTitle": "Bordes",
+  "@settingsCornersTitle": {
+    "description": "Label of the corner roundness setting."
+  },
+  "settingsCornersHelp": "Qué tan redondeados son los botones, las tarjetas y los diálogos.",
+  "@settingsCornersHelp": {
+    "description": "Helper text of the corners setting."
+  },
+  "cornerStyleClean": "Limpio",
+  "@cornerStyleClean": {
+    "description": "Option: tight corners, flat look."
+  },
+  "cornerStyleConsistent": "Coherente",
+  "@cornerStyleConsistent": {
+    "description": "Option: the standard Material 3 corner scale."
+  },
+  "cornerStyleCustom": "Personalizado",
+  "@cornerStyleCustom": {
+    "description": "Option: the user picks the corner radius."
+  },
+  "settingsCornerRadiusLabel": "Radio de borde {radius} dp",
+  "@settingsCornerRadiusLabel": {
+    "description": "Label of the corner radius slider with its value.",
+    "placeholders": {
+      "radius": {
+        "type": "int",
+        "example": "12"
+      }
+    }
+  },
+  "settingsTextTitle": "Tamaño del texto",
+  "@settingsTextTitle": {
+    "description": "Label of the font size setting."
+  },
+  "settingsTextHelp": "Se suma al tamaño de fuente de tu dispositivo.",
+  "@settingsTextHelp": {
+    "description": "Helper text of the font size setting."
+  },
+  "settingsTextScaleLabel": "Tamaño del texto {percent}%",
+  "@settingsTextScaleLabel": {
+    "description": "Label of the font size slider with its value.",
+    "placeholders": {
+      "percent": {
+        "type": "int",
+        "example": "110"
+      }
+    }
+  },
+  "settingsResetAction": "Restablecer valores",
+  "@settingsResetAction": {
+    "description": "Button that restores every appearance setting to its default."
+  },
+  "checkpointStart": "Inicio del proyecto",
+  "@checkpointStart": {
+    "description": "Name of the restore point saved when a project first opens."
+  },
+  "checkpointAuto": "Guardado automático {time}",
+  "@checkpointAuto": {
+    "description": "Name of a restore point the editor saves by itself while editing.",
+    "placeholders": {
+      "time": {
+        "type": "String",
+        "example": "3:45 PM"
+      }
+    }
+  },
+  "checkpointBeforeRestore": "Antes de restaurar «{name}»",
+  "@checkpointBeforeRestore": {
+    "description": "Name of the restore point saved just before going back to a version.",
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "example": "Final cut"
+      }
+    }
+  },
+  "projectNameLabel": "Nombre del proyecto",
+  "@projectNameLabel": {
+    "description": "Hint of the project name field in the top bar."
+  },
+  "renameProjectLabel": "{name}, cambiar nombre del proyecto",
+  "@renameProjectLabel": {
+    "description": "Screen reader label of the project name in the top bar.",
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "example": "Project 1"
+      }
+    }
+  },
+  "renameProjectTooltip": "Cambiar nombre del proyecto",
+  "@renameProjectTooltip": {
+    "description": "Tooltip of the project name in the top bar."
+  },
+  "versionsIntro": "Las versiones son puntos de restauración. Volver a una nunca pierde el estado actual: también queda guardado como punto.",
+  "@versionsIntro": {
+    "description": "Explains what versions are, in the versions panel."
+  },
+  "settingsSectionAppearanceHelp": "Tema, color, bordes y tamaño del texto",
+  "@settingsSectionAppearanceHelp": {
+    "description": "Subtitle of the Appearance entry in the settings list."
+  },
+  "settingsSectionExport": "Exportación",
+  "@settingsSectionExport": {
+    "description": "Name of the settings section about saving exported videos."
+  },
+  "settingsSectionExportHelp": "Dónde se guardan los videos terminados",
+  "@settingsSectionExportHelp": {
+    "description": "Subtitle of the Export entry in the settings list."
+  },
+  "settingsSectionPermissions": "Permisos",
+  "@settingsSectionPermissions": {
+    "description": "Name of the settings section about app permissions."
+  },
+  "settingsSectionPermissionsHelp": "A qué puede acceder Cutter en este dispositivo",
+  "@settingsSectionPermissionsHelp": {
+    "description": "Subtitle of the Permissions entry in the settings list."
+  },
+  "settingsSectionAbout": "Acerca de",
+  "@settingsSectionAbout": {
+    "description": "Name of the settings section with version and changelog."
+  },
+  "settingsSectionAboutHelp": "Versión, novedades y licencias",
+  "@settingsSectionAboutHelp": {
+    "description": "Subtitle of the About entry in the settings list."
+  },
+  "settingsExportGalleryTitle": "Guardar en la galería",
+  "@settingsExportGalleryTitle": {
+    "description": "Label of the switch that also copies exports to the photo gallery."
+  },
+  "settingsExportGalleryHelp": "Copia también los videos terminados a tu galería.",
+  "@settingsExportGalleryHelp": {
+    "description": "Helper text of the save to gallery switch."
+  },
+  "settingsExportFolderTitle": "Carpeta de guardado",
+  "@settingsExportFolderTitle": {
+    "description": "Label of the export folder setting."
+  },
+  "settingsExportFolderHelp": "Los videos terminados se escriben primero aquí.",
+  "@settingsExportFolderHelp": {
+    "description": "Helper text of the export folder setting."
+  },
+  "settingsExportFolderDefault": "Carpeta predeterminada",
+  "@settingsExportFolderDefault": {
+    "description": "Shown when the user has not picked an export folder."
+  },
+  "settingsExportFolderChoose": "Elegir carpeta",
+  "@settingsExportFolderChoose": {
+    "description": "Button that opens the system folder picker."
+  },
+  "settingsExportFolderUseDefault": "Usar carpeta predeterminada",
+  "@settingsExportFolderUseDefault": {
+    "description": "Button that forgets the picked export folder."
+  },
+  "settingsPermissionsGalleryTitle": "Galería",
+  "@settingsPermissionsGalleryTitle": {
+    "description": "Name of the gallery permission row."
+  },
+  "settingsPermissionsGalleryHelp": "Permite a Cutter añadir los videos exportados a tu galería.",
+  "@settingsPermissionsGalleryHelp": {
+    "description": "Helper text of the gallery permission row."
+  },
+  "settingsPermissionAllowed": "Permitido",
+  "@settingsPermissionAllowed": {
+    "description": "Status of a granted permission."
+  },
+  "settingsPermissionNotAllowed": "No permitido",
+  "@settingsPermissionNotAllowed": {
+    "description": "Status of a permission that was not granted."
+  },
+  "settingsPermissionAllow": "Permitir",
+  "@settingsPermissionAllow": {
+    "description": "Button that asks the system for a permission."
+  },
+  "settingsPermissionsOpenSettings": "Abrir ajustes del sistema",
+  "@settingsPermissionsOpenSettings": {
+    "description": "Button that opens the system page of the app permissions."
+  },
+  "settingsPermissionsOpenSettingsHelp": "Revisa o cambia todos los permisos de Cutter.",
+  "@settingsPermissionsOpenSettingsHelp": {
+    "description": "Helper text of the open system settings row."
+  },
+  "settingsPermissionsNone": "Este dispositivo no tiene permisos que revisar aquí.",
+  "@settingsPermissionsNone": {
+    "description": "Shown on platforms where the app asks for no permissions."
+  },
+  "settingsAboutTagline": "Edición de video por capas para teléfonos y tablets.",
+  "@settingsAboutTagline": {
+    "description": "One-line description of the app in the About section."
+  },
+  "settingsAboutVersion": "Versión",
+  "@settingsAboutVersion": {
+    "description": "Label of the app version row."
+  },
+  "settingsAboutVersionValue": "{version} (compilación {build})",
+  "@settingsAboutVersionValue": {
+    "description": "Version and build number of the app.",
+    "placeholders": {
+      "version": {
+        "type": "String",
+        "example": "0.1.0"
+      },
+      "build": {
+        "type": "String",
+        "example": "1"
+      }
+    }
+  },
+  "settingsAboutChangelog": "Novedades",
+  "@settingsAboutChangelog": {
+    "description": "Label of the row that opens the list of changes per version."
+  },
+  "settingsAboutChangelogHelp": "Qué cambió en cada versión.",
+  "@settingsAboutChangelogHelp": {
+    "description": "Helper text of the changelog row."
+  },
+  "settingsAboutLicenses": "Licencias de código abierto",
+  "@settingsAboutLicenses": {
+    "description": "Label of the row that opens the licenses page."
+  },
+  "changelogEmpty": "Aún no hay notas de versión.",
+  "@changelogEmpty": {
+    "description": "Shown when the changelog has no releases."
+  },
+  "changelogLoadError": "No se pudieron cargar las novedades.",
+  "@changelogLoadError": {
+    "description": "Shown when the changelog file cannot be read."
+  },
+  "newProjectTitle": "Nuevo proyecto",
+  "@newProjectTitle": {
+    "description": "Title of the guided new project screen."
+  },
+  "newProjectStepLabel": "Paso {current} de {total}",
+  "@newProjectStepLabel": {
+    "description": "Progress label of the new project guide.",
+    "placeholders": {
+      "current": {
+        "type": "int",
+        "example": "2"
+      },
+      "total": {
+        "type": "int",
+        "example": "4"
+      }
+    }
+  },
+  "newProjectStartTitle": "¿Cómo quieres empezar?",
+  "@newProjectStartTitle": {
+    "description": "Heading of the first step of the new project guide."
+  },
+  "newProjectStartBody": "Elige una plantilla o empieza desde cero.",
+  "@newProjectStartBody": {
+    "description": "Help under the heading of the start step."
+  },
+  "newProjectBlankTitle": "Proyecto en blanco",
+  "@newProjectBlankTitle": {
+    "description": "Option that creates a project with no layers."
+  },
+  "newProjectBlankBody": "Un lienzo vacío. Añade capas sobre la marcha.",
+  "@newProjectBlankBody": {
+    "description": "Description of the blank project option."
+  },
+  "newProjectFormatTitle": "Elige la forma de la pantalla",
+  "@newProjectFormatTitle": {
+    "description": "Heading of the format step."
+  },
+  "newProjectFormatBody": "¿Dónde se verá este video? Puedes cambiarlo después.",
+  "@newProjectFormatBody": {
+    "description": "Help under the heading of the format step."
+  },
+  "formatPortraitHelp": "Stories, reels y shorts",
+  "@formatPortraitHelp": {
+    "description": "Where the vertical 9:16 format is used."
+  },
+  "formatLandscapeHelp": "Plataformas de video y TV",
+  "@formatLandscapeHelp": {
+    "description": "Where the horizontal 16:9 format is used."
+  },
+  "formatSquareHelp": "Feeds",
+  "@formatSquareHelp": {
+    "description": "Where the square 1:1 format is used."
+  },
+  "formatFeedHelp": "Publicaciones de feed",
+  "@formatFeedHelp": {
+    "description": "Where the 4:5 format is used."
+  },
+  "newProjectQualityTitle": "Elige los fotogramas por segundo",
+  "@newProjectQualityTitle": {
+    "description": "Heading of the frame rate step."
+  },
+  "newProjectQualityBody": "Más fotogramas se ven más fluidos pero pesan más.",
+  "@newProjectQualityBody": {
+    "description": "Help under the heading of the frame rate step."
+  },
+  "fpsCinematicTitle": "Cinematográfico · 24 fps",
+  "@fpsCinematicTitle": {
+    "description": "Frame rate option with the film look."
+  },
+  "fpsCinematicBody": "El aspecto del cine",
+  "@fpsCinematicBody": {
+    "description": "Description of the 24 fps option."
+  },
+  "fpsStandardTitle": "Estándar · 30 fps",
+  "@fpsStandardTitle": {
+    "description": "Default frame rate option."
+  },
+  "fpsStandardBody": "Ideal para la mayoría de videos",
+  "@fpsStandardBody": {
+    "description": "Description of the 30 fps option."
+  },
+  "fpsSmoothTitle": "Fluido · 60 fps",
+  "@fpsSmoothTitle": {
+    "description": "Frame rate option for fast motion."
+  },
+  "fpsSmoothBody": "Acción rápida y grabaciones de pantalla",
+  "@fpsSmoothBody": {
+    "description": "Description of the 60 fps option."
+  },
+  "newProjectNameTitle": "Ponle nombre a tu proyecto",
+  "@newProjectNameTitle": {
+    "description": "Heading of the last step of the new project guide."
+  },
+  "newProjectNameBody": "Revisa tus elecciones y ponle un nombre.",
+  "@newProjectNameBody": {
+    "description": "Help under the heading of the name step."
+  },
+  "newProjectSummaryStart": "Inicio",
+  "@newProjectSummaryStart": {
+    "description": "Summary row label: blank or template."
+  },
+  "newProjectSummaryFormat": "Formato",
+  "@newProjectSummaryFormat": {
+    "description": "Summary row label: screen shape."
+  },
+  "newProjectSummaryFps": "Fotogramas",
+  "@newProjectSummaryFps": {
+    "description": "Summary row label: frame rate."
+  },
+  "newProjectNameRequired": "Ponle un nombre al proyecto.",
+  "@newProjectNameRequired": {
+    "description": "Error shown when the project name is empty."
+  },
+  "newProjectBack": "Atrás",
+  "@newProjectBack": {
+    "description": "Button that goes to the previous step."
+  },
+  "newProjectCreate": "Crear proyecto",
+  "@newProjectCreate": {
+    "description": "Button of the last step that creates the project."
+  },
+  "newProjectSkip": "Crear ya con valores predeterminados",
+  "@newProjectSkip": {
+    "description": "Button that creates the project at once, skipping the remaining steps."
+  },
+  "homeSearchHint": "Buscar proyectos",
+  "@homeSearchHint": {
+    "description": "Placeholder of the project search field."
+  },
+  "homeClearSearch": "Borrar búsqueda",
+  "@homeClearSearch": {
+    "description": "Accessible name of the button that empties the search field."
+  },
+  "homeFilterAll": "Todos",
+  "@homeFilterAll": {
+    "description": "Filter chip: every project."
+  },
+  "homeFilterSaved": "Guardados",
+  "@homeFilterSaved": {
+    "description": "Filter chip: projects with a saved version."
+  },
+  "homeFilterEmpty": "Vacíos",
+  "@homeFilterEmpty": {
+    "description": "Filter chip: projects with no clips."
+  },
+  "homeSortRecent": "Editados recientemente",
+  "@homeSortRecent": {
+    "description": "Sort option: latest edits first."
+  },
+  "homeSortName": "Nombre",
+  "@homeSortName": {
+    "description": "Sort option: alphabetical."
+  },
+  "homeProjectCount": "{count, plural, =1{1 proyecto} other{{count} proyectos}}",
+  "@homeProjectCount": {
+    "description": "Number of projects that match the list.",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "12"
+      }
+    }
+  },
+  "homePinAction": "Fijar proyecto",
+  "@homePinAction": {
+    "description": "Accessible name of the button that pins a project."
+  },
+  "homeUnpinAction": "Quitar de fijados",
+  "@homeUnpinAction": {
+    "description": "Accessible name of the button that unpins a project."
+  },
+  "homeNoResultsTitle": "Sin resultados",
+  "@homeNoResultsTitle": {
+    "description": "Title shown when no project matches."
+  },
+  "homeNoResultsFor": "Ningún proyecto coincide con “{query}”.",
+  "@homeNoResultsFor": {
+    "description": "Shown when a search matches nothing.",
+    "placeholders": {
+      "query": {
+        "type": "String",
+        "example": "beach"
+      }
+    }
+  },
+  "homeNoResultsFilters": "Ningún proyecto coincide con estos filtros.",
+  "@homeNoResultsFilters": {
+    "description": "Shown when the filters match nothing."
+  },
+  "homeClearFilters": "Borrar filtros",
+  "@homeClearFilters": {
+    "description": "Button that resets the search and filters."
+  },
+  "homeShowMore": "Mostrar más",
+  "@homeShowMore": {
+    "description": "Button that loads the next page of projects."
+  },
+  "homeShowing": "Mostrando {shown} de {total}",
+  "@homeShowing": {
+    "description": "Progress of the paged project list.",
+    "placeholders": {
+      "shown": {
+        "type": "int",
+        "example": "12"
+      },
+      "total": {
+        "type": "int",
+        "example": "40"
+      }
+    }
+  },
+  "projectEditedJustNow": "Editado ahora mismo",
+  "@projectEditedJustNow": {
+    "description": "When a project was last edited, under a minute ago."
+  },
+  "projectEditedMinutes": "Editado hace {count} min",
+  "@projectEditedMinutes": {
+    "description": "When a project was last edited, in minutes.",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "5"
+      }
+    }
+  },
+  "projectEditedHours": "Editado hace {count} h",
+  "@projectEditedHours": {
+    "description": "When a project was last edited, in hours.",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "3"
+      }
+    }
+  },
+  "projectEditedDays": "Editado hace {count} d",
+  "@projectEditedDays": {
+    "description": "When a project was last edited, in days.",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
+  "projectEditedOn": "Editado el {date}",
+  "@projectEditedOn": {
+    "description": "When a project was last edited, as a date.",
+    "placeholders": {
+      "date": {
+        "type": "String",
+        "example": "Oct 21, 2026"
+      }
+    }
+  },
+  "homeProjectMenu": "Opciones del proyecto",
+  "@homeProjectMenu": {
+    "description": "Accessible name of the menu button on a project card."
+  },
+  "homeDeleteAction": "Eliminar proyecto",
+  "@homeDeleteAction": {
+    "description": "Menu item and confirm button that delete a project."
+  },
+  "homeDeleteTitle": "¿Eliminar “{name}”?",
+  "@homeDeleteTitle": {
+    "description": "Title of the confirmation before deleting a project.",
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "example": "Holiday"
+      }
+    }
+  },
+  "homeDeleteBody": "Esto elimina {clips, plural, =0{sus capas} =1{su 1 clip} other{sus {clips} clips}} y no se puede deshacer. Los videos que ya exportaste siguen en tu biblioteca.",
+  "@homeDeleteBody": {
+    "description": "Consequence shown before deleting a project.",
+    "placeholders": {
+      "clips": {
+        "type": "int",
+        "example": "14"
+      }
+    }
+  },
+  "projectTool": "Ajustes del proyecto",
+  "@projectTool": {
+    "description": "Name of the tool that holds the project's own settings."
+  },
+  "renameAction": "Cambiar nombre",
+  "@renameAction": {
+    "description": "Applies a new project name."
+  },
+  "changeFormatAction": "Cambiar formato",
+  "@changeFormatAction": {
+    "description": "Opens the format tool from the project settings."
+  },
+  "projectSaveTitle": "Guardar",
+  "@projectSaveTitle": {
+    "description": "Heading of the save section of the project settings."
+  },
+  "projectSaveBody": "Todo ya se guarda mientras editas. Guarda un punto de restauración para marcar un momento al que puedas volver. Este proyecto tiene {count, plural, =0{ninguno aún} one{1 punto} other{{count} puntos}}.",
+  "@projectSaveBody": {
+    "description": "Explains saving, in the project settings.",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "3"
+      }
+    }
+  },
+  "savePointNowAction": "Guardar un punto de restauración ahora",
+  "@savePointNowAction": {
+    "description": "Saves a restore point from the project settings."
+  },
+  "restorePointSaved": "Guardado",
+  "@restorePointSaved": {
+    "description": "Shown on the save button for a moment after a restore point was saved."
+  },
+  "projectFolderTitle": "Dónde se guardan sus videos",
+  "@projectFolderTitle": {
+    "description": "Heading of the export folder section of the project settings."
+  },
+  "projectFolderDefault": "La carpeta predeterminada, definida en Ajustes",
+  "@projectFolderDefault": {
+    "description": "Shown when the project has no folder of its own."
+  },
+  "projectFolderChoose": "Elegir carpeta",
+  "@projectFolderChoose": {
+    "description": "Picks a folder for the videos of this project."
+  },
+  "projectFolderUseDefault": "Usar la predeterminada",
+  "@projectFolderUseDefault": {
+    "description": "Goes back to the default export folder."
+  },
+  "deleteProjectTitle": "Eliminar",
+  "@deleteProjectTitle": {
+    "description": "Heading of the delete section of the project settings."
+  },
+  "deleteProjectAction": "Eliminar proyecto",
+  "@deleteProjectAction": {
+    "description": "Starts deleting the project; asks before doing it."
+  },
+  "deleteProjectAsk": "¿Eliminar «{name}»? Se borran sus clips, versiones y puntos de restauración y no se puede deshacer. Los videos que ya exportaste siguen donde están.",
+  "@deleteProjectAsk": {
+    "description": "Asks for confirmation before deleting a project.",
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "example": "Summer trip"
+      }
+    }
+  },
+  "deleteProjectConfirm": "Sí, eliminar",
+  "@deleteProjectConfirm": {
+    "description": "Confirms deleting the project."
+  },
+  "keepProjectAction": "Conservar",
+  "@keepProjectAction": {
+    "description": "Cancels deleting the project."
+  },
+  "browserFolderTitle": "Elegir una carpeta",
+  "@browserFolderTitle": {
+    "description": "Title of the in-app browser when it picks a folder."
+  },
+  "browserUseFolder": "Usar esta carpeta",
+  "@browserUseFolder": {
+    "description": "Confirms the folder the in-app browser is showing."
+  },
+  "homeSortLongest": "Más largos",
+  "@homeSortLongest": {
+    "description": "Sort option: longest projects first."
+  },
+  "homeFilterTitle": "Ordenar y filtrar",
+  "@homeFilterTitle": {
+    "description": "Title and tooltip of the screen that sorts and filters the project list."
+  },
+  "homeFilterReset": "Restablecer",
+  "@homeFilterReset": {
+    "description": "Button that puts the sort and filters back to their defaults."
+  },
+  "homeFilterShowResults": "{count, plural, =0{Sin proyectos} =1{Ver 1 proyecto} other{Ver {count} proyectos}}",
+  "@homeFilterShowResults": {
+    "description": "Button that closes the filter screen and shows how many projects match.",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "12"
+      }
+    }
+  },
+  "homeFilterSortSection": "Ordenar por",
+  "@homeFilterSortSection": {
+    "description": "Heading of the sort options."
+  },
+  "homeFilterShowSection": "Mostrar",
+  "@homeFilterShowSection": {
+    "description": "Heading of the project kind filter."
+  },
+  "homeFilterEditedSection": "Editado",
+  "@homeFilterEditedSection": {
+    "description": "Heading of the last edit filter."
+  },
+  "homeFilterLengthSection": "Duración",
+  "@homeFilterLengthSection": {
+    "description": "Heading of the project length filter."
+  },
+  "homeSortOldest": "Editados hace más",
+  "@homeSortOldest": {
+    "description": "Sort option: least recently edited first."
+  },
+  "homeSortShortest": "Más cortos",
+  "@homeSortShortest": {
+    "description": "Sort option: shortest projects first."
+  },
+  "homeEditedAny": "Cualquier fecha",
+  "@homeEditedAny": {
+    "description": "Last edit filter: no limit."
+  },
+  "homeEditedToday": "Hoy",
+  "@homeEditedToday": {
+    "description": "Last edit filter: edited today."
+  },
+  "homeEditedWeek": "Últimos 7 días",
+  "@homeEditedWeek": {
+    "description": "Last edit filter: edited in the last week."
+  },
+  "homeEditedMonth": "Últimos 30 días",
+  "@homeEditedMonth": {
+    "description": "Last edit filter: edited in the last month."
+  },
+  "homeLengthAny": "Cualquier duración",
+  "@homeLengthAny": {
+    "description": "Length filter: no limit."
+  },
+  "homeLengthShort": "Menos de 30 s",
+  "@homeLengthShort": {
+    "description": "Length filter: shorter than 30 seconds."
+  },
+  "homeLengthMedium": "De 30 s a 2 min",
+  "@homeLengthMedium": {
+    "description": "Length filter: between 30 seconds and 2 minutes."
+  },
+  "homeLengthLong": "Más de 2 min",
+  "@homeLengthLong": {
+    "description": "Length filter: longer than 2 minutes."
+  },
+  "homePinnedSection": "Fijados",
+  "@homePinnedSection": {
+    "description": "Heading of the section with the pinned projects."
+  },
+  "homeProjectsSection": "Proyectos",
+  "@homeProjectsSection": {
+    "description": "Heading of the section with the other projects."
+  },
+  "homeFiltersActive": "Filtros aplicados",
+  "@homeFiltersActive": {
+    "description": "Label of the row of active filter chips."
+  },
+  "addLayerAction": "Agregar una capa",
+  "@addLayerAction": {
+    "description": "Adds media on a new layer of the timeline; the layer takes the kind of the media."
+  },
+  "layerMoveUpAction": "Subir capa",
+  "@layerMoveUpAction": {
+    "description": "Screen reader action: moves a timeline layer toward the front (up)."
+  },
+  "layerMoveDownAction": "Bajar capa",
+  "@layerMoveDownAction": {
+    "description": "Screen reader action: moves a timeline layer toward the back (down)."
+  },
+  "homeRenameTitle": "Cambiar nombre del proyecto",
+  "@homeRenameTitle": {
+    "description": "Title of the dialog that renames a project from the home screen."
+  },
+  "homeArchiveAction": "Archivar",
+  "@homeArchiveAction": {
+    "description": "Menu item that moves a project out of the main list without deleting it."
+  },
+  "homeUnarchiveAction": "Desarchivar",
+  "@homeUnarchiveAction": {
+    "description": "Menu item that puts an archived project back in the main list."
+  },
+  "homeTrashAction": "Mover a la papelera",
+  "@homeTrashAction": {
+    "description": "Menu item and confirm button that move a project to the trash."
+  },
+  "homeRestoreAction": "Restaurar",
+  "@homeRestoreAction": {
+    "description": "Menu item that takes a project out of the trash."
+  },
+  "homeDeleteNowAction": "Eliminar ahora",
+  "@homeDeleteNowAction": {
+    "description": "Menu item that deletes a trashed project for good."
+  },
+  "homeTrashTitle": "¿Mover “{name}” a la papelera?",
+  "@homeTrashTitle": {
+    "description": "Title of the confirmation before moving a project to the trash.",
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "example": "Holiday"
+      }
+    }
+  },
+  "homeTrashBody": "Puedes restaurarlo durante 7 días. Después se elimina para siempre.",
+  "@homeTrashBody": {
+    "description": "Consequence shown before moving a project to the trash."
+  },
+  "homeFilterScopeSection": "Biblioteca",
+  "@homeFilterScopeSection": {
+    "description": "Heading of the option that picks projects, archived or trash."
+  },
+  "homeScopeArchived": "Archivados",
+  "@homeScopeArchived": {
+    "description": "Name of the archived projects part of the library."
+  },
+  "homeScopeTrash": "Papelera",
+  "@homeScopeTrash": {
+    "description": "Name of the trash part of the library."
+  },
+  "homeScopeCount": "{name} · {count}",
+  "@homeScopeCount": {
+    "description": "Library part name followed by how many projects it holds.",
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "example": "Trash"
+      },
+      "count": {
+        "type": "int",
+        "example": "3"
+      }
+    }
+  },
+  "homeTrashDaysLeft": "Se elimina para siempre en {days, plural, =1{1 día} other{{days} días}}",
+  "@homeTrashDaysLeft": {
+    "description": "How long a trashed project has left before it is deleted.",
+    "placeholders": {
+      "days": {
+        "type": "int",
+        "example": "5"
+      }
+    }
+  },
+  "homeTrashNotice": "Los proyectos de la papelera se eliminan para siempre tras 7 días.",
+  "@homeTrashNotice": {
+    "description": "Notice at the top of the trash list."
+  },
+  "homeTrashEmptyTitle": "La papelera está vacía",
+  "@homeTrashEmptyTitle": {
+    "description": "Title shown when the trash holds no project."
+  },
+  "homeTrashEmptyBody": "Los proyectos eliminados esperan aquí 7 días.",
+  "@homeTrashEmptyBody": {
+    "description": "Help shown when the trash holds no project."
+  },
+  "homeArchivedEmptyTitle": "No hay nada archivado",
+  "@homeArchivedEmptyTitle": {
+    "description": "Title shown when no project is archived."
+  },
+  "homeArchivedEmptyBody": "Archiva un proyecto para quitarlo de en medio sin eliminarlo.",
+  "@homeArchivedEmptyBody": {
+    "description": "Help shown when no project is archived."
+  },
+  "settingsSectionShare": "Compartir",
+  "@settingsSectionShare": {
+    "description": "Settings section name: sharing after export."
+  },
+  "settingsSectionShareHelp": "Qué aparece al exportar y dónde compartirlo",
+  "@settingsSectionShareHelp": {
+    "description": "One line of help under the share settings section."
+  },
+  "settingsShareShowTitle": "Mostrar opciones de compartir al exportar",
+  "@settingsShareShowTitle": {
+    "description": "Switch: share options appear when an export finishes."
+  },
+  "settingsShareShowHelp": "El botón de compartir y los atajos de plataformas aparecen con el video terminado.",
+  "@settingsShareShowHelp": {
+    "description": "Help of the switch for share options."
+  },
+  "settingsShareAutoTitle": "Abrir la hoja de compartir sola",
+  "@settingsShareAutoTitle": {
+    "description": "Switch: the system share sheet opens when an export finishes."
+  },
+  "settingsShareAutoHelp": "En cuanto termina la exportación, sin tocar nada.",
+  "@settingsShareAutoHelp": {
+    "description": "Help of the switch that opens the share sheet automatically."
+  },
+  "settingsSharePlatformsTitle": "Plataformas a mostrar",
+  "@settingsSharePlatformsTitle": {
+    "description": "Heading of the list of platform switches."
+  },
+  "settingsShareActionsTitle": "Acciones sobre el resultado",
+  "@settingsShareActionsTitle": {
+    "description": "Heading of the switches for the actions on a finished video."
+  },
+  "settingsShareWatchHelp": "Abre el video terminado en el reproductor.",
+  "@settingsShareWatchHelp": {
+    "description": "Help of the Watch switch."
+  },
+  "settingsShareFolderHelp": "Muestra la carpeta en el administrador de archivos (computadoras).",
+  "@settingsShareFolderHelp": {
+    "description": "Help of the Open folder switch."
+  },
+  "settingsShareCopyHelp": "Copia la ruta del archivo.",
+  "@settingsShareCopyHelp": {
+    "description": "Help of the Copy path switch."
+  },
+  "shareVideoAction": "Compartir",
+  "@shareVideoAction": {
+    "description": "Opens the system share sheet with the finished video."
+  },
+  "sharePublishTo": "Publicar en",
+  "@sharePublishTo": {
+    "description": "Label over the platform shortcuts."
+  },
+  "sharePlatformHint": "Abre la hoja de compartir: elige {platform}",
+  "@sharePlatformHint": {
+    "description": "Tooltip of a platform shortcut; the system sheet does the sending.",
+    "placeholders": {
+      "platform": {
+        "type": "String",
+        "example": "TikTok"
+      }
+    }
+  },
+  "exportWatchAction": "Ver",
+  "@exportWatchAction": {
+    "description": "Opens the finished video in the player."
+  },
+  "exportOpenFolderAction": "Abrir carpeta",
+  "@exportOpenFolderAction": {
+    "description": "Shows the folder of the finished video in the file manager."
+  },
+  "sharePlatformWhatsapp": "WhatsApp",
+  "@sharePlatformWhatsapp": {
+    "description": "Name of the platform."
+  },
+  "sharePlatformInstagram": "Instagram",
+  "@sharePlatformInstagram": {
+    "description": "Name of the platform."
+  },
+  "sharePlatformTiktok": "TikTok",
+  "@sharePlatformTiktok": {
+    "description": "Name of the platform."
+  },
+  "sharePlatformYoutube": "YouTube",
+  "@sharePlatformYoutube": {
+    "description": "Name of the platform."
+  },
+  "sharePlatformFacebook": "Facebook",
+  "@sharePlatformFacebook": {
+    "description": "Name of the platform."
+  },
+  "sharePlatformTelegram": "Telegram",
+  "@sharePlatformTelegram": {
+    "description": "Name of the platform."
+  },
+  "sharePlatformX": "X",
+  "@sharePlatformX": {
+    "description": "Name of the platform."
+  },
+  "sharePlatformSnapchat": "Snapchat",
+  "@sharePlatformSnapchat": {
+    "description": "Name of the platform."
   },
   "musicLibraryTitle": "Biblioteca de música",
   "musicLibraryHint": "Descarga un pack una vez y sus pistas quedan en este dispositivo, listas para usar sin conexión.",
