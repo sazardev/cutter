@@ -180,12 +180,17 @@ Events from engine to UI: frame ready, playback position, engine error, permissi
 - Q8: Is undo/redo required, and what is its depth?
 - Q9: Where do presets and templates come from (built-in, user-created, downloadable), and what is their file format and media-slot contract?
 - Q10: Is all media and project data strictly local, or is any network storage or sync expected?
+  - **Answered (ADR 0016):** local only for now. Nothing leaves the device; the sync engine and outbox in STACK.md stay future work until a network feature is chosen. Every imported or recorded file is copied into the app's own storage, and a project can be backed up to one `.cutter` file and restored from it.
 - Q11: What are the maximum import size, duration and resolution, and the supported codecs/containers?
+  - **Answered (ADR 0016):** no hard limits. A file above 4K, one hour or 4 GB is imported with a warning; only a file the engine cannot read, or one shorter than a clip, is left out, with the reason. Containers and codecs are whatever the engine plays; the extensions offered are in `media_formats.dart`.
 - Q12: Are image formats limited to stills, and which ones (JPEG, PNG, HEIC, WebP)?
+  - **Answered (ADR 0016):** stills only: JPEG, PNG, WebP, GIF (first frame), BMP, TIFF, HEIC/HEIF and AVIF, as far as the engine reads them; one it cannot read is reported like any unreadable file.
 - Q13: Does reverse apply to audio clips too, and what is the behavior for clips whose audio cannot be reversed?
 - Q14: Which UI languages must ship, and is Spanish the default?
 - Q15: Does "grabar" cover microphone voice-over, camera video capture, or both? On interruption, is a partial recording kept or discarded?
+  - **Answered (ADR 0016):** both, plus photos. Voice is recorded inside the editor and lands on an audio layer at the playhead where recording began; photos and videos use the system camera and are appended to the picture sequence. An interrupted recording is kept, with a notice. A denied permission records nothing, explains why and links to the system settings. On Android only `RECORD_AUDIO` is declared, so the system camera works without a camera permission for Cutter.
 - Q16: Is there autosave, and what is the persistence format and recovery behavior after a crash?
+  - **Answered (ADR 0013):** every edit is written to the local database at once, and restore points are saved on their own (when a project first opens, every 10 minutes after an edit, and before a restore). After a crash the project opens as last written.
 
 ## Milestones
 1. M1 — Runtime skeleton: Flutter app shell plus Rust engine over FFI; open one imported video, render preview frames from Rust. Exit: preview of a single clip at 60 FPS, zero frames over 16.67 ms in a 60-second session.

@@ -31,10 +31,10 @@ Where the work stands, for whoever goes on with it. Rewritten after every build;
 - GPU composition, and pitch-correct speed for sound (sound at another speed is muted).
 - Memory stays near its peak after the editor closes (allocator does not return freed pages); measure on a device before acting.
 - GPU composition for 1080p multi-layer at 60 fps (NFR-1), measured on a device.
-- SPEC.md open questions still unanswered: Q3, Q4 (speed, crop, rotation), Q5, Q6, Q7, Q13, Q14, Q15 (camera and microphone recording).
+- SPEC.md open questions still unanswered: Q3, Q4 (speed, crop, rotation), Q5, Q6, Q7, Q13, Q14. Q10, Q11, Q12, Q15 and Q16 are answered (ADR 0016, 0013).
+- Capture (photo, video, voice), backup and restore are tested with fakes only: try them on a phone (camera screen, microphone permission, an interruption, a full disk).
 
 ## Next
 
-- FR-5 / FR-4 camera and microphone recording (Q15).
 - Keyframes for framing, transitions, text and titles.
 - Text and titles, transitions, speed.
