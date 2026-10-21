@@ -237,5 +237,100 @@
   "failureGeneric": "Algo salió mal y el proyecto no cambió. Inténtalo de nuevo.",
   "@failureGeneric": {
     "description": "Mensaje de respaldo para un fallo de edición desconocido."
+  },
+  "musicLibraryTitle": "Biblioteca de música",
+  "musicLibraryHint": "Descarga un pack una vez y sus pistas quedan en este dispositivo, listas para usar sin conexión.",
+  "musicCatalogUnavailable": "El catálogo no está disponible. Conéctate una vez para cargarlo.",
+  "musicRetry": "Reintentar",
+  "musicPackSummary": "{count, plural, =1{1 pista} other{{count} pistas}} · {size} · {source}",
+  "musicPackDownload": "Descargar",
+  "musicPackDownloading": "Descargando {percent} %",
+  "musicPackDownloadingUnknown": "Descargando…",
+  "musicPackUnpacking": "Descomprimiendo…",
+  "musicPackOffline": "Disponible sin conexión",
+  "musicPackRemove": "Quitar del dispositivo",
+  "musicFailureNetwork": "La descarga falló. Revisa tu conexión e inténtalo de nuevo.",
+  "musicFailureCorrupt": "El pack está dañado. Vuelve a descargarlo.",
+  "musicFailureStorage": "No se pudieron guardar los archivos. Revisa el espacio libre del dispositivo.",
+  "musicPackLicense": "{source} · Licencia {license}",
+  "musicPackCredit": "Crédito: {text}",
+  "musicTrackAdd": "Añadir a la línea de tiempo",
+  "musicTrackAdded": "«{title}» añadida",
+  "musicTrackBpm": "{bpm} BPM",
+  "splitFocusPreview": "Enfocar la vista previa",
+  "@splitFocusPreview": {
+    "description": "Hint of the divider button: the preview fills the space."
+  },
+  "splitFocusTimeline": "Enfocar el timeline",
+  "@splitFocusTimeline": {
+    "description": "Hint of the divider button: the timeline fills the space."
+  },
+  "splitBalance": "Mostrar ambos",
+  "@splitBalance": {
+    "description": "Hint of the divider button: preview and timeline share the space again."
+  },
+  "splitHandleLabel": "Divisor entre vista previa y timeline. Arrastra para cambiar el tamaño.",
+  "@splitHandleLabel": {
+    "description": "Screen reader label of the divider."
+  },
+  "timeScaleTitle": "Escala de tiempo",
+  "@timeScaleTitle": {
+    "description": "Tooltip and heading of the menu that picks how the timeline is zoomed."
+  },
+  "timeScaleMilliseconds": "Milisegundos",
+  "@timeScaleMilliseconds": {
+    "description": "Time scale option: marks every few milliseconds."
+  },
+  "timeScaleSeconds": "Segundos",
+  "@timeScaleSeconds": {
+    "description": "Time scale option: one mark per second."
+  },
+  "timeScaleMinutes": "Minutos",
+  "@timeScaleMinutes": {
+    "description": "Time scale option: one mark per minute."
+  },
+  "timeScaleFit": "Ajustar al proyecto",
+  "@timeScaleFit": {
+    "description": "Time scale option that zooms so the whole project is visible."
+  },
+  "timeUnitMilliseconds": "{value} ms",
+  "@timeUnitMilliseconds": {
+    "description": "Distance between two ruler marks, in milliseconds.",
+    "placeholders": {
+      "value": {
+        "type": "int",
+        "example": "50"
+      }
+    }
+  },
+  "timeUnitSeconds": "{value} s",
+  "@timeUnitSeconds": {
+    "description": "Distance between two ruler marks, in seconds.",
+    "placeholders": {
+      "value": {
+        "type": "int",
+        "example": "1"
+      }
+    }
+  },
+  "timeUnitMinutes": "{value} min",
+  "@timeUnitMinutes": {
+    "description": "Distance between two ruler marks, in minutes.",
+    "placeholders": {
+      "value": {
+        "type": "int",
+        "example": "1"
+      }
+    }
+  },
+  "timeScaleLabel": "Escala de tiempo, marcas cada {step}",
+  "@timeScaleLabel": {
+    "description": "Screen reader label of the time scale button with the current mark distance.",
+    "placeholders": {
+      "step": {
+        "type": "String",
+        "example": "1 s"
+      }
+    }
   }
 }

@@ -1,5 +1,12 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Saving exported videos to the gallery (gal): needed up to Android 10. -->
+    <uses-permission
+        android:name="android.permission.WRITE_EXTERNAL_STORAGE"
+        android:maxSdkVersion="29" />
+    <!-- Downloading music packs (the only thing the app fetches). -->
+    <uses-permission android:name="android.permission.INTERNET" />
     <application
+        android:requestLegacyExternalStorage="true"
         android:label="Cutter"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">

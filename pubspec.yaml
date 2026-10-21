@@ -8,6 +8,7 @@ environment:
   flutter: ">=3.24.0"
 
 dependencies:
+  archive: ^4.5.2
   drift: ^2.20.0
   drift_flutter: ^0.2.0
   flutter:

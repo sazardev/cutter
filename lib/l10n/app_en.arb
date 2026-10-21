@@ -237,5 +237,196 @@
   "failureGeneric": "Something went wrong and the project was not changed. Try again.",
   "@failureGeneric": {
     "description": "Fallback message for an unknown editing failure."
+  },
+  "musicLibraryTitle": "Music library",
+  "@musicLibraryTitle": {
+    "description": "Title of the screen and tooltip of the button that opens the music packs."
+  },
+  "musicLibraryHint": "Download a pack once and keep its tracks on this device, ready to use offline.",
+  "@musicLibraryHint": {
+    "description": "Explains the music library under its title."
+  },
+  "musicCatalogUnavailable": "The catalog is not available. Connect once to load it.",
+  "@musicCatalogUnavailable": {
+    "description": "Shown when the list of music packs could not be loaded and none is saved."
+  },
+  "musicRetry": "Retry",
+  "@musicRetry": {
+    "description": "Button that tries again to load the music packs or to install one."
+  },
+  "musicPackSummary": "{count, plural, =1{1 track} other{{count} tracks}} · {size} · {source}",
+  "@musicPackSummary": {
+    "description": "One line under a pack's name: how many tracks, the download size and where the music comes from.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "size": {
+        "type": "String"
+      },
+      "source": {
+        "type": "String"
+      }
+    }
+  },
+  "musicPackDownload": "Download",
+  "@musicPackDownload": {
+    "description": "Button that downloads a music pack."
+  },
+  "musicPackDownloading": "Downloading {percent}%",
+  "@musicPackDownloading": {
+    "description": "Progress of a music pack download.",
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      }
+    }
+  },
+  "musicPackDownloadingUnknown": "Downloading…",
+  "@musicPackDownloadingUnknown": {
+    "description": "Progress of a music pack download whose size is unknown."
+  },
+  "musicPackUnpacking": "Unpacking…",
+  "@musicPackUnpacking": {
+    "description": "Shown while a downloaded music pack is being unpacked."
+  },
+  "musicPackOffline": "Ready offline",
+  "@musicPackOffline": {
+    "description": "Label of a music pack that is on the device."
+  },
+  "musicPackRemove": "Remove from device",
+  "@musicPackRemove": {
+    "description": "Button that deletes a downloaded music pack from the device."
+  },
+  "musicFailureNetwork": "The download failed. Check your connection and try again.",
+  "@musicFailureNetwork": {
+    "description": "Error when a music pack could not be downloaded."
+  },
+  "musicFailureCorrupt": "The pack is damaged. Try downloading it again.",
+  "@musicFailureCorrupt": {
+    "description": "Error when a downloaded music pack is damaged or incomplete."
+  },
+  "musicFailureStorage": "The files could not be saved. Check the free space on the device.",
+  "@musicFailureStorage": {
+    "description": "Error when a music pack could not be written to the device."
+  },
+  "musicPackLicense": "{source} · License {license}",
+  "@musicPackLicense": {
+    "description": "Source and licence of a music pack, at the top of its track list.",
+    "placeholders": {
+      "source": {
+        "type": "String"
+      },
+      "license": {
+        "type": "String"
+      }
+    }
+  },
+  "musicPackCredit": "Credit: {text}",
+  "@musicPackCredit": {
+    "description": "The credit a music licence asks to show, at the top of a pack's track list.",
+    "placeholders": {
+      "text": {
+        "type": "String"
+      }
+    }
+  },
+  "musicTrackAdd": "Add to timeline",
+  "@musicTrackAdd": {
+    "description": "Tooltip of the button that places a music track on the timeline."
+  },
+  "musicTrackAdded": "“{title}” added",
+  "@musicTrackAdded": {
+    "description": "Notice after a music track was placed on the timeline.",
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "musicTrackBpm": "{bpm} BPM",
+  "@musicTrackBpm": {
+    "description": "Tempo of a music track in beats per minute.",
+    "placeholders": {
+      "bpm": {
+        "type": "int"
+      }
+    }
+  },
+  "splitFocusPreview": "Focus the preview",
+  "@splitFocusPreview": {
+    "description": "Hint of the divider button: the preview fills the space."
+  },
+  "splitFocusTimeline": "Focus the timeline",
+  "@splitFocusTimeline": {
+    "description": "Hint of the divider button: the timeline fills the space."
+  },
+  "splitBalance": "Show both",
+  "@splitBalance": {
+    "description": "Hint of the divider button: preview and timeline share the space again."
+  },
+  "splitHandleLabel": "Divider between preview and timeline. Drag to resize.",
+  "@splitHandleLabel": {
+    "description": "Screen reader label of the divider."
+  },
+  "timeScaleTitle": "Time scale",
+  "@timeScaleTitle": {
+    "description": "Tooltip and heading of the menu that picks how the timeline is zoomed."
+  },
+  "timeScaleMilliseconds": "Milliseconds",
+  "@timeScaleMilliseconds": {
+    "description": "Time scale option: marks every few milliseconds."
+  },
+  "timeScaleSeconds": "Seconds",
+  "@timeScaleSeconds": {
+    "description": "Time scale option: one mark per second."
+  },
+  "timeScaleMinutes": "Minutes",
+  "@timeScaleMinutes": {
+    "description": "Time scale option: one mark per minute."
+  },
+  "timeScaleFit": "Fit project",
+  "@timeScaleFit": {
+    "description": "Time scale option that zooms so the whole project is visible."
+  },
+  "timeUnitMilliseconds": "{value} ms",
+  "@timeUnitMilliseconds": {
+    "description": "Distance between two ruler marks, in milliseconds.",
+    "placeholders": {
+      "value": {
+        "type": "int",
+        "example": "50"
+      }
+    }
+  },
+  "timeUnitSeconds": "{value} s",
+  "@timeUnitSeconds": {
+    "description": "Distance between two ruler marks, in seconds.",
+    "placeholders": {
+      "value": {
+        "type": "int",
+        "example": "1"
+      }
+    }
+  },
+  "timeUnitMinutes": "{value} min",
+  "@timeUnitMinutes": {
+    "description": "Distance between two ruler marks, in minutes.",
+    "placeholders": {
+      "value": {
+        "type": "int",
+        "example": "1"
+      }
+    }
+  },
+  "timeScaleLabel": "Time scale, marks every {step}",
+  "@timeScaleLabel": {
+    "description": "Screen reader label of the time scale button with the current mark distance.",
+    "placeholders": {
+      "step": {
+        "type": "String",
+        "example": "1 s"
+      }
+    }
   }
 }
