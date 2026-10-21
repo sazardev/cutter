@@ -1,0 +1,29 @@
+[package]
+name = "cutter_engine"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+crate-type = ["cdylib", "staticlib", "rlib"]
+
+[dependencies]
+anyhow = "1"
+cpal = "0.18"
+crossbeam-channel = "0.5"
+ffmpeg-next = { version = "9", default-features = false, features = ["codec", "format", "software-resampling", "software-scaling"] }
+flutter_rust_bridge = "=2.13.0"
+irondash_engine_context = "0.5"
+irondash_run_loop = "0.5"
+irondash_texture = "0.5"
+parking_lot = "0.12"
+
+[profile.release]
+lto = "thin"
+codegen-units = 1
+
+[profile.dev]
+# Decoding and compositing are unusable without optimisation, even in debug.
+opt-level = 2
+
+[lints.rust]
+unexpected_cfgs = { level = "warn", check-cfg = ['cfg(frb_expand)'] }

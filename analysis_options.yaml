@@ -10,3 +10,8 @@ analyzer:
     - build/**
     - android/**
     - ios/**
+    - linux/**
+    # Flutter Rust Bridge output and the vendored cargokit build tool.
+    - lib/core/engine/bridge/**
+    - rust_builder/**
+    - rust/**
