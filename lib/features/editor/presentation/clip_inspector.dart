@@ -1,8 +1,7 @@
-import 'package:flutter/material.dart';
-
 import 'package:cutter/app/theme/app_theme.dart';
 import 'package:cutter/features/editor/domain/clip.dart';
 import 'package:cutter/l10n/app_localizations.dart';
+import 'package:flutter/material.dart';
 
 /// Identifiers of the filters offered in the inspector.
 const List<String> inspectorFilterIds = ['mono', 'warm', 'cool', 'vintage'];

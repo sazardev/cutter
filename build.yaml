@@ -1,0 +1,12 @@
+targets:
+  $default:
+    builders:
+      drift_dev:
+        options:
+          # The name of the database and the path to the database file.
+          databases:
+            cutter: lib/core/db/app_database.dart
+          # The directory where the schema dump is stored.
+          schema_dir: lib/core/db/schema
+          # The directory where the migration tests are stored.
+          test_dir: test/core/db

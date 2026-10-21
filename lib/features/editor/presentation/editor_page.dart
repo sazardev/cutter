@@ -1,8 +1,4 @@
-import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-
 import 'package:cutter/app/theme/app_theme.dart';
-import 'package:cutter/features/editor/data/editor_dao.dart';
 import 'package:cutter/features/editor/domain/clip.dart' as domain;
 import 'package:cutter/features/editor/domain/project.dart';
 import 'package:cutter/features/editor/presentation/clip_inspector.dart';
@@ -11,6 +7,8 @@ import 'package:cutter/features/editor/presentation/editor_providers.dart';
 import 'package:cutter/features/editor/presentation/failure_message.dart';
 import 'package:cutter/features/editor/presentation/timeline_view.dart';
 import 'package:cutter/l10n/app_localizations.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 const double _twoPaneBreakpoint = 600;
 const double _inspectorPaneWidth = 360;
@@ -41,14 +39,20 @@ class _EditorPageState extends ConsumerState<EditorPage> {
   }
 
   Future<void> _bootstrap() async {
-    final dao = EditorDao(ref.read(appDatabaseProvider));
-    final id = await dao.firstProjectId();
-    if (!mounted) return;
-    if (id == null) {
-      setState(() => _noProject = true);
-      return;
+    try {
+      final id = await ref.read(editorProjectProvider.future);
+      if (!mounted) return;
+      if (id == null) {
+        setState(() => _noProject = true);
+        return;
+      }
+      await ref.read(editorControllerProvider.notifier).load(id);
+    } on Object catch (error, stackTrace) {
+      if (!mounted) return;
+      ref
+          .read(editorControllerProvider.notifier)
+          .reportError(error, stackTrace);
     }
-    await ref.read(editorControllerProvider.notifier).load(id);
   }
 
   void _showFailure(EditorUiState? next) {
@@ -84,16 +88,59 @@ class _EditorPageState extends ConsumerState<EditorPage> {
     if (_noProject) return const _EmptyState();
     return state.when(
       loading: () => const Center(child: CircularProgressIndicator()),
-      error: (error, stack) => Center(
-        child: Padding(
-          padding: const EdgeInsets.all(AppSpacing.md),
-          child: Text(AppLocalizations.of(context)!.failureGeneric),
-        ),
-      ),
+      error: (error, stack) => _LoadError(onRetry: _retry),
       data: (ui) {
         if (ui.project.layers.isEmpty) return const _EmptyState();
         return _EditorContent(ui: ui);
       },
+    );
+  }
+
+  Future<void> _retry() async {
+    final id = await ref.read(editorProjectProvider.future);
+    if (!mounted || id == null) return;
+    await ref.read(editorControllerProvider.notifier).load(id);
+  }
+}
+
+/// The state shown when the project cannot be read from the local database:
+/// what failed, and the action that retries it.
+class _LoadError extends StatelessWidget {
+  const _LoadError({required this.onRetry});
+
+  final VoidCallback onRetry;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final theme = Theme.of(context);
+    return Center(
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: _emptyMaxWidth),
+        child: Padding(
+          padding: const EdgeInsets.all(AppSpacing.md),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                l10n.loadErrorTitle,
+                style: theme.textTheme.titleMedium,
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: AppSpacing.sm),
+              Text(
+                l10n.loadErrorBody,
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: AppSpacing.md),
+              FilledButton(onPressed: onRetry, child: Text(l10n.retryAction)),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }
@@ -234,19 +281,19 @@ class _MainPane extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             IconButton(
-              tooltip: l10n.moveEarlierAction,
+              tooltip: l10n.playheadStepBackAction,
               icon: const Icon(Icons.chevron_left),
               onPressed: () => controller.seek(ui.playheadMs - _playheadStepMs),
             ),
             Semantics(
               liveRegion: false,
               child: Text(
-                formatTimelineTime(ui.playheadMs),
+                l10n.timeLabel(formatTimelineTime(ui.playheadMs)),
                 style: theme.textTheme.titleMedium,
               ),
             ),
             IconButton(
-              tooltip: l10n.moveLaterAction,
+              tooltip: l10n.playheadStepForwardAction,
               icon: const Icon(Icons.chevron_right),
               onPressed: () => controller.seek(ui.playheadMs + _playheadStepMs),
             ),

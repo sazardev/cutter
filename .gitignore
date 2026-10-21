@@ -11,6 +11,10 @@ coverage/
 doc/api/
 *.log
 
+# Generated code (drift, and any other builder output)
+**/*.g.dart
+**/*.drift.dart
+
 # Generated localization files
 lib/l10n/app_localizations*.dart
 

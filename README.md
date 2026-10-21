@@ -11,10 +11,11 @@ This slice adds persistence and the first editor screen on top of the existing e
 Included:
 
 - A drift database (`editor_projects`, `editor_layers`, `editor_clips`) that implements the domain `ProjectRepository` port. A save replaces a project's layers and clips in one transaction, so a crash never leaves a half-saved project.
-- A Riverpod controller that runs the domain use cases against the playhead and the selected clip: split, move, reverse, volume, filter and adjustments.
-- The editor page: timeline (layers as rows, clips as blocks), ruler and playhead, time label, clip inspector, empty state, and localized failure messages. Two panes from 600dp.
+- A Riverpod controller that runs the domain use cases against the playhead and the selected clip: split, move, trim, reverse, volume, filter and adjustments.
+- The editor page: timeline (layers as rows, clips as blocks), ruler and playhead, time label, clip inspector, empty state, a retryable load error and localized failure messages. Two panes from 600dp.
 - Light and dark Material 3 themes (seed `#6750A4`), and English and Spanish strings (English is the template).
 - Screen reader labels for every clip on the timeline.
+- The `android/` and `ios/` folders, so the app builds and runs on a phone or a tablet.
 
 Not included:
 
@@ -27,14 +28,17 @@ Not included:
 | Task | Command |
 | --- | --- |
 | Install dependencies | `flutter pub get` |
-| Generate code (drift) | `dart run build_runner build --delete-conflicting-outputs` |
+| Generate code (drift) | `dart run build_runner build` |
 | Generate localizations | `flutter gen-l10n` |
+| Generate everything | `make generate` |
+| Dump the database schema | `make schema` |
 | Run the app | `flutter run` |
 | Analyze | `flutter analyze` |
 | Format | `dart format .` |
 | Test | `flutter test` |
+| All the checks | `make check` |
 
-Run `flutter pub get`, then `build_runner` and `flutter gen-l10n`, before the first analyze, test or run: the generated files (`*.g.dart`, `lib/l10n/app_localizations*.dart`) are not committed to hand-edits and are always regenerated from their sources.
+Run `flutter pub get`, then `build_runner` and `flutter gen-l10n`, before the first analyze, test or run: the generated files (`*.g.dart`, `lib/l10n/app_localizations*.dart`) are not committed and are always regenerated from their sources. CI runs the same two steps before it analyzes, tests or builds.
 
 ## Layout
 
@@ -48,6 +52,7 @@ lib/
     data/                        drift tables, DAO, DriftProjectRepository
     presentation/                providers, controller, failure messages, timeline, inspector, page
   l10n/                          app_en.arb (template), app_es.arb
+android/, ios/                   the platform folders the app ships on
 test/                            mirrors lib/
 ```
 

@@ -13,16 +13,16 @@ const _clipDurationMs = 4000;
 
 Future<void> _seedProject(AppDatabase database) async {
   await database.into(database.editorProjects).insert(
-    EditorProjectsCompanion(
-      id: const Value(_projectId),
-      name: const Value('Test project'),
-      createdAtMs: const Value(0),
-      updatedAtMs: const Value(0),
-      canvasWidth: const Value(1080),
-      canvasHeight: const Value(1920),
-      fps: const Value(60),
-    ),
-  );
+        const EditorProjectsCompanion(
+          id: Value(_projectId),
+          name: Value('Test project'),
+          createdAtMs: Value(0),
+          updatedAtMs: Value(0),
+          canvasWidth: Value(1080),
+          canvasHeight: Value(1920),
+          fps: Value(60),
+        ),
+      );
   await _insertLayer(database, _videoLayerId, 0, 'video');
   await _insertLayer(database, _audioLayerId, 1, 'audio');
   await _insertClip(database, 'c1', _videoLayerId, 0, 0, 'file:///video.mp4');
@@ -44,15 +44,15 @@ Future<void> _insertLayer(
   String kind,
 ) {
   return database.into(database.editorLayers).insert(
-    EditorLayersCompanion(
-      id: Value(id),
-      projectId: const Value(_projectId),
-      position: Value(position),
-      kind: Value(kind),
-      volume: const Value(1),
-      muted: const Value(false),
-    ),
-  );
+        EditorLayersCompanion(
+          id: Value(id),
+          projectId: const Value(_projectId),
+          position: Value(position),
+          kind: Value(kind),
+          volume: const Value(1),
+          muted: const Value(false),
+        ),
+      );
 }
 
 Future<void> _insertClip(
@@ -64,21 +64,21 @@ Future<void> _insertClip(
   String sourceUri,
 ) {
   return database.into(database.editorClips).insert(
-    EditorClipsCompanion(
-      id: Value(id),
-      layerId: Value(layerId),
-      sortKey: Value(sortKey),
-      sourceUri: Value(sourceUri),
-      startMs: Value(startMs),
-      durationMs: const Value(_clipDurationMs),
-      inPointMs: const Value(0),
-      outPointMs: const Value(_clipDurationMs),
-      reversed: const Value(false),
-      volume: const Value(1),
-      filterId: const Value(null),
-      adjustmentsJson: const Value('{}'),
-    ),
-  );
+        EditorClipsCompanion(
+          id: Value(id),
+          layerId: Value(layerId),
+          sortKey: Value(sortKey),
+          sourceUri: Value(sourceUri),
+          startMs: Value(startMs),
+          durationMs: const Value(_clipDurationMs),
+          inPointMs: const Value(0),
+          outPointMs: const Value(_clipDurationMs),
+          reversed: const Value(false),
+          volume: const Value(1),
+          filterId: const Value(null),
+          adjustmentsJson: const Value('{}'),
+        ),
+      );
 }
 
 void main() {
@@ -93,8 +93,8 @@ void main() {
 
   List<Clip> layerClips(String layerId) {
     final layer = uiState().project.layers.firstWhere(
-      (layer) => layer.id == layerId,
-    );
+          (layer) => layer.id == layerId,
+        );
     final clips = [...layer.clips]
       ..sort((a, b) => a.startMs.compareTo(b.startMs));
     return clips;
@@ -258,6 +258,49 @@ void main() {
 
     await controller().setClipVolume(0);
     expect(clipById('a1').volume, 0);
+  });
+
+  test('trims the selected clip to the given source range', () async {
+    controller().selectClip('c1');
+
+    await controller().trimSelectedClip(inPointMs: 0, outPointMs: 2000);
+
+    expect(uiState().failure, isNull);
+    final clip = clipById('c1');
+    expect(clip.inPointMs, 0);
+    expect(clip.outPointMs, 2000);
+    expect(clip.durationMs, 2000);
+  });
+
+  test('a trim that leaves no duration is rejected and keeps the clip',
+      () async {
+    controller().selectClip('c1');
+
+    await controller().trimSelectedClip(inPointMs: 0, outPointMs: 50);
+
+    expect(uiState().failure, isNotNull);
+    expect(clipById('c1').outPointMs, _clipDurationMs);
+  });
+
+  test('setting one adjustment keeps the other ones', () async {
+    controller().selectClip('c1');
+
+    await controller().setAdjustment('brightness', 0.5);
+    expect(uiState().failure, isNull);
+
+    await controller().setAdjustment('contrast', -0.25);
+
+    final clip = clipById('c1');
+    expect(clip.adjustments, {'brightness': 0.5, 'contrast': -0.25});
+  });
+
+  test('an unknown adjustment key is rejected and changes nothing', () async {
+    controller().selectClip('c1');
+
+    await controller().setAdjustment('sepia', 0.5);
+
+    expect(uiState().failure, isNotNull);
+    expect(clipById('c1').adjustments, isEmpty);
   });
 
   test('an edit is persisted and survives a reload', () async {

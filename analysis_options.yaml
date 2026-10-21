@@ -8,3 +8,5 @@ analyzer:
     - "**/*.drift.dart"
     - "**/*.mocks.dart"
     - build/**
+    - android/**
+    - ios/**

@@ -3,10 +3,10 @@ import 'dart:convert';
 import 'package:cutter/core/db/app_database.dart';
 import 'package:cutter/features/editor/data/editor_dao.dart';
 import 'package:cutter/features/editor/domain/clip.dart';
+import 'package:cutter/features/editor/domain/editor_ports.dart';
 import 'package:cutter/features/editor/domain/layer.dart';
-import 'package:cutter/features/editor/domain/media_kind.dart';
+import 'package:cutter/features/editor/domain/media_asset.dart';
 import 'package:cutter/features/editor/domain/project.dart';
-import 'package:cutter/features/editor/domain/project_repository.dart';
 
 /// Drift-backed [ProjectRepository]: maps stored rows to the immutable
 /// domain entities and back.
@@ -24,7 +24,7 @@ class DriftProjectRepository implements ProjectRepository {
   static const _unnamedLayer = '';
 
   @override
-  Future<Project?> load(String id) async {
+  Future<Project?> find(String id) async {
     final rows = await _dao.loadProjectRows(id);
     if (rows == null) {
       return null;

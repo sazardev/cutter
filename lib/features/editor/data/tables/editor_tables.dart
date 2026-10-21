@@ -38,8 +38,7 @@ class EditorLayers extends Table {
   TextColumn get projectId =>
       text().references(EditorProjects, #id, onDelete: KeyAction.cascade)();
 
-  IntColumn get position =>
-      integer().check(position.isBiggerOrEqualValue(0))();
+  IntColumn get position => integer().check(position.isBiggerOrEqualValue(0))();
 
   TextColumn get kind => text().check(kind.isIn(editorLayerKinds))();
 

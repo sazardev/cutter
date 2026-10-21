@@ -42,18 +42,20 @@ void main() {
     });
 
     test('creates_clip_with_intrinsic_duration', () async {
+      // 8000 is the first free slot on the layer: the fixture's clips cover
+      // 0..4000 and 6000..8000, and a 3000 ms asset would overlap the second.
       final result = await addClip(
         projectId: 'p1',
         layerId: 'v1',
         asset: _asset(),
-        startMs: 4000,
+        startMs: 8000,
       );
 
       final project = _okProject(result);
       final clip = project.layerById('v1')!.clips.firstWhere(
             (c) => c.id == 'id-1',
           );
-      expect(clip.startMs, 4000);
+      expect(clip.startMs, 8000);
       expect(clip.inPointMs, 0);
       expect(clip.outPointMs, 3000);
       expect(clip.durationMs, 3000);

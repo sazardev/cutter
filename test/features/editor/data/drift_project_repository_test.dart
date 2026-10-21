@@ -3,7 +3,7 @@ import 'package:cutter/features/editor/data/drift_project_repository.dart';
 import 'package:cutter/features/editor/data/editor_dao.dart';
 import 'package:cutter/features/editor/domain/clip.dart';
 import 'package:cutter/features/editor/domain/layer.dart';
-import 'package:cutter/features/editor/domain/media_kind.dart';
+import 'package:cutter/features/editor/domain/media_asset.dart';
 import 'package:cutter/features/editor/domain/project.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -124,7 +124,7 @@ void main() {
     );
 
     await repository.save(project);
-    final loaded = await repository.load('project-1');
+    final loaded = await repository.find('project-1');
 
     expect(loaded, isNotNull);
     expect(loaded!.layers.map((layer) => layer.id), [
@@ -144,7 +144,7 @@ void main() {
     expect(loaded.layers.last.kind, MediaKind.audio);
 
     await repository.save(loaded);
-    expect(await repository.load('project-1'), loaded);
+    expect(await repository.find('project-1'), loaded);
   });
 
   test('saving again replaces the previous layers and clips', () async {
@@ -175,13 +175,13 @@ void main() {
     await repository.save(first);
     await repository.save(second);
 
-    final loaded = await repository.load('project-1');
+    final loaded = await repository.find('project-1');
     expect(loaded!.layers.single.clips.map((clip) => clip.id), ['clip-1']);
     expect(loaded.layers.single.clips.single.durationMs, 500);
   });
 
   test('an unknown id loads as null', () async {
-    expect(await repository.load('missing'), isNull);
+    expect(await repository.find('missing'), isNull);
   });
 
   test('firstProjectId is null when empty and the oldest otherwise', () async {
@@ -222,6 +222,6 @@ void main() {
 
     await expectLater(repository.save(broken), throwsA(anything));
 
-    expect(await repository.load('project-1'), original);
+    expect(await repository.find('project-1'), original);
   });
 }

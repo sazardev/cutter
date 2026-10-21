@@ -13,14 +13,14 @@ const _clipDurationMs = 10000;
 
 Future<void> _seed(AppDatabase db, {required String layerKind}) async {
   await db.into(db.editorProjects).insert(
-        EditorProjectsCompanion(
-          id: const Value(_projectId),
-          name: const Value('Test'),
-          createdAtMs: const Value(1),
-          updatedAtMs: const Value(1),
-          canvasWidth: const Value(1920),
-          canvasHeight: const Value(1080),
-          fps: const Value(60),
+        const EditorProjectsCompanion(
+          id: Value(_projectId),
+          name: Value('Test'),
+          createdAtMs: Value(1),
+          updatedAtMs: Value(1),
+          canvasWidth: Value(1920),
+          canvasHeight: Value(1080),
+          fps: Value(60),
         ),
       );
   await db.into(db.editorLayers).insert(
@@ -34,19 +34,19 @@ Future<void> _seed(AppDatabase db, {required String layerKind}) async {
         ),
       );
   await db.into(db.editorClips).insert(
-        EditorClipsCompanion(
-          id: const Value('clip-1'),
-          layerId: const Value('layer-1'),
-          sortKey: const Value(0),
-          sourceUri: const Value('file:///clip.mp4'),
-          startMs: const Value(0),
-          durationMs: const Value(_clipDurationMs),
-          inPointMs: const Value(0),
-          outPointMs: const Value(_clipDurationMs),
-          reversed: const Value(false),
-          volume: const Value(1),
-          filterId: const Value(null),
-          adjustmentsJson: const Value('{}'),
+        const EditorClipsCompanion(
+          id: Value('clip-1'),
+          layerId: Value('layer-1'),
+          sortKey: Value(0),
+          sourceUri: Value('file:///clip.mp4'),
+          startMs: Value(0),
+          durationMs: Value(_clipDurationMs),
+          inPointMs: Value(0),
+          outPointMs: Value(_clipDurationMs),
+          reversed: Value(false),
+          volume: Value(1),
+          filterId: Value(null),
+          adjustmentsJson: Value('{}'),
         ),
       );
 }
@@ -54,14 +54,18 @@ Future<void> _seed(AppDatabase db, {required String layerKind}) async {
 Future<void> _pumpPage(
   WidgetTester tester,
   AppDatabase db,
-  Locale locale,
-) async {
+  Locale locale, {
+  List<Override> overrides = const [],
+}) async {
   tester.view.physicalSize = const Size(900, 900);
   tester.view.devicePixelRatio = 1;
   addTearDown(tester.view.reset);
   await tester.pumpWidget(
     ProviderScope(
-      overrides: [appDatabaseProvider.overrideWithValue(db)],
+      overrides: [
+        appDatabaseProvider.overrideWithValue(db),
+        ...overrides,
+      ],
       child: MaterialApp(
         locale: locale,
         localizationsDelegates: AppLocalizations.localizationsDelegates,
@@ -115,6 +119,29 @@ void main() {
     });
   }
 
+  testWidgets('shows a retryable error when the project cannot be read',
+      (tester) async {
+    final db = AppDatabase.inMemory();
+    addTearDown(() => tester.runAsync(db.close));
+    const locale = Locale('en');
+    final l10n = await _strings(locale);
+
+    // The provider names a project the database does not hold, so loading it
+    // fails the way an unreadable file does.
+    await _pumpPage(
+      tester,
+      db,
+      locale,
+      overrides: [
+        editorProjectProvider.overrideWith((ref) async => 'missing-project'),
+      ],
+    );
+
+    expect(find.text(l10n.loadErrorTitle), findsOneWidget);
+    expect(find.text(l10n.loadErrorBody), findsOneWidget);
+    expect(find.text(l10n.retryAction), findsOneWidget);
+  });
+
   testWidgets('disables filter chips for a selected audio clip',
       (tester) async {
     final db = AppDatabase.inMemory();
@@ -149,8 +176,9 @@ void main() {
     addTearDown(() => tester.runAsync(db.close));
     await tester.runAsync(() => _seed(db, layerKind: 'video'));
     const locale = Locale('en');
+    // The handle has to be released inside the test body: the framework
+    // checks for leaked handles before the tear-down callbacks run.
     final handle = tester.ensureSemantics();
-    addTearDown(handle.dispose);
 
     await _pumpPage(tester, db, locale);
 
@@ -166,5 +194,7 @@ void main() {
       ),
     );
     expect(selectedNodes, findsWidgets);
+
+    handle.dispose();
   });
 }

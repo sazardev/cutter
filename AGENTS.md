@@ -16,8 +16,8 @@ Then read the code around a change before writing: the DAO, the repository, the 
 | Task | Command |
 | --- | --- |
 | Install dependencies | `flutter pub get` |
-| Generate code (drift, freezed, riverpod, json) | `dart run build_runner build --delete-conflicting-outputs` |
-| Watch generated code | `dart run build_runner watch --delete-conflicting-outputs` |
+| Generate code (drift, freezed, riverpod, json) | `dart run build_runner build` |
+| Watch generated code | `dart run build_runner watch` |
 | Generate localizations | `flutter gen-l10n` |
 | Run the app | `flutter run` |
 | Analyze (typecheck + lint) | `flutter analyze` |
@@ -29,10 +29,10 @@ Then read the code around a change before writing: the DAO, the repository, the 
 | Build Android | `flutter build apk --flavor <flavor>` |
 | Build iOS | `flutter build ipa --flavor <flavor>` |
 
-TODO: the repository currently holds only `DESIGN.md`, `SPEC.md`, `STACK.md` — there is no `Makefile`, `scripts/` or `pubspec.yaml` yet. The commands above come from the Flutter toolchain and from the CI job names in STACK.md (`lint` = format + lint + typecheck, `test`, `build`); confirm them against `.github/workflows/ci.yml` and `lefthook.yml` once they exist.
+The generated code (`*.g.dart`, `lib/l10n/app_localizations*.dart`) is not committed. Run `make generate` (or the two commands above) before the first analyze, test or run on a fresh clone; CI runs the same steps. `build_runner` dropped the `--delete-conflicting-outputs` flag in 2.15, so the commands above no longer pass it.
 
 ## Layout
-Top level today: `DESIGN.md`, `SPEC.md`, `STACK.md`. The application tree below is the target structure from STACK.md; create files where it says, not elsewhere.
+The application tree below is the target structure from STACK.md; create files where it says, not elsewhere. The tree that exists today is the `features/editor/` part: the domain, the drift data layer and the editor screen. `core/sync/`, `core/network/` and the outbox wait on Q10.
 
 - `lib/main.dart` — opens the database, registers background sync, mounts `ProviderScope`.
 - `lib/app/` — `app.dart`, `router.dart`, `theme/`.

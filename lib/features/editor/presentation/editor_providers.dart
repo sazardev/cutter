@@ -1,15 +1,9 @@
 import 'package:cutter/core/db/app_database.dart';
 import 'package:cutter/features/editor/data/drift_project_repository.dart';
 import 'package:cutter/features/editor/data/editor_dao.dart';
-import 'package:cutter/features/editor/domain/id_generator.dart';
-import 'package:cutter/features/editor/domain/move_clip.dart';
-import 'package:cutter/features/editor/domain/project_repository.dart';
-import 'package:cutter/features/editor/domain/reverse_clip.dart';
-import 'package:cutter/features/editor/domain/set_clip_adjustments.dart';
-import 'package:cutter/features/editor/domain/set_clip_filter.dart';
-import 'package:cutter/features/editor/domain/set_clip_volume.dart';
-import 'package:cutter/features/editor/domain/split_clip.dart';
-import 'package:cutter/features/editor/domain/trim_clip.dart';
+import 'package:cutter/features/editor/domain/clip_settings_use_cases.dart';
+import 'package:cutter/features/editor/domain/clip_timing_use_cases.dart';
+import 'package:cutter/features/editor/domain/editor_ports.dart';
 import 'package:cutter/features/editor/presentation/editor_controller.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:uuid/uuid.dart';
@@ -22,7 +16,7 @@ class UuidV7IdGenerator implements IdGenerator {
   final Uuid _uuid;
 
   @override
-  String newId() => _uuid.v7();
+  String next() => _uuid.v7();
 }
 
 /// The opened database. `main` overrides it; reading it before that is a
@@ -71,8 +65,8 @@ final moveClipProvider = Provider<MoveClip>(
 );
 
 /// The use case that reverses a clip's playback direction.
-final reverseClipProvider = Provider<ReverseClip>(
-  (ref) => ReverseClip(ref.watch(projectRepositoryProvider)),
+final setClipReverseProvider = Provider<SetClipReverse>(
+  (ref) => SetClipReverse(ref.watch(projectRepositoryProvider)),
 );
 
 /// The use case that sets a clip's volume.
@@ -93,5 +87,5 @@ final setClipAdjustmentsProvider = Provider<SetClipAdjustments>(
 /// The controller holding the editor screen state.
 final editorControllerProvider =
     NotifierProvider<EditorController, AsyncValue<EditorUiState>>(
-      EditorController.new,
-    );
+  EditorController.new,
+);

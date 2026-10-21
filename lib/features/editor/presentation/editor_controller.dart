@@ -38,9 +38,8 @@ class EditorUiState {
     return EditorUiState(
       project: project ?? this.project,
       playheadMs: playheadMs ?? this.playheadMs,
-      selectedClipId: selectedClipId != null
-          ? selectedClipId()
-          : this.selectedClipId,
+      selectedClipId:
+          selectedClipId != null ? selectedClipId() : this.selectedClipId,
       failure: failure != null ? failure() : this.failure,
     );
   }
@@ -55,7 +54,7 @@ class EditorController extends Notifier<AsyncValue<EditorUiState>> {
   Future<void> load(String projectId) async {
     state = const AsyncValue.loading();
     state = await AsyncValue.guard(() async {
-      final project = await ref.read(projectRepositoryProvider).load(projectId);
+      final project = await ref.read(projectRepositoryProvider).find(projectId);
       if (project == null) {
         throw StateError('Project $projectId was not found.');
       }
@@ -88,6 +87,12 @@ class EditorController extends Notifier<AsyncValue<EditorUiState>> {
     state = AsyncValue.data(current.copyWith(failure: () => null));
   }
 
+  /// Puts the screen in its error state when the project could not be read
+  /// at all, so the page can offer a retry.
+  void reportError(Object error, StackTrace stackTrace) {
+    state = AsyncValue.error(error, stackTrace);
+  }
+
   /// True only when a clip is selected and the playhead is strictly inside it.
   bool get canSplit {
     final current = state.valueOrNull;
@@ -104,10 +109,10 @@ class EditorController extends Notifier<AsyncValue<EditorUiState>> {
     if (current == null || clip == null) return;
     await _run(
       (project) => ref.read(splitClipProvider).call(
-        projectId: project.id,
-        clipId: clip.id,
-        atMs: current.playheadMs,
-      ),
+            projectId: project.id,
+            clipId: clip.id,
+            atMs: current.playheadMs,
+          ),
     );
   }
 
@@ -122,11 +127,11 @@ class EditorController extends Notifier<AsyncValue<EditorUiState>> {
     final newStart = clip.startMs + deltaMs;
     await _run(
       (project) => ref.read(moveClipProvider).call(
-        projectId: project.id,
-        clipId: clip.id,
-        targetLayerId: layer.id,
-        startMs: newStart < 0 ? 0 : newStart,
-      ),
+            projectId: project.id,
+            clipId: clip.id,
+            targetLayerId: layer.id,
+            startMs: newStart < 0 ? 0 : newStart,
+          ),
     );
   }
 
@@ -135,11 +140,28 @@ class EditorController extends Notifier<AsyncValue<EditorUiState>> {
     final clip = _selectedClip(state.valueOrNull);
     if (clip == null) return;
     await _run(
-      (project) => ref.read(reverseClipProvider).call(
-        projectId: project.id,
-        clipId: clip.id,
-        enabled: !clip.reversed,
-      ),
+      (project) => ref.read(setClipReverseProvider).call(
+            projectId: project.id,
+            clipId: clip.id,
+            enabled: !clip.reversed,
+          ),
+    );
+  }
+
+  /// Trims the selected clip to [inPointMs]..[outPointMs] of its source.
+  Future<void> trimSelectedClip({
+    required int inPointMs,
+    required int outPointMs,
+  }) async {
+    final clip = _selectedClip(state.valueOrNull);
+    if (clip == null) return;
+    await _run(
+      (project) => ref.read(trimClipProvider).call(
+            projectId: project.id,
+            clipId: clip.id,
+            inPointMs: inPointMs,
+            outPointMs: outPointMs,
+          ),
     );
   }
 
@@ -149,10 +171,10 @@ class EditorController extends Notifier<AsyncValue<EditorUiState>> {
     if (clip == null) return;
     await _run(
       (project) => ref.read(setClipVolumeProvider).call(
-        projectId: project.id,
-        clipId: clip.id,
-        volume: value,
-      ),
+            projectId: project.id,
+            clipId: clip.id,
+            volume: value,
+          ),
     );
   }
 
@@ -162,24 +184,25 @@ class EditorController extends Notifier<AsyncValue<EditorUiState>> {
     if (clip == null) return;
     await _run(
       (project) => ref.read(setClipFilterProvider).call(
-        projectId: project.id,
-        clipId: clip.id,
-        filterId: filterId,
-      ),
+            projectId: project.id,
+            clipId: clip.id,
+            filterId: filterId,
+          ),
     );
   }
 
-  /// Sets one adjustment [key] of the selected clip to [value].
+  /// Sets one adjustment [key] of the selected clip to [value], keeping the
+  /// other adjustments of the clip.
   Future<void> setAdjustment(String key, double value) async {
     final clip = _selectedClip(state.valueOrNull);
     if (clip == null) return;
+    final adjustments = Map<String, double>.of(clip.adjustments)..[key] = value;
     await _run(
       (project) => ref.read(setClipAdjustmentsProvider).call(
-        projectId: project.id,
-        clipId: clip.id,
-        key: key,
-        value: value,
-      ),
+            projectId: project.id,
+            clipId: clip.id,
+            adjustments: adjustments,
+          ),
     );
   }
 

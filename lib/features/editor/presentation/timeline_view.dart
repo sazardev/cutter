@@ -221,8 +221,8 @@ class _LayerRow extends StatelessWidget {
               child: Text(
                 label,
                 style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                ),
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
               ),
             ),
           ),
@@ -270,12 +270,10 @@ class _ClipBlock extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final scheme = Theme.of(context).colorScheme;
-    final background = selected
-        ? scheme.primaryContainer
-        : scheme.secondaryContainer;
-    final foreground = selected
-        ? scheme.onPrimaryContainer
-        : scheme.onSecondaryContainer;
+    final background =
+        selected ? scheme.primaryContainer : scheme.secondaryContainer;
+    final foreground =
+        selected ? scheme.onPrimaryContainer : scheme.onSecondaryContainer;
     final shape = RoundedRectangleBorder(
       borderRadius: BorderRadius.circular(AppRadii.small),
       side: BorderSide(

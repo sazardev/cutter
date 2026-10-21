@@ -150,7 +150,6 @@ class Clip {
       );
 
   @override
-  String toString() =>
-      'Clip($id, layer $layerId, start $startMs, '
+  String toString() => 'Clip($id, layer $layerId, start $startMs, '
       'in $inPointMs, out $outPointMs)';
 }
