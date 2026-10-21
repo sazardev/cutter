@@ -5,6 +5,7 @@ import 'package:cutter/features/editor/data/engine_timeline.dart';
 import 'package:cutter/features/editor/domain/clip_transform.dart';
 import 'package:cutter/features/editor/domain/project.dart';
 import 'package:cutter/features/editor/presentation/editor_providers.dart';
+import 'package:cutter/features/editor/presentation/missing_media.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /// What the preview shows: where the playhead is, whether it plays, and the
@@ -156,6 +157,8 @@ class PlaybackController extends AutoDisposeNotifier<PlaybackUi> {
     session.setTimeline(
       engineTimelineOf(
         project,
+        missingSources:
+            ref.read(missingSourcesProvider).valueOrNull ?? const {},
         adjustmentOverrides: _adjustmentPreviews,
         transformOverrides: _transformPreviews,
       ),

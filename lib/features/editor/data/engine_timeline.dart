@@ -18,9 +18,12 @@ String filePathOf(String uri) =>
 
 /// What the engine renders for [project]. [adjustmentOverrides] and
 /// [transformOverrides] replace the values of clips by id, so a slider or a
-/// gesture shows its result before it is saved.
+/// gesture shows its result before it is saved. Clips whose source is in
+/// [missingSources] are left out, so a file that went missing never reaches
+/// the engine.
 Timeline engineTimelineOf(
   Project project, {
+  Set<String> missingSources = const {},
   Map<String, Map<String, double>> adjustmentOverrides = const {},
   Map<String, ClipTransform> transformOverrides = const {},
 }) {
@@ -36,38 +39,39 @@ Timeline engineTimelineOf(
           muted: layer.muted,
           clips: [
             for (final clip in layer.clips)
-              () {
-                final adjustments =
-                    adjustmentOverrides[clip.id] ?? clip.adjustments;
-                final t = transformOverrides[clip.id] ?? clip.transform;
-                return TimelineClip(
-                  path: filePathOf(clip.sourceUri),
-                  kind: engineKindOf(clip.kind),
-                  startMs: clip.startMs,
-                  inMs: clip.inPointMs,
-                  outMs: clip.outPointMs,
-                  reversed: clip.reversed,
-                  volume: clip.volume,
-                  filter: clip.filterId,
-                  brightness: adjustments['brightness'] ?? 0,
-                  contrast: adjustments['contrast'] ?? 0,
-                  saturation: adjustments['saturation'] ?? 0,
-                  x: t.x,
-                  y: t.y,
-                  scale: t.scale,
-                  rotation: t.rotation,
-                  opacity: t.opacity,
-                  flipX: t.flipX,
-                  fill: t.fit == ClipFit.fill,
-                  cropLeft: clip.crop.left,
-                  cropTop: clip.crop.top,
-                  cropRight: clip.crop.right,
-                  cropBottom: clip.crop.bottom,
-                  speed: clip.speed,
-                  fadeInMs: clip.fadeInMs,
-                  fadeOutMs: clip.fadeOutMs,
-                );
-              }(),
+              if (!missingSources.contains(clip.sourceUri))
+                () {
+                  final adjustments =
+                      adjustmentOverrides[clip.id] ?? clip.adjustments;
+                  final t = transformOverrides[clip.id] ?? clip.transform;
+                  return TimelineClip(
+                    path: filePathOf(clip.sourceUri),
+                    kind: engineKindOf(clip.kind),
+                    startMs: clip.startMs,
+                    inMs: clip.inPointMs,
+                    outMs: clip.outPointMs,
+                    reversed: clip.reversed,
+                    volume: clip.volume,
+                    filter: clip.filterId,
+                    brightness: adjustments['brightness'] ?? 0,
+                    contrast: adjustments['contrast'] ?? 0,
+                    saturation: adjustments['saturation'] ?? 0,
+                    x: t.x,
+                    y: t.y,
+                    scale: t.scale,
+                    rotation: t.rotation,
+                    opacity: t.opacity,
+                    flipX: t.flipX,
+                    fill: t.fit == ClipFit.fill,
+                    cropLeft: clip.crop.left,
+                    cropTop: clip.crop.top,
+                    cropRight: clip.crop.right,
+                    cropBottom: clip.crop.bottom,
+                    speed: clip.speed,
+                    fadeInMs: clip.fadeInMs,
+                    fadeOutMs: clip.fadeOutMs,
+                  );
+                }(),
           ],
         ),
     ],

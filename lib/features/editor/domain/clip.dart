@@ -134,12 +134,14 @@ class Clip {
     int? fadeInMs,
     int? fadeOutMs,
     String? id,
+    String? sourceUri,
+    String? assetId,
   }) {
     return Clip(
       id: id ?? this.id,
       layerId: layerId ?? this.layerId,
-      assetId: assetId,
-      sourceUri: sourceUri,
+      assetId: assetId ?? this.assetId,
+      sourceUri: sourceUri ?? this.sourceUri,
       kind: kind,
       startMs: startMs ?? this.startMs,
       inPointMs: inPointMs ?? this.inPointMs,

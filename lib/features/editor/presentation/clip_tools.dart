@@ -1,4 +1,6 @@
 import 'package:cutter/app/theme/app_theme.dart';
+import 'package:cutter/features/capture/presentation/capture_panel.dart';
+import 'package:cutter/features/capture/presentation/capture_providers.dart';
 import 'package:cutter/features/editor/domain/clip.dart';
 import 'package:cutter/features/editor/domain/clip_settings_use_cases.dart';
 import 'package:cutter/features/editor/domain/media_asset.dart';
@@ -57,6 +59,7 @@ class EditorActions {
 /// The project tools, in the order the tool bars show them.
 const List<EditorTool> projectTools = [
   EditorTool.media,
+  EditorTool.capture,
   EditorTool.canvas,
   EditorTool.layout,
   EditorTool.versions,
@@ -64,6 +67,16 @@ const List<EditorTool> projectTools = [
   EditorTool.project,
   EditorTool.diagnostics,
 ];
+
+/// The project tools this device shows: Capture only where there is a camera
+/// and a microphone to capture with (phones and tablets).
+List<EditorTool> visibleProjectTools(WidgetRef ref) {
+  final capture = ref.watch(captureAvailableProvider);
+  return [
+    for (final tool in projectTools)
+      if (tool != EditorTool.capture || capture) tool,
+  ];
+}
 
 /// One labelled tool: an icon over a short label, at least 48dp square.
 class _ToolButton extends StatelessWidget {
@@ -171,7 +184,7 @@ class EditorToolbar extends ConsumerWidget {
             label: Text(l10n.addMediaAction),
           ),
         ),
-        for (final tool in projectTools)
+        for (final tool in visibleProjectTools(ref))
           _ToolButton(
             icon: tool.icon,
             label: tool.label(l10n),
@@ -273,6 +286,7 @@ Widget toolContent(EditorTool tool) => switch (tool) {
       EditorTool.adjust => const AdjustPanel(),
       EditorTool.transform => const TransformPanel(),
       EditorTool.media => const MediaBankPanel(),
+      EditorTool.capture => const CapturePanel(),
       EditorTool.canvas => const CanvasPanel(),
       EditorTool.versions => const VersionsPanel(),
       EditorTool.export => const ExportPanel(),
@@ -758,7 +772,7 @@ class EditorRail extends ConsumerWidget {
                 Expanded(
                   child: ListView(
                     children: [
-                      for (final tool in projectTools)
+                      for (final tool in visibleProjectTools(ref))
                         item(tool, labels: labels),
                     ],
                   ),

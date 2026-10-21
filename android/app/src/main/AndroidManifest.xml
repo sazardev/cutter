@@ -5,6 +5,17 @@
         android:maxSdkVersion="29" />
     <!-- Downloading music packs (the only thing the app fetches). -->
     <uses-permission android:name="android.permission.INTERNET" />
+    <!-- Voice-over recording (record). Photos and videos use the system camera
+         app, so the CAMERA permission is deliberately not declared: declaring
+         it would make that camera app fail until the user grants it to
+         Cutter. -->
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <uses-feature
+        android:name="android.hardware.microphone"
+        android:required="false" />
+    <uses-feature
+        android:name="android.hardware.camera"
+        android:required="false" />
     <application
         android:requestLegacyExternalStorage="true"
         android:label="Cutter"

@@ -2306,5 +2306,163 @@
         "type": "String"
       }
     }
+  },
+  "importReportTitle": "Import report",
+  "@importReportTitle": {
+    "description": "Title of the dialog that lists files that were left out or need attention after an import."
+  },
+  "importReportDone": "{count, plural, =0{Nothing was imported.} =1{1 file was imported.} other{{count} files were imported.}}",
+  "@importReportDone": {
+    "description": "First line of the import report.",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "3"
+      }
+    }
+  },
+  "importReportSkipped": "Left out",
+  "@importReportSkipped": {
+    "description": "Heading of the list of files that could not be imported."
+  },
+  "importReportAttention": "Worth knowing",
+  "@importReportAttention": {
+    "description": "Heading of the list of warnings about imported files."
+  },
+  "importIssueUnreadable": "Format not supported or the file is damaged.",
+  "@importIssueUnreadable": {
+    "description": "Reason a file could not be imported."
+  },
+  "importIssueTooShort": "Too short to be a clip.",
+  "@importIssueTooShort": {
+    "description": "Reason a file could not be imported."
+  },
+  "importIssueStorageFull": "Not enough free space on this device to keep a copy.",
+  "@importIssueStorageFull": {
+    "description": "Reason a file could not be imported."
+  },
+  "importIssueCopyFailed": "Cutter could not copy the file. It may have been moved or deleted.",
+  "@importIssueCopyFailed": {
+    "description": "Reason a file could not be imported."
+  },
+  "importNoticeHighResolution": "Higher than 4K: preview and export may be slow.",
+  "@importNoticeHighResolution": {
+    "description": "Warning about an imported file."
+  },
+  "importNoticeLongDuration": "Longer than an hour: editing may be slow.",
+  "@importNoticeLongDuration": {
+    "description": "Warning about an imported file."
+  },
+  "importNoticeLargeFile": "Larger than 4 GB: it takes space on this device.",
+  "@importNoticeLargeFile": {
+    "description": "Warning about an imported file."
+  },
+  "importReportClose": "Got it",
+  "@importReportClose": {
+    "description": "Button that closes the import report."
+  },
+  "missingMediaBanner": "{count, plural, =1{1 file used by this project is missing} other{{count} files used by this project are missing}}",
+  "@missingMediaBanner": {
+    "description": "Banner above the timeline when files of the project were moved or deleted.",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
+  "missingMediaFind": "Find file",
+  "@missingMediaFind": {
+    "description": "Button that lets the user pick the file that replaces a missing one."
+  },
+  "missingMediaClip": "Missing file",
+  "@missingMediaClip": {
+    "description": "Accessible label of a clip whose file is missing."
+  },
+  "relinkTooShort": "That file is shorter than the clips need.",
+  "@relinkTooShort": {
+    "description": "Reason a picked file cannot replace a missing one."
+  },
+  "relinkWrongKind": "That is another kind of file than the clips use.",
+  "@relinkWrongKind": {
+    "description": "Reason a picked file cannot replace a missing one."
+  },
+  "relinkUnreadable": "Cutter cannot read that file.",
+  "@relinkUnreadable": {
+    "description": "Reason a picked file cannot replace a missing one."
+  },
+  "relinkTitle": "Could not use that file",
+  "@relinkTitle": {
+    "description": "Title of the dialog explaining why a file cannot replace a missing one."
+  },
+  "exportMissingMedia": "Find the missing files before exporting.",
+  "@exportMissingMedia": {
+    "description": "Shown in place of the export button while the project has missing files."
+  },
+  "captureTool": "Capture",
+  "@captureTool": {
+    "description": "Name of the tool that takes photos and records video and voice."
+  },
+  "capturePhoto": "Take photo",
+  "@capturePhoto": {
+    "description": "Button that opens the camera to take a photo and adds it to the project."
+  },
+  "captureVideo": "Record video",
+  "@captureVideo": {
+    "description": "Button that opens the camera to record a video and adds it to the project."
+  },
+  "captureVoice": "Record voice",
+  "@captureVoice": {
+    "description": "Button that starts recording the microphone."
+  },
+  "captureVoiceStop": "Stop and add",
+  "@captureVoiceStop": {
+    "description": "Button that stops the voice recording and adds it to the timeline."
+  },
+  "captureVoiceRecording": "Recording {time}",
+  "@captureVoiceRecording": {
+    "description": "Elapsed time while recording voice.",
+    "placeholders": {
+      "time": {
+        "type": "String",
+        "example": "0:12.3"
+      }
+    }
+  },
+  "captureVoiceHelp": "The recording is added as a sound clip at the playhead.",
+  "@captureVoiceHelp": {
+    "description": "Help under the voice recording button."
+  },
+  "capturePlayAlong": "Play the timeline while recording",
+  "@capturePlayAlong": {
+    "description": "Switch: play the project while recording a voice-over."
+  },
+  "captureMicDeniedTitle": "Microphone access is off",
+  "@captureMicDeniedTitle": {
+    "description": "Title shown when the microphone is not allowed."
+  },
+  "captureMicDeniedBody": "Allow the microphone in the system settings to record your voice.",
+  "@captureMicDeniedBody": {
+    "description": "Explains how to allow the microphone."
+  },
+  "captureCameraDeniedTitle": "Camera access is off",
+  "@captureCameraDeniedTitle": {
+    "description": "Title shown when the camera is not allowed."
+  },
+  "captureCameraDeniedBody": "Allow the camera in the system settings to take photos and record video.",
+  "@captureCameraDeniedBody": {
+    "description": "Explains how to allow the camera."
+  },
+  "captureInterrupted": "The recording was interrupted. What was recorded so far was kept.",
+  "@captureInterrupted": {
+    "description": "Shown after a recording was cut short and its audio was kept."
+  },
+  "captureFailed": "The recording could not be saved.",
+  "@captureFailed": {
+    "description": "Shown when a recording left no usable file."
+  },
+  "captureRecovered": "A photo or video taken before the app closed was added.",
+  "@captureRecovered": {
+    "description": "Shown when a capture lost to a closed app is recovered."
   }
 }

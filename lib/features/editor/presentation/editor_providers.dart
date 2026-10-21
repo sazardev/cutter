@@ -21,6 +21,7 @@ import 'package:cutter/features/editor/domain/layer_use_cases.dart';
 import 'package:cutter/features/editor/domain/media_bank.dart';
 import 'package:cutter/features/editor/domain/project_summary.dart';
 import 'package:cutter/features/editor/domain/project_version.dart';
+import 'package:cutter/features/editor/domain/relink_media.dart';
 import 'package:cutter/features/editor/domain/rename_project.dart';
 import 'package:cutter/features/editor/presentation/editor_controller.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -147,6 +148,11 @@ final importMediaProvider = Provider<ImportMedia>(
     ref.watch(projectRepositoryProvider),
     ref.watch(idGeneratorProvider),
   ),
+);
+
+/// The use case that points clips at another file when theirs went missing.
+final relinkMediaProvider = Provider<RelinkMedia>(
+  (ref) => RelinkMedia(ref.watch(projectRepositoryProvider)),
 );
 
 /// The use case that deletes a clip.

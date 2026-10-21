@@ -10,6 +10,7 @@ import 'package:cutter/features/editor/presentation/editor_providers.dart';
 import 'package:cutter/features/editor/presentation/import_flow.dart';
 import 'package:cutter/features/editor/presentation/layout/editor_layout.dart';
 import 'package:cutter/features/editor/presentation/layout/editor_split.dart';
+import 'package:cutter/features/editor/presentation/missing_media.dart';
 import 'package:cutter/features/editor/presentation/playback_controller.dart';
 import 'package:cutter/features/editor/presentation/preview_view.dart';
 import 'package:cutter/features/editor/presentation/project_title.dart';
@@ -265,10 +266,17 @@ class _EditorPageState extends ConsumerState<EditorPage> {
     );
   }
 
-  Widget _timelineView(EditorActions actions) => TimelineView(
-        key: _timeline,
-        onAddMedia: actions.onAddMedia,
-        onAddLayer: actions.onAddLayer,
+  Widget _timelineView(EditorActions actions) => Column(
+        children: [
+          const MissingMediaBanner(),
+          Expanded(
+            child: TimelineView(
+              key: _timeline,
+              onAddMedia: actions.onAddMedia,
+              onAddLayer: actions.onAddLayer,
+            ),
+          ),
+        ],
       );
 
   /// Phones held upright: preview, transport and timeline in a column (the

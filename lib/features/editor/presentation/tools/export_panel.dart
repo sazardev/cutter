@@ -8,6 +8,7 @@ import 'package:cutter/features/editor/domain/export_preset.dart';
 import 'package:cutter/features/editor/domain/export_record.dart';
 import 'package:cutter/features/editor/domain/project.dart';
 import 'package:cutter/features/editor/presentation/editor_providers.dart';
+import 'package:cutter/features/editor/presentation/missing_media.dart';
 import 'package:cutter/features/editor/presentation/project_settings.dart';
 import 'package:cutter/features/editor/presentation/share_video.dart';
 import 'package:cutter/features/editor/presentation/tools/share_block.dart';
@@ -137,7 +138,10 @@ class ExportController extends AutoDisposeNotifier<ExportUi> {
     final safeName = project.name.replaceAll(RegExp(r'[^\w\- ]'), '_');
     final path = '${dir.path}${Platform.pathSeparator}${safeName}_$stamp.mp4';
     final plan = ExportPlan.of(project.canvas, platform, quality, fps);
-    final timeline = engineTimelineOf(project);
+    final timeline = engineTimelineOf(
+      project,
+      missingSources: ref.read(missingSourcesProvider).valueOrNull ?? const {},
+    );
     final task = ref.read(mediaEngineProvider).export(
           Timeline(
             width: plan.width,
@@ -270,6 +274,8 @@ class _ExportPanelState extends ConsumerState<ExportPanel> {
     if (project == null) return const SizedBox.shrink();
     final fps = _fps ?? project.canvas.fps;
     final plan = ExportPlan.of(project.canvas, _platform, _quality, fps);
+    final hasMissing =
+        ref.watch(missingSourcesProvider).valueOrNull?.isNotEmpty ?? false;
     final megabytes = plan.estimatedBytes(project.durationMs) / (1024 * 1024);
     final muted = theme.textTheme.bodySmall?.copyWith(
       color: theme.colorScheme.onSurfaceVariant,
@@ -334,8 +340,13 @@ class _ExportPanelState extends ConsumerState<ExportPanel> {
             ),
             if (plan.reframed) Text(l10n.exportReframedNote, style: muted),
             const SizedBox(height: AppSpacing.md),
+            if (hasMissing)
+              Padding(
+                padding: const EdgeInsets.only(bottom: AppSpacing.sm),
+                child: Text(l10n.exportMissingMedia, style: muted),
+              ),
             FilledButton.icon(
-              onPressed: project.durationMs == 0
+              onPressed: project.durationMs == 0 || hasMissing
                   ? null
                   : () => controller.start(project, _platform, _quality, fps),
               icon: const Icon(Icons.file_upload_outlined),

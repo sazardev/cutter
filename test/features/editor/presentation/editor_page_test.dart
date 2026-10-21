@@ -1,12 +1,17 @@
+import 'dart:io';
+
 import 'package:cutter/core/db/app_database.dart';
 import 'package:cutter/core/engine/media_engine.dart';
 import 'package:cutter/core/settings/settings_store.dart';
+import 'package:cutter/features/capture/domain/capture_ports.dart';
+import 'package:cutter/features/capture/presentation/capture_providers.dart';
 import 'package:cutter/features/editor/data/drift_media_bank.dart';
 import 'package:cutter/features/editor/data/engine_media_inspector.dart';
 import 'package:cutter/features/editor/presentation/clip_tools.dart';
 import 'package:cutter/features/editor/presentation/editor_page.dart';
 import 'package:cutter/features/editor/presentation/editor_providers.dart';
 import 'package:cutter/features/editor/presentation/import_flow.dart';
+import 'package:cutter/features/editor/presentation/missing_media.dart';
 import 'package:cutter/features/editor/presentation/timeline/timeline_painters.dart';
 import 'package:cutter/features/editor/presentation/timeline/timeline_view.dart';
 import 'package:cutter/l10n/app_localizations.dart';
@@ -17,6 +22,16 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../../../core/engine/fake_media_engine.dart';
+
+const MediaInfo _photo = MediaInfo(
+  kind: EngineMediaKind.image,
+  durationMs: 0,
+  width: 4000,
+  height: 3000,
+  hasAudio: false,
+  frameRate: 0,
+  rotation: 0,
+);
 
 const _projectId = 'project-1';
 const _clipDurationMs = 10000;
@@ -80,11 +95,16 @@ Future<FakeMediaEngine> _pumpPage(
   String projectId = _projectId,
   Size size = const Size(590, 900),
   List<String> picked = const [],
+  Set<String> missing = const {},
+  Map<String, MediaInfo>? media,
+  List<Override> overrides = const [],
 }) async {
   tester.view.physicalSize = size;
   tester.view.devicePixelRatio = 1;
   addTearDown(tester.view.reset);
-  final engine = FakeMediaEngine(media: {'/media/new.mp4': fakeVideo});
+  final engine = FakeMediaEngine(
+    media: media ?? {'/media/new.mp4': fakeVideo},
+  );
   await tester.pumpWidget(
     ProviderScope(
       overrides: [
@@ -98,6 +118,8 @@ Future<FakeMediaEngine> _pumpPage(
           ),
         ),
         mediaPickerProvider.overrideWithValue((context, kind) async => picked),
+        fileExistsProvider.overrideWithValue((path) => !missing.contains(path)),
+        ...overrides,
         // The test files only exist in the fake engine.
         mediaBankProvider.overrideWithValue(
           DriftMediaBank(db, exists: (_) => true),
@@ -921,4 +943,270 @@ void main() {
       expect(find.text(l10n.timeUnitMinutes(1)), findsNothing);
     });
   });
+
+  group('missing media', () {
+    testWidgets('a clip whose file is gone is flagged and can be relinked',
+        (tester) async {
+      final db = AppDatabase.inMemory();
+      addTearDown(() => tester.runAsync(db.close));
+      await tester.runAsync(() => _seed(db, layerKind: 'video'));
+      final l10n = await _strings(const Locale('en'));
+      await _pumpPage(
+        tester,
+        db,
+        const Locale('en'),
+        picked: const ['/media/new.mp4'],
+        missing: const {'/media/clip.mp4'},
+        media: {
+          '/media/new.mp4': const MediaInfo(
+            kind: EngineMediaKind.video,
+            durationMs: 20000,
+            width: 1920,
+            height: 1080,
+            hasAudio: true,
+            frameRate: 30,
+            rotation: 0,
+          ),
+        },
+      );
+
+      expect(find.text(l10n.missingMediaBanner(1)), findsOneWidget);
+
+      await tester.tap(find.text(l10n.missingMediaFind));
+      await _settle(tester);
+      await _settle(tester);
+
+      final row = await tester.runAsync(
+        () => db.select(db.editorClips).getSingle(),
+      );
+      expect(row!.sourceUri, '/media/new.mp4');
+      expect(find.text(l10n.missingMediaBanner(1)), findsNothing);
+    });
+
+    testWidgets('a file shorter than the clips is refused with a reason',
+        (tester) async {
+      final db = AppDatabase.inMemory();
+      addTearDown(() => tester.runAsync(db.close));
+      await tester.runAsync(() => _seed(db, layerKind: 'video'));
+      final l10n = await _strings(const Locale('en'));
+      // The fake file lasts 4 s; the clip needs 10 s.
+      await _pumpPage(
+        tester,
+        db,
+        const Locale('en'),
+        picked: const ['/media/new.mp4'],
+        missing: const {'/media/clip.mp4'},
+      );
+
+      await tester.tap(find.text(l10n.missingMediaFind));
+      await _settle(tester);
+      await tester.pumpAndSettle();
+
+      expect(find.text(l10n.relinkTooShort), findsOneWidget);
+      final row = await tester.runAsync(
+        () => db.select(db.editorClips).getSingle(),
+      );
+      expect(row!.sourceUri, '/media/clip.mp4');
+    });
+
+    testWidgets('with every file present there is no banner', (tester) async {
+      final db = AppDatabase.inMemory();
+      addTearDown(() => tester.runAsync(db.close));
+      await tester.runAsync(() => _seed(db, layerKind: 'video'));
+      final l10n = await _strings(const Locale('en'));
+      await _pumpPage(tester, db, const Locale('en'));
+
+      expect(find.text(l10n.missingMediaFind), findsNothing);
+    });
+  });
+
+  group('capture', () {
+    Future<void> openCapture(WidgetTester tester, AppLocalizations l10n) async {
+      await tester.tap(find.text(l10n.captureTool).first);
+      await tester.pumpAndSettle();
+    }
+
+    testWidgets('a photo from the camera lands on the timeline',
+        (tester) async {
+      final db = AppDatabase.inMemory();
+      addTearDown(() => tester.runAsync(db.close));
+      await tester.runAsync(() => _seedEmptyProject(db));
+      final l10n = await _strings(const Locale('en'));
+      await _pumpPage(
+        tester,
+        db,
+        const Locale('en'),
+        size: const Size(1200, 900),
+        media: {'/camera/photo.jpg': _photo},
+        overrides: [
+          captureAvailableProvider.overrideWithValue(true),
+          cameraCaptureProvider
+              .overrideWithValue(_FakeCamera('/camera/photo.jpg')),
+        ],
+      );
+      await openCapture(tester, l10n);
+
+      await tester.tap(find.text(l10n.capturePhoto));
+      await _settle(tester);
+      await _settle(tester);
+
+      final clips = await tester.runAsync(
+        () => db.select(db.editorClips).get(),
+      );
+      expect(clips!.single.sourceUri, '/camera/photo.jpg');
+    });
+
+    testWidgets('a denied camera explains how to allow it', (tester) async {
+      final db = AppDatabase.inMemory();
+      addTearDown(() => tester.runAsync(db.close));
+      await tester.runAsync(() => _seedEmptyProject(db));
+      final l10n = await _strings(const Locale('en'));
+      await _pumpPage(
+        tester,
+        db,
+        const Locale('en'),
+        size: const Size(1200, 900),
+        overrides: [
+          captureAvailableProvider.overrideWithValue(true),
+          cameraCaptureProvider
+              .overrideWithValue(_FakeCamera(null, denied: true)),
+        ],
+      );
+      await openCapture(tester, l10n);
+
+      await tester.tap(find.text(l10n.captureVideo));
+      await _settle(tester);
+      await tester.pumpAndSettle();
+
+      expect(find.text(l10n.captureCameraDeniedTitle), findsOneWidget);
+      expect(find.text(l10n.settingsPermissionsOpenSettings), findsOneWidget);
+    });
+
+    testWidgets('a voice recording is added as a sound clip', (tester) async {
+      final db = AppDatabase.inMemory();
+      addTearDown(() => tester.runAsync(db.close));
+      final dir = Directory.systemTemp.createTempSync('cutter_capture_test');
+      addTearDown(() => dir.deleteSync(recursive: true));
+      final path = '${dir.path}/voice.m4a';
+      await tester.runAsync(() => _seedEmptyProject(db));
+      final l10n = await _strings(const Locale('en'));
+      await _pumpPage(
+        tester,
+        db,
+        const Locale('en'),
+        size: const Size(1200, 900),
+        media: {path: fakeSound},
+        overrides: [
+          captureAvailableProvider.overrideWithValue(true),
+          voiceRecorderFactoryProvider.overrideWithValue(_FakeVoice.new),
+          voiceFilePathProvider.overrideWithValue(() async => path),
+        ],
+      );
+      await openCapture(tester, l10n);
+
+      await tester.tap(find.text(l10n.captureVoice));
+      await tester.pump(const Duration(milliseconds: 300));
+      expect(find.textContaining('Recording'), findsOneWidget);
+
+      await tester.tap(find.text(l10n.captureVoiceStop));
+      await _settle(tester);
+      await _settle(tester);
+
+      final layers = await tester.runAsync(
+        () => db.select(db.editorLayers).get(),
+      );
+      expect(layers!.map((l) => l.kind), ['audio']);
+    });
+
+    testWidgets('a denied microphone records nothing and says why',
+        (tester) async {
+      final db = AppDatabase.inMemory();
+      addTearDown(() => tester.runAsync(db.close));
+      await tester.runAsync(() => _seedEmptyProject(db));
+      final l10n = await _strings(const Locale('en'));
+      await _pumpPage(
+        tester,
+        db,
+        const Locale('en'),
+        size: const Size(1200, 900),
+        overrides: [
+          captureAvailableProvider.overrideWithValue(true),
+          voiceRecorderFactoryProvider
+              .overrideWithValue(() => _FakeVoice(allowed: false)),
+        ],
+      );
+      await openCapture(tester, l10n);
+
+      await tester.tap(find.text(l10n.captureVoice));
+      await tester.pumpAndSettle();
+
+      expect(find.text(l10n.captureMicDeniedTitle), findsOneWidget);
+      expect(find.text(l10n.captureVoiceStop), findsNothing);
+    });
+
+    testWidgets('on a device without camera or microphone there is no tool',
+        (tester) async {
+      final db = AppDatabase.inMemory();
+      addTearDown(() => tester.runAsync(db.close));
+      await tester.runAsync(() => _seedEmptyProject(db));
+      final l10n = await _strings(const Locale('en'));
+      await _pumpPage(
+        tester,
+        db,
+        const Locale('en'),
+        size: const Size(1200, 900),
+        overrides: [captureAvailableProvider.overrideWithValue(false)],
+      );
+
+      expect(find.text(l10n.captureTool), findsNothing);
+      expect(find.text(l10n.mediaTool), findsWidgets);
+    });
+  });
+}
+
+class _FakeCamera implements CameraCapture {
+  _FakeCamera(this.path, {this.denied = false});
+
+  final String? path;
+  final bool denied;
+
+  @override
+  Future<String?> photo() async {
+    if (denied) throw const CameraDenied();
+    return path;
+  }
+
+  @override
+  Future<String?> video() async {
+    if (denied) throw const CameraDenied();
+    return path;
+  }
+
+  @override
+  Future<String?> lostCapture() async => null;
+}
+
+class _FakeVoice implements VoiceRecorder {
+  _FakeVoice({this.allowed = true});
+
+  final bool allowed;
+  String? _path;
+
+  @override
+  Future<bool> requestPermission() async => allowed;
+
+  @override
+  Future<void> start(String path) async {
+    _path = path;
+    File(path).writeAsStringSync('audio');
+  }
+
+  @override
+  Future<String?> stop() async => _path;
+
+  @override
+  Future<bool> get isRecording async => _path != null;
+
+  @override
+  Future<void> dispose() async {}
 }

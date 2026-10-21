@@ -1,5 +1,7 @@
 // ignore_for_file: avoid_equals_and_hash_code_on_mutable_classes
 
+import 'package:cutter/features/editor/domain/import_limits.dart';
+
 /// The kinds of media a layer or clip can hold.
 enum MediaKind {
   /// A video file, with or without an audio track.
@@ -10,6 +12,7 @@ enum MediaKind {
 
   /// An audio file.
   audio,
+
 }
 
 /// An imported media file as the engine described it.
@@ -27,6 +30,8 @@ class MediaAsset {
     this.height = 0,
     this.audioPresent = false,
     this.supported = true,
+    this.sizeBytes = 0,
+    this.issue,
   });
 
   /// Unique id of the asset.
@@ -53,6 +58,12 @@ class MediaAsset {
   /// False when the file is in an unsupported format or is corrupt.
   final bool supported;
 
+  /// Size of the file in bytes, 0 when unknown.
+  final int sizeBytes;
+
+  /// Why the file cannot be used, when [supported] is false.
+  final ImportIssueKind? issue;
+
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -64,7 +75,9 @@ class MediaAsset {
           other.width == width &&
           other.height == height &&
           other.audioPresent == audioPresent &&
-          other.supported == supported;
+          other.supported == supported &&
+          other.sizeBytes == sizeBytes &&
+          other.issue == issue;
 
   @override
   int get hashCode => Object.hash(
@@ -76,5 +89,7 @@ class MediaAsset {
         height,
         audioPresent,
         supported,
+        sizeBytes,
+        issue,
       );
 }

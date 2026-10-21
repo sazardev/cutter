@@ -23,6 +23,9 @@ enum EditorTool {
   /// The project's media bank: import once, place again and again.
   media(Icons.perm_media_outlined),
 
+  /// Photos, video and voice recorded with the device and added at once.
+  capture(Icons.videocam_outlined),
+
   /// The shape and frame rate of the canvas.
   canvas(Icons.aspect_ratio),
 
@@ -57,6 +60,7 @@ enum EditorTool {
         EditorTool.adjust => l10n.adjustTool,
         EditorTool.transform => l10n.transformTool,
         EditorTool.media => l10n.mediaTool,
+        EditorTool.capture => l10n.captureTool,
         EditorTool.canvas => l10n.canvasTool,
         EditorTool.versions => l10n.versionsTool,
         EditorTool.export => l10n.exportTitle,

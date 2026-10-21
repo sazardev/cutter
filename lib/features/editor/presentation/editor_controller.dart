@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:cutter/core/engine/media_engine.dart';
 import 'package:cutter/features/editor/data/engine_timeline.dart';
@@ -8,12 +9,14 @@ import 'package:cutter/features/editor/domain/clip_crop.dart';
 import 'package:cutter/features/editor/domain/clip_transform.dart';
 import 'package:cutter/features/editor/domain/edit_history.dart';
 import 'package:cutter/features/editor/domain/editor_result.dart';
+import 'package:cutter/features/editor/domain/import_limits.dart';
 import 'package:cutter/features/editor/domain/import_media.dart';
 import 'package:cutter/features/editor/domain/layer.dart';
 import 'package:cutter/features/editor/domain/media_asset.dart';
 import 'package:cutter/features/editor/domain/media_bank.dart';
 import 'package:cutter/features/editor/domain/project.dart';
 import 'package:cutter/features/editor/domain/project_version.dart';
+import 'package:cutter/features/editor/domain/relink_media.dart';
 import 'package:cutter/features/editor/presentation/checkpoint_labels.dart';
 import 'package:cutter/features/editor/presentation/edit_log.dart';
 import 'package:cutter/features/editor/presentation/editor_providers.dart';
@@ -94,6 +97,8 @@ class ImportOutcome {
     required this.imported,
     required this.rejected,
     this.canvasChangedTo,
+    this.issues = const [],
+    this.notices = const [],
   });
 
   /// The shape the project took from its first picture, if it changed.
@@ -102,8 +107,17 @@ class ImportOutcome {
   /// How many files became clips.
   final int imported;
 
-  /// The paths of the files the engine cannot play.
+  /// The paths of the files that were left out.
   final List<String> rejected;
+
+  /// Each file that was left out, with why.
+  final List<ImportIssue> issues;
+
+  /// Warnings about files that were imported anyway.
+  final List<ImportNotice> notices;
+
+  /// Whether there is anything to tell the user about.
+  bool get hasReport => issues.isNotEmpty || notices.isNotEmpty;
 }
 
 /// Runs the domain use cases for the editor screen. Every accepted edit is
@@ -262,19 +276,39 @@ class EditorController extends Notifier<AsyncValue<EditorUiState>> {
     final inspector = ref.read(mediaInspectorProvider);
     final assets = <MediaAsset>[];
     final rejected = <String>[];
+    final issues = <ImportIssue>[];
+    final notices = <ImportNotice>[];
     for (final path in paths) {
       final asset = await inspector.inspect(path);
-      // A file too short to be a clip is reported like an unreadable one;
-      // it never takes the rest of the import down with it.
+      // A file too short to be a clip is left out with its own reason; it
+      // never takes the rest of the import down with it.
       if (asset.supported && asset.durationMs >= minClipDurationMs) {
         assets.add(asset);
+        for (final kind in noticesFor(
+          width: asset.width,
+          height: asset.height,
+          durationMs: asset.durationMs,
+          sizeBytes: asset.sizeBytes,
+        )) {
+          notices.add(ImportNotice(path, kind));
+        }
       } else {
         rejected.add(path);
+        issues.add(
+          ImportIssue(
+            path,
+            asset.supported
+                ? ImportIssueKind.tooShort
+                : asset.issue ?? ImportIssueKind.unreadable,
+          ),
+        );
       }
     }
     final latest = state.valueOrNull ?? current;
     state = AsyncValue.data(latest.copyWith(importing: false));
-    if (assets.isEmpty) return ImportOutcome(imported: 0, rejected: rejected);
+    if (assets.isEmpty) {
+      return ImportOutcome(imported: 0, rejected: rejected, issues: issues);
+    }
 
     final now = DateTime.now().millisecondsSinceEpoch;
     await ref.read(mediaBankProvider).add([
@@ -293,7 +327,12 @@ class EditorController extends Notifier<AsyncValue<EditorUiState>> {
     ]);
     ref.invalidate(projectMediaProvider(latest.project.id));
     if (!toTimeline) {
-      return ImportOutcome(imported: assets.length, rejected: rejected);
+      return ImportOutcome(
+        imported: assets.length,
+        rejected: rejected,
+        issues: issues,
+        notices: notices,
+      );
     }
 
     final before = latest.project;
@@ -323,6 +362,8 @@ class EditorController extends Notifier<AsyncValue<EditorUiState>> {
             imported: assets.length,
             rejected: rejected,
             canvasChangedTo: shape,
+            issues: issues,
+            notices: notices,
           );
         }
       }
@@ -330,7 +371,45 @@ class EditorController extends Notifier<AsyncValue<EditorUiState>> {
     return ImportOutcome(
       imported: accepted ? assets.length : 0,
       rejected: rejected,
+      issues: issues,
+      notices: notices,
     );
+  }
+
+  /// Points the clips whose file [oldUri] is missing at the file at [path],
+  /// keeping their places and trims. The new file is copied into the app
+  /// like any import. Returns whether it fitted; when it did not, nothing
+  /// changed and the copy is removed.
+  Future<RelinkCheck> relinkMedia(String oldUri, String path) async {
+    final current = state.valueOrNull;
+    if (current == null) return RelinkCheck.notUsed;
+    final asset = await ref.read(mediaInspectorProvider).inspect(path);
+    final check = relinkCheck(current.project, oldUri, asset);
+    if (check != RelinkCheck.ok) {
+      await _forgetCopy(path, asset);
+      return check;
+    }
+    final done = await _run(
+      'relink',
+      (project) => ref.read(relinkMediaProvider).call(
+            projectId: project.id,
+            oldUri: oldUri,
+            asset: asset,
+          ),
+    );
+    return done ? RelinkCheck.ok : RelinkCheck.unreadable;
+  }
+
+  /// Removes the copy the inspector made of [path] when it was not used.
+  Future<void> _forgetCopy(String path, MediaAsset asset) async {
+    if (!asset.supported || asset.uri == path) return;
+    final library = await ref.read(mediaLibraryProvider.future);
+    if (!library.contains(asset.uri)) return;
+    try {
+      await File(asset.uri).delete();
+    } on FileSystemException {
+      // A leftover copy costs space only.
+    }
   }
 
   /// Places files of the media bank on the timeline: pictures at the end of

@@ -3,7 +3,9 @@ import 'dart:io';
 import 'package:cutter/features/editor/domain/import_media.dart';
 import 'package:cutter/features/editor/domain/media_asset.dart';
 import 'package:cutter/features/editor/domain/media_bank.dart';
+import 'package:cutter/features/editor/presentation/editor_controller.dart';
 import 'package:cutter/features/editor/presentation/editor_providers.dart';
+import 'package:cutter/features/editor/presentation/import_report_dialog.dart';
 import 'package:cutter/features/editor/presentation/media/media_browser_page.dart';
 import 'package:cutter/features/editor/presentation/media/media_formats.dart';
 import 'package:cutter/features/editor/presentation/playback_controller.dart';
@@ -81,21 +83,26 @@ Future<void> pickAndImport(
 }
 
 /// Imports the files at [paths]. The result shows on the timeline or in the
-/// bank; files that cannot be used are left out without a notice.
-Future<void> importPaths(
+/// bank; files that were left out, and warnings about big ones, are listed
+/// in a report so nothing is dropped silently. [atMs] places sound at that
+/// time instead of the playhead.
+Future<ImportOutcome> importPaths(
   BuildContext context,
   WidgetRef ref,
   List<String> paths, {
   bool toTimeline = true,
   ImportPlacement placement = ImportPlacement.append,
+  int? atMs,
 }) async {
-  final playhead = ref.read(playbackControllerProvider).positionMs;
-  await ref.read(editorControllerProvider.notifier).importFiles(
+  final playhead = atMs ?? ref.read(playbackControllerProvider).positionMs;
+  final outcome = await ref.read(editorControllerProvider.notifier).importFiles(
         paths,
         atMs: playhead,
         placement: placement,
         toTimeline: toTimeline,
       );
+  if (context.mounted) await showImportReport(context, outcome);
+  return outcome;
 }
 
 /// Places bank [items] on the timeline.

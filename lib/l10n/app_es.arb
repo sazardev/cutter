@@ -2117,5 +2117,163 @@
   "settingsMusicRemoveAll": "Quitar todos los packs",
   "settingsMusicRemoveAllHelp": "Libera {size}. Puedes volver a descargarlos.",
   "settingsMusicRemoveTitle": "¿Quitar {name}?",
-  "settingsMusicRemoveBody": "Esto libera {size}. Puedes volver a descargarlo."
+  "settingsMusicRemoveBody": "Esto libera {size}. Puedes volver a descargarlo.",
+  "importReportTitle": "Informe de importación",
+  "@importReportTitle": {
+    "description": "Title of the dialog that lists files that were left out or need attention after an import."
+  },
+  "importReportDone": "{count, plural, =0{No se importó nada.} =1{Se importó 1 archivo.} other{Se importaron {count} archivos.}}",
+  "@importReportDone": {
+    "description": "First line of the import report.",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "3"
+      }
+    }
+  },
+  "importReportSkipped": "No se importaron",
+  "@importReportSkipped": {
+    "description": "Heading of the list of files that could not be imported."
+  },
+  "importReportAttention": "Conviene saber",
+  "@importReportAttention": {
+    "description": "Heading of the list of warnings about imported files."
+  },
+  "importIssueUnreadable": "Formato no compatible o archivo dañado.",
+  "@importIssueUnreadable": {
+    "description": "Reason a file could not be imported."
+  },
+  "importIssueTooShort": "Demasiado corto para ser un clip.",
+  "@importIssueTooShort": {
+    "description": "Reason a file could not be imported."
+  },
+  "importIssueStorageFull": "No hay espacio libre en este dispositivo para guardar una copia.",
+  "@importIssueStorageFull": {
+    "description": "Reason a file could not be imported."
+  },
+  "importIssueCopyFailed": "Cutter no pudo copiar el archivo. Puede que se haya movido o eliminado.",
+  "@importIssueCopyFailed": {
+    "description": "Reason a file could not be imported."
+  },
+  "importNoticeHighResolution": "Más de 4K: la vista previa y la exportación pueden ir lentas.",
+  "@importNoticeHighResolution": {
+    "description": "Warning about an imported file."
+  },
+  "importNoticeLongDuration": "Más de una hora: la edición puede ir lenta.",
+  "@importNoticeLongDuration": {
+    "description": "Warning about an imported file."
+  },
+  "importNoticeLargeFile": "Más de 4 GB: ocupa espacio en este dispositivo.",
+  "@importNoticeLargeFile": {
+    "description": "Warning about an imported file."
+  },
+  "importReportClose": "Entendido",
+  "@importReportClose": {
+    "description": "Button that closes the import report."
+  },
+  "missingMediaBanner": "{count, plural, =1{Falta 1 archivo que usa este proyecto} other{Faltan {count} archivos que usa este proyecto}}",
+  "@missingMediaBanner": {
+    "description": "Banner above the timeline when files of the project were moved or deleted.",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
+  "missingMediaFind": "Buscar archivo",
+  "@missingMediaFind": {
+    "description": "Button that lets the user pick the file that replaces a missing one."
+  },
+  "missingMediaClip": "Archivo faltante",
+  "@missingMediaClip": {
+    "description": "Accessible label of a clip whose file is missing."
+  },
+  "relinkTooShort": "Ese archivo es más corto de lo que necesitan los clips.",
+  "@relinkTooShort": {
+    "description": "Reason a picked file cannot replace a missing one."
+  },
+  "relinkWrongKind": "Ese es otro tipo de archivo del que usan los clips.",
+  "@relinkWrongKind": {
+    "description": "Reason a picked file cannot replace a missing one."
+  },
+  "relinkUnreadable": "Cutter no puede leer ese archivo.",
+  "@relinkUnreadable": {
+    "description": "Reason a picked file cannot replace a missing one."
+  },
+  "relinkTitle": "No se pudo usar ese archivo",
+  "@relinkTitle": {
+    "description": "Title of the dialog explaining why a file cannot replace a missing one."
+  },
+  "exportMissingMedia": "Busca los archivos faltantes antes de exportar.",
+  "@exportMissingMedia": {
+    "description": "Shown in place of the export button while the project has missing files."
+  },
+  "captureTool": "Capturar",
+  "@captureTool": {
+    "description": "Name of the tool that takes photos and records video and voice."
+  },
+  "capturePhoto": "Tomar foto",
+  "@capturePhoto": {
+    "description": "Button that opens the camera to take a photo and adds it to the project."
+  },
+  "captureVideo": "Grabar video",
+  "@captureVideo": {
+    "description": "Button that opens the camera to record a video and adds it to the project."
+  },
+  "captureVoice": "Grabar voz",
+  "@captureVoice": {
+    "description": "Button that starts recording the microphone."
+  },
+  "captureVoiceStop": "Detener y añadir",
+  "@captureVoiceStop": {
+    "description": "Button that stops the voice recording and adds it to the timeline."
+  },
+  "captureVoiceRecording": "Grabando {time}",
+  "@captureVoiceRecording": {
+    "description": "Elapsed time while recording voice.",
+    "placeholders": {
+      "time": {
+        "type": "String",
+        "example": "0:12.3"
+      }
+    }
+  },
+  "captureVoiceHelp": "La grabación se añade como un clip de sonido en el cabezal.",
+  "@captureVoiceHelp": {
+    "description": "Help under the voice recording button."
+  },
+  "capturePlayAlong": "Reproducir la línea de tiempo al grabar",
+  "@capturePlayAlong": {
+    "description": "Switch: play the project while recording a voice-over."
+  },
+  "captureMicDeniedTitle": "El acceso al micrófono está desactivado",
+  "@captureMicDeniedTitle": {
+    "description": "Title shown when the microphone is not allowed."
+  },
+  "captureMicDeniedBody": "Permite el micrófono en los ajustes del sistema para grabar tu voz.",
+  "@captureMicDeniedBody": {
+    "description": "Explains how to allow the microphone."
+  },
+  "captureCameraDeniedTitle": "El acceso a la cámara está desactivado",
+  "@captureCameraDeniedTitle": {
+    "description": "Title shown when the camera is not allowed."
+  },
+  "captureCameraDeniedBody": "Permite la cámara en los ajustes del sistema para tomar fotos y grabar video.",
+  "@captureCameraDeniedBody": {
+    "description": "Explains how to allow the camera."
+  },
+  "captureInterrupted": "La grabación se interrumpió. Lo grabado hasta ese momento se conservó.",
+  "@captureInterrupted": {
+    "description": "Shown after a recording was cut short and its audio was kept."
+  },
+  "captureFailed": "No se pudo guardar la grabación.",
+  "@captureFailed": {
+    "description": "Shown when a recording left no usable file."
+  },
+  "captureRecovered": "Se añadió una foto o video tomado antes de que se cerrara la app.",
+  "@captureRecovered": {
+    "description": "Shown when a capture lost to a closed app is recovered."
+  }
 }

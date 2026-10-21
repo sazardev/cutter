@@ -1,5 +1,9 @@
+import 'dart:io';
+
 import 'package:cutter/core/engine/media_engine.dart';
+import 'package:cutter/features/editor/data/media_library.dart';
 import 'package:cutter/features/editor/domain/editor_ports.dart';
+import 'package:cutter/features/editor/domain/import_limits.dart';
 import 'package:cutter/features/editor/domain/import_media.dart';
 import 'package:cutter/features/editor/domain/media_asset.dart';
 
@@ -38,6 +42,7 @@ class EngineMediaInspector implements MediaInspector {
         kind: MediaKind.video,
         durationMs: 0,
         supported: false,
+        issue: ImportIssueKind.unreadable,
       );
     }
     final kind = switch (info.kind) {
@@ -45,15 +50,43 @@ class EngineMediaInspector implements MediaInspector {
       EngineMediaKind.image => MediaKind.image,
       EngineMediaKind.audio => MediaKind.audio,
     };
+    final String kept;
+    try {
+      kept = await keep(path);
+    } on MediaStorageFull {
+      return _failed(path, kind, ImportIssueKind.storageFull);
+    } on Object {
+      return _failed(path, kind, ImportIssueKind.copyFailed);
+    }
     return MediaAsset(
       id: _ids.next(),
-      uri: await keep(path),
+      uri: kept,
       kind: kind,
+      sizeBytes: _sizeOf(kept),
       durationMs:
           kind == MediaKind.image ? defaultImageDurationMs : info.durationMs,
       width: info.width,
       height: info.height,
       audioPresent: info.hasAudio,
     );
+  }
+
+  MediaAsset _failed(String path, MediaKind kind, ImportIssueKind issue) {
+    return MediaAsset(
+      id: _ids.next(),
+      uri: path,
+      kind: kind,
+      durationMs: 0,
+      supported: false,
+      issue: issue,
+    );
+  }
+
+  int _sizeOf(String path) {
+    try {
+      return File(path).lengthSync();
+    } on FileSystemException {
+      return 0;
+    }
   }
 }

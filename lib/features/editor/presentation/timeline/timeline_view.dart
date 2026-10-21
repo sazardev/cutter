@@ -9,6 +9,7 @@ import 'package:cutter/features/editor/domain/media_asset.dart';
 import 'package:cutter/features/editor/domain/project.dart';
 import 'package:cutter/features/editor/presentation/double_tap.dart';
 import 'package:cutter/features/editor/presentation/editor_providers.dart';
+import 'package:cutter/features/editor/presentation/missing_media.dart';
 import 'package:cutter/features/editor/presentation/playback_controller.dart';
 import 'package:cutter/features/editor/presentation/time_format.dart';
 import 'package:cutter/features/editor/presentation/timeline/media_previews.dart';
@@ -1044,7 +1045,13 @@ class _ClipTile extends ConsumerWidget {
               contentLeft: contentLeft,
             ),
           );
+    final missing = ref.watch(
+      missingSourcesProvider.select(
+        (sources) => sources.valueOrNull?.contains(clip.sourceUri) ?? false,
+      ),
+    );
     final badges = [
+      if (missing) Icons.link_off,
       if (clip.reversed) Icons.fast_rewind,
       if (clip.filterId != null || clip.adjustments.values.any((v) => v != 0))
         Icons.auto_awesome,
@@ -1055,10 +1062,14 @@ class _ClipTile extends ConsumerWidget {
       duration: const Duration(milliseconds: 90),
       child: DecoratedBox(
         decoration: BoxDecoration(
-          color: background,
+          color: missing ? scheme.errorContainer : background,
           borderRadius: BorderRadius.circular(_clipRadius),
           border: Border.all(
-            color: selected ? scheme.primary : scheme.outlineVariant,
+            color: missing
+                ? scheme.error
+                : selected
+                    ? scheme.primary
+                    : scheme.outlineVariant,
             width: selected ? 2 : 1,
           ),
         ),
@@ -1104,7 +1115,8 @@ class _ClipTile extends ConsumerWidget {
       child: Semantics(
         button: true,
         selected: selected,
-        label: l10n.clipSemanticsLabel(
+        label: (missing ? '${l10n.missingMediaClip}. ' : '') +
+            l10n.clipSemanticsLabel(
           _kindLabel(l10n, clip.kind),
           formatTimelineTime(clip.startMs),
           formatTimelineTime(clip.durationMs),
