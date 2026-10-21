@@ -2562,5 +2562,115 @@
         "example": "Holiday"
       }
     }
+  },
+  "settingsSectionStorage": "Storage",
+  "@settingsSectionStorage": {
+    "description": "Name of the settings section about disk space."
+  },
+  "settingsSectionStorageHelp": "What Cutter keeps on this device, and cleaning",
+  "@settingsSectionStorageHelp": {
+    "description": "Subtitle of the Storage entry in the settings list."
+  },
+  "storageTotal": "Cutter uses {size}",
+  "@storageTotal": {
+    "description": "Total space the app holds.",
+    "placeholders": {
+      "size": {
+        "type": "String",
+        "example": "1.2 GB"
+      }
+    }
+  },
+  "storageMedia": "Media",
+  "@storageMedia": {
+    "description": "Legend: imported and recorded files kept by the app."
+  },
+  "storageExports": "Exported videos",
+  "@storageExports": {
+    "description": "Legend: rendered videos."
+  },
+  "storageCache": "Cache",
+  "@storageCache": {
+    "description": "Legend: temporary files."
+  },
+  "storageCacheHelp": "Temporary files Cutter can recreate. Recent ones are kept.",
+  "@storageCacheHelp": {
+    "description": "Help under the cache row."
+  },
+  "storageClearCache": "Clear cache",
+  "@storageClearCache": {
+    "description": "Button that deletes old temporary files."
+  },
+  "storageFreed": "Freed {size}",
+  "@storageFreed": {
+    "description": "Shown after cleaning, with the space recovered.",
+    "placeholders": {
+      "size": {
+        "type": "String",
+        "example": "24 MB"
+      }
+    }
+  },
+  "storageUnusedTitle": "Unused media",
+  "@storageUnusedTitle": {
+    "description": "Row about files that are on no timeline."
+  },
+  "storageUnusedHelp": "{count, plural, =0{Every file is on a timeline.} =1{1 file is not on any timeline.} other{{count} files are not on any timeline.}}",
+  "@storageUnusedHelp": {
+    "description": "Says how many media files no project uses.",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "3"
+      }
+    }
+  },
+  "storageCleanUnused": "Clean up",
+  "@storageCleanUnused": {
+    "description": "Button that deletes the unused media."
+  },
+  "storageCleanTitle": "Delete unused media?",
+  "@storageCleanTitle": {
+    "description": "Title of the confirmation before deleting unused files."
+  },
+  "storageCleanBody": "{count, plural, =1{1 file} other{{count} files}} ({size}) that no project uses will be deleted. Your projects are not affected, but these files will no longer be offered in the media bank.",
+  "@storageCleanBody": {
+    "description": "Consequence shown before deleting unused media.",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "3"
+      },
+      "size": {
+        "type": "String",
+        "example": "240 MB"
+      }
+    }
+  },
+  "storageByProject": "By project",
+  "@storageByProject": {
+    "description": "Heading of the list with the space each project takes."
+  },
+  "storageProjectsNone": "No projects yet.",
+  "@storageProjectsNone": {
+    "description": "Shown when there are no projects to list."
+  },
+  "storageProjectShared": "{size} shared with other projects",
+  "@storageProjectShared": {
+    "description": "Part of a project's media that other projects use too.",
+    "placeholders": {
+      "size": {
+        "type": "String",
+        "example": "40 MB"
+      }
+    }
+  },
+  "storageProjectTrash": "In trash",
+  "@storageProjectTrash": {
+    "description": "Marks a project in the trash in the storage list."
+  },
+  "storageRefresh": "Refresh",
+  "@storageRefresh": {
+    "description": "Button that measures the storage again."
   }
 }

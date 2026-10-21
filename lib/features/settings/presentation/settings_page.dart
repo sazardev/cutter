@@ -6,6 +6,7 @@ import 'package:cutter/features/settings/presentation/sections/export_section.da
 import 'package:cutter/features/settings/presentation/sections/music_section.dart';
 import 'package:cutter/features/settings/presentation/sections/permissions_section.dart';
 import 'package:cutter/features/settings/presentation/sections/share_section.dart';
+import 'package:cutter/features/settings/presentation/sections/storage_section.dart';
 import 'package:cutter/features/settings/presentation/settings_widgets.dart';
 import 'package:cutter/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
@@ -31,6 +32,9 @@ enum SettingsSection {
   /// The downloaded music packs and the space they take.
   music(Icons.library_music_outlined),
 
+  /// What the app keeps on the device, and cleaning it.
+  storage(Icons.pie_chart_outline),
+
   /// What the app may access.
   permissions(Icons.shield_outlined),
 
@@ -53,6 +57,8 @@ enum SettingsSection {
         return l10n.settingsSectionShare;
       case SettingsSection.music:
         return l10n.settingsSectionMusic;
+      case SettingsSection.storage:
+        return l10n.settingsSectionStorage;
       case SettingsSection.permissions:
         return l10n.settingsSectionPermissions;
       case SettingsSection.about:
@@ -71,6 +77,8 @@ enum SettingsSection {
         return l10n.settingsSectionShareHelp;
       case SettingsSection.music:
         return l10n.settingsSectionMusicHelp;
+      case SettingsSection.storage:
+        return l10n.settingsSectionStorageHelp;
       case SettingsSection.permissions:
         return l10n.settingsSectionPermissionsHelp;
       case SettingsSection.about:
@@ -89,6 +97,8 @@ enum SettingsSection {
         return const ShareSection();
       case SettingsSection.music:
         return const MusicSection();
+      case SettingsSection.storage:
+        return const StorageSection();
       case SettingsSection.permissions:
         return const PermissionsSection();
       case SettingsSection.about:
