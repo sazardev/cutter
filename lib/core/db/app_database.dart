@@ -2,6 +2,12 @@ import 'dart:io';
 
 import 'package:cutter/core/db/app_database.steps.dart';
 import 'package:cutter/core/db/migrations/from1To2.dart';
+import 'package:cutter/core/db/migrations/from2To3.dart';
+import 'package:cutter/core/db/migrations/from3To4.dart';
+import 'package:cutter/core/db/migrations/from4To5.dart';
+import 'package:cutter/core/db/migrations/from5To6.dart';
+
+import 'package:cutter/core/db/tables/app_settings_table.dart';
 import 'package:cutter/features/editor/data/tables/editor_tables.dart';
 import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
@@ -16,8 +22,19 @@ const _busyTimeoutMs = 5000;
 /// The name of the database file, without a directory.
 const _databaseFileName = 'cutter.sqlite';
 
-/// The local source of truth: editor projects, layers and clips.
-@DriftDatabase(tables: [EditorProjects, EditorLayers, EditorClips])
+/// The local source of truth: editor projects, layers and clips, plus the
+/// device-level settings.
+@DriftDatabase(
+  tables: [
+    EditorProjects,
+    EditorLayers,
+    EditorClips,
+    EditorVersions,
+    EditorExports,
+    EditorMedia,
+    AppSettings,
+  ],
+)
 class AppDatabase extends _$AppDatabase {
   /// Creates the database on the given [executor].
   AppDatabase(super.executor);
@@ -26,12 +43,18 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.inMemory() : super(NativeDatabase.memory());
 
   @override
-  int get schemaVersion => 2;
+  int get schemaVersion => 6;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
         onCreate: (migrator) => migrator.createAll(),
-        onUpgrade: stepByStep(from1To2: migrateFrom1To2),
+        onUpgrade: stepByStep(
+          from1To2: migrateFrom1To2,
+          from2To3: migrateFrom2To3,
+          from3To4: migrateFrom3To4,
+          from4To5: migrateFrom4To5,
+          from5To6: migrateFrom5To6,
+        ),
         beforeOpen: (details) async {
           await customStatement('PRAGMA journal_mode=WAL');
           await customStatement('PRAGMA foreign_keys=ON');

@@ -233,8 +233,923 @@ i1.GeneratedColumn<String> _column_21(String aliasedName) =>
 i1.GeneratedColumn<int> _column_22(String aliasedName) =>
     i1.GeneratedColumn<int>('source_duration_ms', aliasedName, true,
         type: i1.DriftSqlType.int, $customConstraints: 'NULL');
+
+final class Schema3 extends i0.VersionedSchema {
+  Schema3({required super.database}) : super(version: 3);
+  @override
+  late final List<i1.DatabaseSchemaEntity> entities = [
+    editorProjects,
+    editorLayers,
+    editorClips,
+    appSettings,
+  ];
+  late final Shape0 editorProjects = Shape0(
+      source: i0.VersionedTable(
+        entityName: 'editor_projects',
+        withoutRowId: false,
+        isStrict: false,
+        tableConstraints: [
+          'PRIMARY KEY(id)',
+        ],
+        columns: [
+          _column_0,
+          _column_1,
+          _column_2,
+          _column_3,
+          _column_4,
+          _column_5,
+          _column_6,
+        ],
+        attachedDatabase: database,
+      ),
+      alias: null);
+  late final Shape1 editorLayers = Shape1(
+      source: i0.VersionedTable(
+        entityName: 'editor_layers',
+        withoutRowId: false,
+        isStrict: false,
+        tableConstraints: [
+          'PRIMARY KEY(id)',
+        ],
+        columns: [
+          _column_0,
+          _column_7,
+          _column_8,
+          _column_9,
+          _column_10,
+          _column_11,
+        ],
+        attachedDatabase: database,
+      ),
+      alias: null);
+  late final Shape2 editorClips = Shape2(
+      source: i0.VersionedTable(
+        entityName: 'editor_clips',
+        withoutRowId: false,
+        isStrict: false,
+        tableConstraints: [
+          'PRIMARY KEY(id)',
+        ],
+        columns: [
+          _column_0,
+          _column_12,
+          _column_13,
+          _column_14,
+          _column_15,
+          _column_16,
+          _column_17,
+          _column_18,
+          _column_19,
+          _column_10,
+          _column_20,
+          _column_21,
+          _column_22,
+        ],
+        attachedDatabase: database,
+      ),
+      alias: null);
+  late final Shape3 appSettings = Shape3(
+      source: i0.VersionedTable(
+        entityName: 'app_settings',
+        withoutRowId: false,
+        isStrict: false,
+        tableConstraints: [
+          'PRIMARY KEY("key")',
+        ],
+        columns: [
+          _column_23,
+          _column_24,
+        ],
+        attachedDatabase: database,
+      ),
+      alias: null);
+}
+
+class Shape3 extends i0.VersionedTable {
+  Shape3({required super.source, required super.alias}) : super.aliased();
+  i1.GeneratedColumn<String> get key =>
+      columnsByName['key']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get value =>
+      columnsByName['value']! as i1.GeneratedColumn<String>;
+}
+
+i1.GeneratedColumn<String> _column_23(String aliasedName) =>
+    i1.GeneratedColumn<String>('key', aliasedName, false,
+        type: i1.DriftSqlType.string, $customConstraints: 'NOT NULL');
+i1.GeneratedColumn<String> _column_24(String aliasedName) =>
+    i1.GeneratedColumn<String>('value', aliasedName, false,
+        type: i1.DriftSqlType.string, $customConstraints: 'NOT NULL');
+
+final class Schema4 extends i0.VersionedSchema {
+  Schema4({required super.database}) : super(version: 4);
+  @override
+  late final List<i1.DatabaseSchemaEntity> entities = [
+    editorProjects,
+    editorLayers,
+    editorClips,
+    editorVersions,
+    appSettings,
+  ];
+  late final Shape4 editorProjects = Shape4(
+      source: i0.VersionedTable(
+        entityName: 'editor_projects',
+        withoutRowId: false,
+        isStrict: false,
+        tableConstraints: [
+          'PRIMARY KEY(id)',
+        ],
+        columns: [
+          _column_0,
+          _column_1,
+          _column_2,
+          _column_3,
+          _column_4,
+          _column_5,
+          _column_6,
+          _column_25,
+        ],
+        attachedDatabase: database,
+      ),
+      alias: null);
+  late final Shape1 editorLayers = Shape1(
+      source: i0.VersionedTable(
+        entityName: 'editor_layers',
+        withoutRowId: false,
+        isStrict: false,
+        tableConstraints: [
+          'PRIMARY KEY(id)',
+        ],
+        columns: [
+          _column_0,
+          _column_7,
+          _column_8,
+          _column_9,
+          _column_10,
+          _column_11,
+        ],
+        attachedDatabase: database,
+      ),
+      alias: null);
+  late final Shape5 editorClips = Shape5(
+      source: i0.VersionedTable(
+        entityName: 'editor_clips',
+        withoutRowId: false,
+        isStrict: false,
+        tableConstraints: [
+          'PRIMARY KEY(id)',
+        ],
+        columns: [
+          _column_0,
+          _column_12,
+          _column_13,
+          _column_14,
+          _column_15,
+          _column_16,
+          _column_17,
+          _column_18,
+          _column_19,
+          _column_10,
+          _column_20,
+          _column_21,
+          _column_22,
+          _column_26,
+          _column_27,
+          _column_28,
+          _column_29,
+          _column_30,
+          _column_31,
+          _column_32,
+          _column_33,
+          _column_34,
+        ],
+        attachedDatabase: database,
+      ),
+      alias: null);
+  late final Shape6 editorVersions = Shape6(
+      source: i0.VersionedTable(
+        entityName: 'editor_versions',
+        withoutRowId: false,
+        isStrict: false,
+        tableConstraints: [
+          'PRIMARY KEY(id)',
+        ],
+        columns: [
+          _column_0,
+          _column_7,
+          _column_1,
+          _column_2,
+          _column_35,
+          _column_36,
+        ],
+        attachedDatabase: database,
+      ),
+      alias: null);
+  late final Shape3 appSettings = Shape3(
+      source: i0.VersionedTable(
+        entityName: 'app_settings',
+        withoutRowId: false,
+        isStrict: false,
+        tableConstraints: [
+          'PRIMARY KEY("key")',
+        ],
+        columns: [
+          _column_23,
+          _column_24,
+        ],
+        attachedDatabase: database,
+      ),
+      alias: null);
+}
+
+class Shape4 extends i0.VersionedTable {
+  Shape4({required super.source, required super.alias}) : super.aliased();
+  i1.GeneratedColumn<String> get id =>
+      columnsByName['id']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get name =>
+      columnsByName['name']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<int> get createdAtMs =>
+      columnsByName['created_at_ms']! as i1.GeneratedColumn<int>;
+  i1.GeneratedColumn<int> get updatedAtMs =>
+      columnsByName['updated_at_ms']! as i1.GeneratedColumn<int>;
+  i1.GeneratedColumn<int> get canvasWidth =>
+      columnsByName['canvas_width']! as i1.GeneratedColumn<int>;
+  i1.GeneratedColumn<int> get canvasHeight =>
+      columnsByName['canvas_height']! as i1.GeneratedColumn<int>;
+  i1.GeneratedColumn<int> get fps =>
+      columnsByName['fps']! as i1.GeneratedColumn<int>;
+  i1.GeneratedColumn<int> get savedAtMs =>
+      columnsByName['saved_at_ms']! as i1.GeneratedColumn<int>;
+}
+
+i1.GeneratedColumn<int> _column_25(String aliasedName) =>
+    i1.GeneratedColumn<int>('saved_at_ms', aliasedName, true,
+        type: i1.DriftSqlType.int, $customConstraints: 'NULL');
+
+class Shape5 extends i0.VersionedTable {
+  Shape5({required super.source, required super.alias}) : super.aliased();
+  i1.GeneratedColumn<String> get id =>
+      columnsByName['id']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get layerId =>
+      columnsByName['layer_id']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<int> get sortKey =>
+      columnsByName['sort_key']! as i1.GeneratedColumn<int>;
+  i1.GeneratedColumn<String> get sourceUri =>
+      columnsByName['source_uri']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<int> get startMs =>
+      columnsByName['start_ms']! as i1.GeneratedColumn<int>;
+  i1.GeneratedColumn<int> get durationMs =>
+      columnsByName['duration_ms']! as i1.GeneratedColumn<int>;
+  i1.GeneratedColumn<int> get inPointMs =>
+      columnsByName['in_point_ms']! as i1.GeneratedColumn<int>;
+  i1.GeneratedColumn<int> get outPointMs =>
+      columnsByName['out_point_ms']! as i1.GeneratedColumn<int>;
+  i1.GeneratedColumn<int> get reversed =>
+      columnsByName['reversed']! as i1.GeneratedColumn<int>;
+  i1.GeneratedColumn<double> get volume =>
+      columnsByName['volume']! as i1.GeneratedColumn<double>;
+  i1.GeneratedColumn<String> get filterId =>
+      columnsByName['filter_id']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get adjustmentsJson =>
+      columnsByName['adjustments_json']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<int> get sourceDurationMs =>
+      columnsByName['source_duration_ms']! as i1.GeneratedColumn<int>;
+  i1.GeneratedColumn<double> get posX =>
+      columnsByName['pos_x']! as i1.GeneratedColumn<double>;
+  i1.GeneratedColumn<double> get posY =>
+      columnsByName['pos_y']! as i1.GeneratedColumn<double>;
+  i1.GeneratedColumn<double> get scale =>
+      columnsByName['scale']! as i1.GeneratedColumn<double>;
+  i1.GeneratedColumn<double> get rotation =>
+      columnsByName['rotation']! as i1.GeneratedColumn<double>;
+  i1.GeneratedColumn<double> get opacity =>
+      columnsByName['opacity']! as i1.GeneratedColumn<double>;
+  i1.GeneratedColumn<int> get flipX =>
+      columnsByName['flip_x']! as i1.GeneratedColumn<int>;
+  i1.GeneratedColumn<String> get fit =>
+      columnsByName['fit']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<int> get sourceWidth =>
+      columnsByName['source_width']! as i1.GeneratedColumn<int>;
+  i1.GeneratedColumn<int> get sourceHeight =>
+      columnsByName['source_height']! as i1.GeneratedColumn<int>;
+}
+
+i1.GeneratedColumn<double> _column_26(String aliasedName) =>
+    i1.GeneratedColumn<double>('pos_x', aliasedName, false,
+        type: i1.DriftSqlType.double,
+        $customConstraints: 'NOT NULL DEFAULT 0.0',
+        defaultValue: const i1.CustomExpression('0.0'));
+i1.GeneratedColumn<double> _column_27(String aliasedName) =>
+    i1.GeneratedColumn<double>('pos_y', aliasedName, false,
+        type: i1.DriftSqlType.double,
+        $customConstraints: 'NOT NULL DEFAULT 0.0',
+        defaultValue: const i1.CustomExpression('0.0'));
+i1.GeneratedColumn<double> _column_28(String aliasedName) =>
+    i1.GeneratedColumn<double>('scale', aliasedName, false,
+        type: i1.DriftSqlType.double,
+        $customConstraints: 'NOT NULL DEFAULT 1.0',
+        defaultValue: const i1.CustomExpression('1.0'));
+i1.GeneratedColumn<double> _column_29(String aliasedName) =>
+    i1.GeneratedColumn<double>('rotation', aliasedName, false,
+        type: i1.DriftSqlType.double,
+        $customConstraints: 'NOT NULL DEFAULT 0.0',
+        defaultValue: const i1.CustomExpression('0.0'));
+i1.GeneratedColumn<double> _column_30(String aliasedName) =>
+    i1.GeneratedColumn<double>('opacity', aliasedName, false,
+        type: i1.DriftSqlType.double,
+        $customConstraints: 'NOT NULL DEFAULT 1.0',
+        defaultValue: const i1.CustomExpression('1.0'));
+i1.GeneratedColumn<int> _column_31(String aliasedName) =>
+    i1.GeneratedColumn<int>('flip_x', aliasedName, false,
+        type: i1.DriftSqlType.int,
+        $customConstraints: 'NOT NULL DEFAULT 0 CHECK (flip_x IN (0, 1))',
+        defaultValue: const i1.CustomExpression('0'));
+i1.GeneratedColumn<String> _column_32(String aliasedName) =>
+    i1.GeneratedColumn<String>('fit', aliasedName, false,
+        type: i1.DriftSqlType.string,
+        $customConstraints:
+            'NOT NULL DEFAULT \'fit\' CHECK (fit IN (\'fit\', \'fill\'))',
+        defaultValue: const i1.CustomExpression('\'fit\''));
+i1.GeneratedColumn<int> _column_33(String aliasedName) =>
+    i1.GeneratedColumn<int>('source_width', aliasedName, false,
+        type: i1.DriftSqlType.int,
+        $customConstraints: 'NOT NULL DEFAULT 0',
+        defaultValue: const i1.CustomExpression('0'));
+i1.GeneratedColumn<int> _column_34(String aliasedName) =>
+    i1.GeneratedColumn<int>('source_height', aliasedName, false,
+        type: i1.DriftSqlType.int,
+        $customConstraints: 'NOT NULL DEFAULT 0',
+        defaultValue: const i1.CustomExpression('0'));
+
+class Shape6 extends i0.VersionedTable {
+  Shape6({required super.source, required super.alias}) : super.aliased();
+  i1.GeneratedColumn<String> get id =>
+      columnsByName['id']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get projectId =>
+      columnsByName['project_id']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get name =>
+      columnsByName['name']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<int> get createdAtMs =>
+      columnsByName['created_at_ms']! as i1.GeneratedColumn<int>;
+  i1.GeneratedColumn<int> get durationMs =>
+      columnsByName['duration_ms']! as i1.GeneratedColumn<int>;
+  i1.GeneratedColumn<String> get snapshotJson =>
+      columnsByName['snapshot_json']! as i1.GeneratedColumn<String>;
+}
+
+i1.GeneratedColumn<int> _column_35(String aliasedName) =>
+    i1.GeneratedColumn<int>('duration_ms', aliasedName, false,
+        type: i1.DriftSqlType.int,
+        $customConstraints: 'NOT NULL DEFAULT 0',
+        defaultValue: const i1.CustomExpression('0'));
+i1.GeneratedColumn<String> _column_36(String aliasedName) =>
+    i1.GeneratedColumn<String>('snapshot_json', aliasedName, false,
+        type: i1.DriftSqlType.string, $customConstraints: 'NOT NULL');
+
+final class Schema5 extends i0.VersionedSchema {
+  Schema5({required super.database}) : super(version: 5);
+  @override
+  late final List<i1.DatabaseSchemaEntity> entities = [
+    editorProjects,
+    editorLayers,
+    editorClips,
+    editorVersions,
+    editorExports,
+    appSettings,
+  ];
+  late final Shape4 editorProjects = Shape4(
+      source: i0.VersionedTable(
+        entityName: 'editor_projects',
+        withoutRowId: false,
+        isStrict: false,
+        tableConstraints: [
+          'PRIMARY KEY(id)',
+        ],
+        columns: [
+          _column_0,
+          _column_1,
+          _column_2,
+          _column_3,
+          _column_4,
+          _column_5,
+          _column_6,
+          _column_25,
+        ],
+        attachedDatabase: database,
+      ),
+      alias: null);
+  late final Shape1 editorLayers = Shape1(
+      source: i0.VersionedTable(
+        entityName: 'editor_layers',
+        withoutRowId: false,
+        isStrict: false,
+        tableConstraints: [
+          'PRIMARY KEY(id)',
+        ],
+        columns: [
+          _column_0,
+          _column_7,
+          _column_8,
+          _column_9,
+          _column_10,
+          _column_11,
+        ],
+        attachedDatabase: database,
+      ),
+      alias: null);
+  late final Shape7 editorClips = Shape7(
+      source: i0.VersionedTable(
+        entityName: 'editor_clips',
+        withoutRowId: false,
+        isStrict: false,
+        tableConstraints: [
+          'PRIMARY KEY(id)',
+        ],
+        columns: [
+          _column_0,
+          _column_12,
+          _column_13,
+          _column_14,
+          _column_15,
+          _column_16,
+          _column_17,
+          _column_18,
+          _column_19,
+          _column_10,
+          _column_20,
+          _column_21,
+          _column_22,
+          _column_26,
+          _column_27,
+          _column_28,
+          _column_29,
+          _column_30,
+          _column_31,
+          _column_32,
+          _column_33,
+          _column_34,
+          _column_37,
+          _column_38,
+          _column_39,
+          _column_40,
+          _column_41,
+          _column_42,
+          _column_43,
+        ],
+        attachedDatabase: database,
+      ),
+      alias: null);
+  late final Shape6 editorVersions = Shape6(
+      source: i0.VersionedTable(
+        entityName: 'editor_versions',
+        withoutRowId: false,
+        isStrict: false,
+        tableConstraints: [
+          'PRIMARY KEY(id)',
+        ],
+        columns: [
+          _column_0,
+          _column_7,
+          _column_1,
+          _column_2,
+          _column_35,
+          _column_36,
+        ],
+        attachedDatabase: database,
+      ),
+      alias: null);
+  late final Shape8 editorExports = Shape8(
+      source: i0.VersionedTable(
+        entityName: 'editor_exports',
+        withoutRowId: false,
+        isStrict: false,
+        tableConstraints: [
+          'PRIMARY KEY(id)',
+        ],
+        columns: [
+          _column_0,
+          _column_44,
+          _column_45,
+          _column_46,
+          _column_47,
+          _column_48,
+          _column_49,
+          _column_50,
+          _column_51,
+          _column_2,
+          _column_52,
+          _column_53,
+        ],
+        attachedDatabase: database,
+      ),
+      alias: null);
+  late final Shape3 appSettings = Shape3(
+      source: i0.VersionedTable(
+        entityName: 'app_settings',
+        withoutRowId: false,
+        isStrict: false,
+        tableConstraints: [
+          'PRIMARY KEY("key")',
+        ],
+        columns: [
+          _column_23,
+          _column_24,
+        ],
+        attachedDatabase: database,
+      ),
+      alias: null);
+}
+
+class Shape7 extends i0.VersionedTable {
+  Shape7({required super.source, required super.alias}) : super.aliased();
+  i1.GeneratedColumn<String> get id =>
+      columnsByName['id']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get layerId =>
+      columnsByName['layer_id']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<int> get sortKey =>
+      columnsByName['sort_key']! as i1.GeneratedColumn<int>;
+  i1.GeneratedColumn<String> get sourceUri =>
+      columnsByName['source_uri']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<int> get startMs =>
+      columnsByName['start_ms']! as i1.GeneratedColumn<int>;
+  i1.GeneratedColumn<int> get durationMs =>
+      columnsByName['duration_ms']! as i1.GeneratedColumn<int>;
+  i1.GeneratedColumn<int> get inPointMs =>
+      columnsByName['in_point_ms']! as i1.GeneratedColumn<int>;
+  i1.GeneratedColumn<int> get outPointMs =>
+      columnsByName['out_point_ms']! as i1.GeneratedColumn<int>;
+  i1.GeneratedColumn<int> get reversed =>
+      columnsByName['reversed']! as i1.GeneratedColumn<int>;
+  i1.GeneratedColumn<double> get volume =>
+      columnsByName['volume']! as i1.GeneratedColumn<double>;
+  i1.GeneratedColumn<String> get filterId =>
+      columnsByName['filter_id']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get adjustmentsJson =>
+      columnsByName['adjustments_json']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<int> get sourceDurationMs =>
+      columnsByName['source_duration_ms']! as i1.GeneratedColumn<int>;
+  i1.GeneratedColumn<double> get posX =>
+      columnsByName['pos_x']! as i1.GeneratedColumn<double>;
+  i1.GeneratedColumn<double> get posY =>
+      columnsByName['pos_y']! as i1.GeneratedColumn<double>;
+  i1.GeneratedColumn<double> get scale =>
+      columnsByName['scale']! as i1.GeneratedColumn<double>;
+  i1.GeneratedColumn<double> get rotation =>
+      columnsByName['rotation']! as i1.GeneratedColumn<double>;
+  i1.GeneratedColumn<double> get opacity =>
+      columnsByName['opacity']! as i1.GeneratedColumn<double>;
+  i1.GeneratedColumn<int> get flipX =>
+      columnsByName['flip_x']! as i1.GeneratedColumn<int>;
+  i1.GeneratedColumn<String> get fit =>
+      columnsByName['fit']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<int> get sourceWidth =>
+      columnsByName['source_width']! as i1.GeneratedColumn<int>;
+  i1.GeneratedColumn<int> get sourceHeight =>
+      columnsByName['source_height']! as i1.GeneratedColumn<int>;
+  i1.GeneratedColumn<double> get cropLeft =>
+      columnsByName['crop_left']! as i1.GeneratedColumn<double>;
+  i1.GeneratedColumn<double> get cropTop =>
+      columnsByName['crop_top']! as i1.GeneratedColumn<double>;
+  i1.GeneratedColumn<double> get cropRight =>
+      columnsByName['crop_right']! as i1.GeneratedColumn<double>;
+  i1.GeneratedColumn<double> get cropBottom =>
+      columnsByName['crop_bottom']! as i1.GeneratedColumn<double>;
+  i1.GeneratedColumn<double> get speed =>
+      columnsByName['speed']! as i1.GeneratedColumn<double>;
+  i1.GeneratedColumn<int> get fadeInMs =>
+      columnsByName['fade_in_ms']! as i1.GeneratedColumn<int>;
+  i1.GeneratedColumn<int> get fadeOutMs =>
+      columnsByName['fade_out_ms']! as i1.GeneratedColumn<int>;
+}
+
+i1.GeneratedColumn<double> _column_37(String aliasedName) =>
+    i1.GeneratedColumn<double>('crop_left', aliasedName, false,
+        type: i1.DriftSqlType.double,
+        $customConstraints: 'NOT NULL DEFAULT 0.0',
+        defaultValue: const i1.CustomExpression('0.0'));
+i1.GeneratedColumn<double> _column_38(String aliasedName) =>
+    i1.GeneratedColumn<double>('crop_top', aliasedName, false,
+        type: i1.DriftSqlType.double,
+        $customConstraints: 'NOT NULL DEFAULT 0.0',
+        defaultValue: const i1.CustomExpression('0.0'));
+i1.GeneratedColumn<double> _column_39(String aliasedName) =>
+    i1.GeneratedColumn<double>('crop_right', aliasedName, false,
+        type: i1.DriftSqlType.double,
+        $customConstraints: 'NOT NULL DEFAULT 0.0',
+        defaultValue: const i1.CustomExpression('0.0'));
+i1.GeneratedColumn<double> _column_40(String aliasedName) =>
+    i1.GeneratedColumn<double>('crop_bottom', aliasedName, false,
+        type: i1.DriftSqlType.double,
+        $customConstraints: 'NOT NULL DEFAULT 0.0',
+        defaultValue: const i1.CustomExpression('0.0'));
+i1.GeneratedColumn<double> _column_41(String aliasedName) =>
+    i1.GeneratedColumn<double>('speed', aliasedName, false,
+        type: i1.DriftSqlType.double,
+        $customConstraints: 'NOT NULL DEFAULT 1.0',
+        defaultValue: const i1.CustomExpression('1.0'));
+i1.GeneratedColumn<int> _column_42(String aliasedName) =>
+    i1.GeneratedColumn<int>('fade_in_ms', aliasedName, false,
+        type: i1.DriftSqlType.int,
+        $customConstraints: 'NOT NULL DEFAULT 0',
+        defaultValue: const i1.CustomExpression('0'));
+i1.GeneratedColumn<int> _column_43(String aliasedName) =>
+    i1.GeneratedColumn<int>('fade_out_ms', aliasedName, false,
+        type: i1.DriftSqlType.int,
+        $customConstraints: 'NOT NULL DEFAULT 0',
+        defaultValue: const i1.CustomExpression('0'));
+
+class Shape8 extends i0.VersionedTable {
+  Shape8({required super.source, required super.alias}) : super.aliased();
+  i1.GeneratedColumn<String> get id =>
+      columnsByName['id']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get projectId =>
+      columnsByName['project_id']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get projectName =>
+      columnsByName['project_name']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get path =>
+      columnsByName['path']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<int> get width =>
+      columnsByName['width']! as i1.GeneratedColumn<int>;
+  i1.GeneratedColumn<int> get height =>
+      columnsByName['height']! as i1.GeneratedColumn<int>;
+  i1.GeneratedColumn<int> get fps =>
+      columnsByName['fps']! as i1.GeneratedColumn<int>;
+  i1.GeneratedColumn<int> get durationMs =>
+      columnsByName['duration_ms']! as i1.GeneratedColumn<int>;
+  i1.GeneratedColumn<int> get sizeBytes =>
+      columnsByName['size_bytes']! as i1.GeneratedColumn<int>;
+  i1.GeneratedColumn<int> get createdAtMs =>
+      columnsByName['created_at_ms']! as i1.GeneratedColumn<int>;
+  i1.GeneratedColumn<String> get preset =>
+      columnsByName['preset']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<int> get inGallery =>
+      columnsByName['in_gallery']! as i1.GeneratedColumn<int>;
+}
+
+i1.GeneratedColumn<String> _column_44(String aliasedName) =>
+    i1.GeneratedColumn<String>('project_id', aliasedName, true,
+        type: i1.DriftSqlType.string, $customConstraints: 'NULL');
+i1.GeneratedColumn<String> _column_45(String aliasedName) =>
+    i1.GeneratedColumn<String>('project_name', aliasedName, false,
+        type: i1.DriftSqlType.string, $customConstraints: 'NOT NULL');
+i1.GeneratedColumn<String> _column_46(String aliasedName) =>
+    i1.GeneratedColumn<String>('path', aliasedName, false,
+        type: i1.DriftSqlType.string, $customConstraints: 'NOT NULL');
+i1.GeneratedColumn<int> _column_47(String aliasedName) =>
+    i1.GeneratedColumn<int>('width', aliasedName, false,
+        type: i1.DriftSqlType.int, $customConstraints: 'NOT NULL');
+i1.GeneratedColumn<int> _column_48(String aliasedName) =>
+    i1.GeneratedColumn<int>('height', aliasedName, false,
+        type: i1.DriftSqlType.int, $customConstraints: 'NOT NULL');
+i1.GeneratedColumn<int> _column_49(String aliasedName) =>
+    i1.GeneratedColumn<int>('fps', aliasedName, false,
+        type: i1.DriftSqlType.int, $customConstraints: 'NOT NULL');
+i1.GeneratedColumn<int> _column_50(String aliasedName) =>
+    i1.GeneratedColumn<int>('duration_ms', aliasedName, false,
+        type: i1.DriftSqlType.int, $customConstraints: 'NOT NULL');
+i1.GeneratedColumn<int> _column_51(String aliasedName) =>
+    i1.GeneratedColumn<int>('size_bytes', aliasedName, false,
+        type: i1.DriftSqlType.int, $customConstraints: 'NOT NULL');
+i1.GeneratedColumn<String> _column_52(String aliasedName) =>
+    i1.GeneratedColumn<String>('preset', aliasedName, false,
+        type: i1.DriftSqlType.string, $customConstraints: 'NOT NULL');
+i1.GeneratedColumn<int> _column_53(String aliasedName) =>
+    i1.GeneratedColumn<int>('in_gallery', aliasedName, false,
+        type: i1.DriftSqlType.int,
+        $customConstraints: 'NOT NULL DEFAULT 0 CHECK (in_gallery IN (0, 1))',
+        defaultValue: const i1.CustomExpression('0'));
+
+final class Schema6 extends i0.VersionedSchema {
+  Schema6({required super.database}) : super(version: 6);
+  @override
+  late final List<i1.DatabaseSchemaEntity> entities = [
+    editorProjects,
+    editorLayers,
+    editorClips,
+    editorVersions,
+    editorExports,
+    editorMedia,
+    appSettings,
+  ];
+  late final Shape4 editorProjects = Shape4(
+      source: i0.VersionedTable(
+        entityName: 'editor_projects',
+        withoutRowId: false,
+        isStrict: false,
+        tableConstraints: [
+          'PRIMARY KEY(id)',
+        ],
+        columns: [
+          _column_0,
+          _column_1,
+          _column_2,
+          _column_3,
+          _column_4,
+          _column_5,
+          _column_6,
+          _column_25,
+        ],
+        attachedDatabase: database,
+      ),
+      alias: null);
+  late final Shape1 editorLayers = Shape1(
+      source: i0.VersionedTable(
+        entityName: 'editor_layers',
+        withoutRowId: false,
+        isStrict: false,
+        tableConstraints: [
+          'PRIMARY KEY(id)',
+        ],
+        columns: [
+          _column_0,
+          _column_7,
+          _column_8,
+          _column_9,
+          _column_10,
+          _column_11,
+        ],
+        attachedDatabase: database,
+      ),
+      alias: null);
+  late final Shape7 editorClips = Shape7(
+      source: i0.VersionedTable(
+        entityName: 'editor_clips',
+        withoutRowId: false,
+        isStrict: false,
+        tableConstraints: [
+          'PRIMARY KEY(id)',
+        ],
+        columns: [
+          _column_0,
+          _column_12,
+          _column_13,
+          _column_14,
+          _column_15,
+          _column_16,
+          _column_17,
+          _column_18,
+          _column_19,
+          _column_10,
+          _column_20,
+          _column_21,
+          _column_22,
+          _column_26,
+          _column_27,
+          _column_28,
+          _column_29,
+          _column_30,
+          _column_31,
+          _column_32,
+          _column_33,
+          _column_34,
+          _column_37,
+          _column_38,
+          _column_39,
+          _column_40,
+          _column_41,
+          _column_42,
+          _column_43,
+        ],
+        attachedDatabase: database,
+      ),
+      alias: null);
+  late final Shape6 editorVersions = Shape6(
+      source: i0.VersionedTable(
+        entityName: 'editor_versions',
+        withoutRowId: false,
+        isStrict: false,
+        tableConstraints: [
+          'PRIMARY KEY(id)',
+        ],
+        columns: [
+          _column_0,
+          _column_7,
+          _column_1,
+          _column_2,
+          _column_35,
+          _column_36,
+        ],
+        attachedDatabase: database,
+      ),
+      alias: null);
+  late final Shape8 editorExports = Shape8(
+      source: i0.VersionedTable(
+        entityName: 'editor_exports',
+        withoutRowId: false,
+        isStrict: false,
+        tableConstraints: [
+          'PRIMARY KEY(id)',
+        ],
+        columns: [
+          _column_0,
+          _column_44,
+          _column_45,
+          _column_46,
+          _column_47,
+          _column_48,
+          _column_49,
+          _column_50,
+          _column_51,
+          _column_2,
+          _column_52,
+          _column_53,
+        ],
+        attachedDatabase: database,
+      ),
+      alias: null);
+  late final Shape9 editorMedia = Shape9(
+      source: i0.VersionedTable(
+        entityName: 'editor_media',
+        withoutRowId: false,
+        isStrict: false,
+        tableConstraints: [
+          'PRIMARY KEY(id)',
+          'UNIQUE(project_id, path)',
+        ],
+        columns: [
+          _column_0,
+          _column_44,
+          _column_46,
+          _column_9,
+          _column_50,
+          _column_54,
+          _column_55,
+          _column_56,
+          _column_57,
+          _column_58,
+        ],
+        attachedDatabase: database,
+      ),
+      alias: null);
+  late final Shape3 appSettings = Shape3(
+      source: i0.VersionedTable(
+        entityName: 'app_settings',
+        withoutRowId: false,
+        isStrict: false,
+        tableConstraints: [
+          'PRIMARY KEY("key")',
+        ],
+        columns: [
+          _column_23,
+          _column_24,
+        ],
+        attachedDatabase: database,
+      ),
+      alias: null);
+}
+
+class Shape9 extends i0.VersionedTable {
+  Shape9({required super.source, required super.alias}) : super.aliased();
+  i1.GeneratedColumn<String> get id =>
+      columnsByName['id']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get projectId =>
+      columnsByName['project_id']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get path =>
+      columnsByName['path']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get kind =>
+      columnsByName['kind']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<int> get durationMs =>
+      columnsByName['duration_ms']! as i1.GeneratedColumn<int>;
+  i1.GeneratedColumn<int> get width =>
+      columnsByName['width']! as i1.GeneratedColumn<int>;
+  i1.GeneratedColumn<int> get height =>
+      columnsByName['height']! as i1.GeneratedColumn<int>;
+  i1.GeneratedColumn<int> get hasAudio =>
+      columnsByName['has_audio']! as i1.GeneratedColumn<int>;
+  i1.GeneratedColumn<int> get sizeBytes =>
+      columnsByName['size_bytes']! as i1.GeneratedColumn<int>;
+  i1.GeneratedColumn<int> get addedAtMs =>
+      columnsByName['added_at_ms']! as i1.GeneratedColumn<int>;
+}
+
+i1.GeneratedColumn<int> _column_54(String aliasedName) =>
+    i1.GeneratedColumn<int>('width', aliasedName, false,
+        type: i1.DriftSqlType.int,
+        $customConstraints: 'NOT NULL DEFAULT 0',
+        defaultValue: const i1.CustomExpression('0'));
+i1.GeneratedColumn<int> _column_55(String aliasedName) =>
+    i1.GeneratedColumn<int>('height', aliasedName, false,
+        type: i1.DriftSqlType.int,
+        $customConstraints: 'NOT NULL DEFAULT 0',
+        defaultValue: const i1.CustomExpression('0'));
+i1.GeneratedColumn<int> _column_56(String aliasedName) =>
+    i1.GeneratedColumn<int>('has_audio', aliasedName, false,
+        type: i1.DriftSqlType.int,
+        $customConstraints: 'NOT NULL DEFAULT 0 CHECK (has_audio IN (0, 1))',
+        defaultValue: const i1.CustomExpression('0'));
+i1.GeneratedColumn<int> _column_57(String aliasedName) =>
+    i1.GeneratedColumn<int>('size_bytes', aliasedName, false,
+        type: i1.DriftSqlType.int,
+        $customConstraints: 'NOT NULL DEFAULT 0',
+        defaultValue: const i1.CustomExpression('0'));
+i1.GeneratedColumn<int> _column_58(String aliasedName) =>
+    i1.GeneratedColumn<int>('added_at_ms', aliasedName, false,
+        type: i1.DriftSqlType.int, $customConstraints: 'NOT NULL');
 i0.MigrationStepWithVersion migrationSteps({
   required Future<void> Function(i1.Migrator m, Schema2 schema) from1To2,
+  required Future<void> Function(i1.Migrator m, Schema3 schema) from2To3,
+  required Future<void> Function(i1.Migrator m, Schema4 schema) from3To4,
+  required Future<void> Function(i1.Migrator m, Schema5 schema) from4To5,
+  required Future<void> Function(i1.Migrator m, Schema6 schema) from5To6,
 }) {
   return (currentVersion, database) async {
     switch (currentVersion) {
@@ -243,6 +1158,26 @@ i0.MigrationStepWithVersion migrationSteps({
         final migrator = i1.Migrator(database, schema);
         await from1To2(migrator, schema);
         return 2;
+      case 2:
+        final schema = Schema3(database: database);
+        final migrator = i1.Migrator(database, schema);
+        await from2To3(migrator, schema);
+        return 3;
+      case 3:
+        final schema = Schema4(database: database);
+        final migrator = i1.Migrator(database, schema);
+        await from3To4(migrator, schema);
+        return 4;
+      case 4:
+        final schema = Schema5(database: database);
+        final migrator = i1.Migrator(database, schema);
+        await from4To5(migrator, schema);
+        return 5;
+      case 5:
+        final schema = Schema6(database: database);
+        final migrator = i1.Migrator(database, schema);
+        await from5To6(migrator, schema);
+        return 6;
       default:
         throw ArgumentError.value('Unknown migration from $currentVersion');
     }
@@ -251,8 +1186,16 @@ i0.MigrationStepWithVersion migrationSteps({
 
 i1.OnUpgrade stepByStep({
   required Future<void> Function(i1.Migrator m, Schema2 schema) from1To2,
+  required Future<void> Function(i1.Migrator m, Schema3 schema) from2To3,
+  required Future<void> Function(i1.Migrator m, Schema4 schema) from3To4,
+  required Future<void> Function(i1.Migrator m, Schema5 schema) from4To5,
+  required Future<void> Function(i1.Migrator m, Schema6 schema) from5To6,
 }) =>
     i0.VersionedSchema.stepByStepHelper(
         step: migrationSteps(
       from1To2: from1To2,
+      from2To3: from2To3,
+      from3To4: from3To4,
+      from4To5: from4To5,
+      from5To6: from5To6,
     ));
