@@ -1,4 +1,5 @@
 import 'package:cutter/app/theme/app_tokens.dart';
+import 'package:cutter/features/backup/presentation/backup_flow.dart';
 import 'package:cutter/features/editor/domain/editor_result.dart';
 import 'package:cutter/features/editor/domain/project_summary.dart';
 import 'package:cutter/features/editor/domain/template.dart';
@@ -45,6 +46,11 @@ class HomePage extends ConsumerWidget {
         title: Text(l10n.homeTitle),
         actions: [
           IconButton(
+            tooltip: l10n.homeRestoreBackupAction,
+            icon: const Icon(Icons.settings_backup_restore),
+            onPressed: () => restoreFromBackup(context, ref),
+          ),
+          IconButton(
             tooltip: l10n.settingsAction,
             icon: const Icon(Icons.settings_outlined),
             onPressed: () => _showSettings(context),
@@ -76,6 +82,7 @@ class HomePage extends ConsumerWidget {
                 _newProject(context, ref, templateId: template.id),
             onOpen: (id) => _open(context, ref, id),
             onRename: (project) => _rename(context, ref, project),
+            onBackup: (project) => backUpProject(context, ref, project.id),
             onTrash: (project) => _confirmTrash(context, ref, project),
             onDeleteForever: (project) =>
                 _confirmDeleteForever(context, ref, project),
@@ -237,6 +244,7 @@ class _Content extends ConsumerStatefulWidget {
     required this.onCreateFromTemplate,
     required this.onOpen,
     required this.onRename,
+    required this.onBackup,
     required this.onTrash,
     required this.onDeleteForever,
   });
@@ -246,6 +254,7 @@ class _Content extends ConsumerStatefulWidget {
   final ValueChanged<Template> onCreateFromTemplate;
   final ValueChanged<String> onOpen;
   final ValueChanged<ProjectSummary> onRename;
+  final ValueChanged<ProjectSummary> onBackup;
   final ValueChanged<ProjectSummary> onTrash;
   final ValueChanged<ProjectSummary> onDeleteForever;
 
@@ -337,6 +346,11 @@ class _ContentState extends ConsumerState<_Content> {
                   label: l10n.homeUnarchiveAction,
                   onTap: () => controller.unarchive(project.id),
                 ),
+              ProjectAction(
+                icon: Icons.inventory_2_outlined,
+                label: l10n.homeBackupAction,
+                onTap: () => widget.onBackup(project),
+              ),
               ProjectAction(
                 icon: Icons.delete_outline,
                 label: l10n.homeTrashAction,

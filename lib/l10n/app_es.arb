@@ -2275,5 +2275,103 @@
   "captureRecovered": "Se añadió una foto o video tomado antes de que se cerrara la app.",
   "@captureRecovered": {
     "description": "Shown when a capture lost to a closed app is recovered."
+  },
+  "homeBackupAction": "Respaldar",
+  "@homeBackupAction": {
+    "description": "Menu item that saves a project and its media into one backup file."
+  },
+  "homeRestoreBackupAction": "Restaurar respaldo",
+  "@homeRestoreBackupAction": {
+    "description": "Tooltip of the home button that opens a backup file."
+  },
+  "backupWorking": "Trabajando… los videos grandes tardan un poco.",
+  "@backupWorking": {
+    "description": "Shown while a backup is being written or unpacked."
+  },
+  "backupSavedTitle": "Respaldo guardado",
+  "@backupSavedTitle": {
+    "description": "Title of the dialog shown when a backup was written."
+  },
+  "backupSavedBody": "{count, plural, =0{Se guardó el proyecto.} =1{Se guardaron el proyecto y 1 archivo multimedia.} other{Se guardaron el proyecto y {count} archivos multimedia.}}",
+  "@backupSavedBody": {
+    "description": "Says what a backup holds.",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "3"
+      }
+    }
+  },
+  "backupSavedMissing": "{count, plural, =1{Faltaba 1 archivo que usa el proyecto y no se incluyó.} other{Faltaban {count} archivos que usa el proyecto y no se incluyeron.}}",
+  "@backupSavedMissing": {
+    "description": "Warns that some media were not found when backing up.",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "1"
+      }
+    }
+  },
+  "backupSavedWhere": "Guardado en {path}",
+  "@backupSavedWhere": {
+    "description": "Where the backup file was written.",
+    "placeholders": {
+      "path": {
+        "type": "String",
+        "example": "/storage/Cutter/Holiday.cutter"
+      }
+    }
+  },
+  "backupFailedTitle": "No se pudo hacer el respaldo",
+  "@backupFailedTitle": {
+    "description": "Title of the dialog shown when a backup failed."
+  },
+  "restoreDoneTitle": "Respaldo restaurado",
+  "@restoreDoneTitle": {
+    "description": "Title of the dialog shown when a backup was opened."
+  },
+  "restoreDoneBody": "Se añadió “{name}” a tus proyectos.",
+  "@restoreDoneBody": {
+    "description": "Says which project a restored backup created.",
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "example": "Holiday"
+      }
+    }
+  },
+  "restoreFailedTitle": "No se pudo restaurar el respaldo",
+  "@restoreFailedTitle": {
+    "description": "Title of the dialog shown when opening a backup failed."
+  },
+  "backupNotABackup": "Ese archivo no es un respaldo de Cutter.",
+  "@backupNotABackup": {
+    "description": "Reason a backup could not be opened."
+  },
+  "backupNewerVersion": "Este respaldo lo hizo una versión más reciente de Cutter. Actualiza la app para abrirlo.",
+  "@backupNewerVersion": {
+    "description": "Reason a backup could not be opened."
+  },
+  "backupDamaged": "El respaldo está dañado o incompleto.",
+  "@backupDamaged": {
+    "description": "Reason a backup could not be opened."
+  },
+  "backupStorageFull": "No hay espacio libre suficiente en este dispositivo.",
+  "@backupStorageFull": {
+    "description": "Reason a backup could not be made or opened."
+  },
+  "backupIoError": "No se pudo leer o escribir el archivo.",
+  "@backupIoError": {
+    "description": "Reason a backup could not be made or opened."
+  },
+  "backupRestoredName": "{name} (restaurado)",
+  "@backupRestoredName": {
+    "description": "Name given to a project restored from a backup.",
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "example": "Holiday"
+      }
+    }
   }
 }
