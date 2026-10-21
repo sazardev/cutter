@@ -1,0 +1,29 @@
+{
+  "baseUrl": "https://github.com/sazardev/cutter/releases/download/music-v1",
+  "bitrateKbps": 128,
+  "allowedLicenses": ["CC0-1.0", "CC-BY-4.0", "CC-BY-3.0"],
+  "archiveItems": [
+    {
+      "identifier": "freepd",
+      "source": {
+        "name": "FreePD",
+        "url": "https://archive.org/details/freepd",
+        "license": "CC0-1.0",
+        "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+        "attribution": null
+      },
+      "folders": {
+        "epic": {"id": "epic", "genre": "epic", "names": {"en": "Epic & cinematic", "es": "Épica y cinematográfica"}},
+        "scoring": {"id": "scoring", "genre": "scoring", "names": {"en": "Film scoring", "es": "Banda sonora"}},
+        "upbeat": {"id": "upbeat", "genre": "upbeat", "names": {"en": "Upbeat & fun", "es": "Alegre y animada"}},
+        "electronic": {"id": "electronic", "genre": "electronic", "names": {"en": "Electronic", "es": "Electrónica"}},
+        "comedy": {"id": "comedy", "genre": "comedy", "names": {"en": "Comedy", "es": "Comedia"}},
+        "romantic": {"id": "romantic", "genre": "romantic", "names": {"en": "Romantic", "es": "Romántica"}},
+        "horror": {"id": "horror", "genre": "horror", "names": {"en": "Horror & suspense", "es": "Terror y suspenso"}},
+        "world": {"id": "world", "genre": "world", "names": {"en": "World & ambient", "es": "Mundo y ambiental"}},
+        "misc": {"id": "misc", "genre": "misc", "names": {"en": "Miscellaneous", "es": "Variada"}}
+      }
+    }
+  ],
+  "directTracks": []
+}
