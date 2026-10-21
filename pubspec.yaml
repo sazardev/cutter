@@ -1,23 +1,32 @@
 name: cutter
-description: Multi-layer video editor for phones and tablets.
+description: Cutter, a multi-layer video editor for mobile phones and tablets.
 publish_to: none
 version: 0.1.0+1
 
 environment:
   sdk: ^3.5.0
+  flutter: ">=3.24.0"
 
 dependencies:
+  drift: ^2.20.0
+  drift_flutter: ^0.2.0
   flutter:
     sdk: flutter
   flutter_localizations:
     sdk: flutter
+  flutter_riverpod: ^2.5.1
   intl: any
+  path_provider: ^2.1.4
+  uuid: ^4.5.0
 
 dev_dependencies:
+  build_runner: ^2.4.12
+  drift_dev: ^2.20.0
   flutter_test:
     sdk: flutter
+  mocktail: ^1.0.4
   very_good_analysis: ^6.0.0
 
 flutter:
-  generate: true
   uses-material-design: true
+  generate: true

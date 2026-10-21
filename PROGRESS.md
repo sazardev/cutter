@@ -1,12 +1,13 @@
-# Progress: cutter-editor-domain
+# Progress: cutter-editor-slice
 
 Where the work stands, for whoever goes on with it. Rewritten after every build; `Done` is a log and is kept.
 
 ## Now
 
-- Last build: domain · ✓ built · 20 files · checks pass · 2026-10-21
-- Files: 20 of 20 written · $3.673
-- What it builds: Builds the editor domain under lib/features/editor/domain: immutable entities (Project, Layer, Clip, MediaAsset, Preset, Template), value objects (TimeRange), an EditorResult/EditorFailure error model, the ports the use cases need, and use cases for trim, split, move, reverse, volume, filter, adjustments, layer ordering, media import, presets and templates. Every use case loads a Project through ProjectRepository, applies one rule and saves it. A failure is returned as an Err value and saves nothing, so the project stays unchanged. Time is integer milliseconds, with a 100 ms minimum clip duration. The domain imports no Flutter, drift or FFI code and adds no packages. Tests use hand-written in-memory fakes of the ports, so they need only flutter_test. The existing presentation and sample-data files are not touched.
+- Last build: the whole project · ✗ no progress in 2 fix rounds (2 in all) · 2026-10-21
+- Files: 22 of 22 written · $3.073
+- What it builds: This build adds persistence and a first editor screen on top of the existing editor domain (ADR 0003). It does not recreate the domain files. A drift database stores projects, layers and clips and implements the domain's ProjectRepository port. A Riverpod controller runs the domain use cases against the playhead and the selected clip. The editor page shows the timeline (layers as rows, clips as blocks), a playhead, and an inspector for split, reverse, volume and filter. Domain failures are mapped once to localized messages. The Rust/FFI engine, recording, import pickers and sync are out of this build: the preview canvas is a placeholder and the outbox waits on Q10.
+- To resume: <leader>aSbb in Neovim (the run is saved), or go on by hand from `Open`
 
 ## Done
 
@@ -17,6 +18,8 @@ Where the work stands, for whoever goes on with it. Rewritten after every build;
 
 ## Open
 
+- the check `flutter analyze` fails
+- ✗ no progress in 2 fix rounds (2 in all)
 - SPEC.md has 16 open questions: the build decided them in its plan, the answer is yours
 
 ## Next

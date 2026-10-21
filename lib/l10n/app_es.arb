@@ -1,0 +1,241 @@
+{
+  "@@locale": "es",
+  "editorTitle": "Editor",
+  "@editorTitle": {
+    "description": "Título de la barra superior de la pantalla del editor."
+  },
+  "emptyTitle": "Aún no hay capas",
+  "@emptyTitle": {
+    "description": "Título del estado vacío cuando el proyecto no tiene capas."
+  },
+  "emptyBody": "Añade una capa de vídeo, imagen o audio para empezar a editar.",
+  "@emptyBody": {
+    "description": "Explicación de una frase en el estado vacío del editor."
+  },
+  "previewPlaceholder": "Vista previa",
+  "@previewPlaceholder": {
+    "description": "Etiqueta del marcador del lienzo de vista previa hasta que el motor multimedia esté disponible."
+  },
+  "timeLabel": "{time}",
+  "@timeLabel": {
+    "description": "Tiempo del cabezal mostrado sobre la línea de tiempo, con formato mm:ss.mmm.",
+    "placeholders": {
+      "time": {
+        "type": "String",
+        "example": "00:01.250"
+      }
+    }
+  },
+  "playheadStepBackAction": "Retroceder el cabezal",
+  "@playheadStepBackAction": {
+    "description": "Nombre accesible del botón que mueve el cabezal hacia atrás."
+  },
+  "playheadStepForwardAction": "Avanzar el cabezal",
+  "@playheadStepForwardAction": {
+    "description": "Nombre accesible del botón que mueve el cabezal hacia delante."
+  },
+  "timelineLabel": "Línea de tiempo",
+  "@timelineLabel": {
+    "description": "Nombre accesible de la región de la línea de tiempo."
+  },
+  "rulerLabel": "Regla de la línea de tiempo. Toca para mover el cabezal.",
+  "@rulerLabel": {
+    "description": "Nombre accesible de la regla de la línea de tiempo que mueve el cabezal al tocar."
+  },
+  "layerKindVideo": "Vídeo",
+  "@layerKindVideo": {
+    "description": "Nombre de una capa de vídeo."
+  },
+  "layerKindImage": "Imagen",
+  "@layerKindImage": {
+    "description": "Nombre de una capa de imagen."
+  },
+  "layerKindAudio": "Audio",
+  "@layerKindAudio": {
+    "description": "Nombre de una capa de audio."
+  },
+  "layerLabel": "Capa {index}: {kind}",
+  "@layerLabel": {
+    "description": "Etiqueta de una fila de la línea de tiempo.",
+    "placeholders": {
+      "index": {
+        "type": "int",
+        "example": "1"
+      },
+      "kind": {
+        "type": "String",
+        "example": "Vídeo"
+      }
+    }
+  },
+  "clipSemanticsLabel": "Clip en {layer}, empieza en {start}, dura {duration}",
+  "@clipSemanticsLabel": {
+    "description": "Etiqueta para lector de pantalla de un bloque de clip en la línea de tiempo.",
+    "placeholders": {
+      "layer": {
+        "type": "String",
+        "example": "Capa 1: Vídeo"
+      },
+      "start": {
+        "type": "String",
+        "example": "00:02.000"
+      },
+      "duration": {
+        "type": "String",
+        "example": "00:05.500"
+      }
+    }
+  },
+  "clipReversedIcon": "Invertido",
+  "@clipReversedIcon": {
+    "description": "Nombre accesible del icono de inversión mostrado en un clip invertido."
+  },
+  "clipMutedIcon": "Silenciado",
+  "@clipMutedIcon": {
+    "description": "Nombre accesible del icono de silencio mostrado en un clip con volumen cero."
+  },
+  "selectClipHint": "Selecciona un clip",
+  "@selectClipHint": {
+    "description": "Pista mostrada en el inspector cuando no hay ningún clip seleccionado."
+  },
+  "inspectorTitle": "Clip",
+  "@inspectorTitle": {
+    "description": "Encabezado del inspector de clips."
+  },
+  "splitAction": "Dividir",
+  "@splitAction": {
+    "description": "Botón que divide el clip seleccionado en el cabezal."
+  },
+  "moveEarlierAction": "Mover antes",
+  "@moveEarlierAction": {
+    "description": "Botón que mueve el clip seleccionado antes en el tiempo."
+  },
+  "moveLaterAction": "Mover después",
+  "@moveLaterAction": {
+    "description": "Botón que mueve el clip seleccionado después en el tiempo."
+  },
+  "reverseLabel": "Invertir",
+  "@reverseLabel": {
+    "description": "Etiqueta del interruptor que invierte la reproducción del clip."
+  },
+  "volumeLabel": "Volumen {percent}%",
+  "@volumeLabel": {
+    "description": "Etiqueta del control de volumen con el valor actual.",
+    "placeholders": {
+      "percent": {
+        "type": "int",
+        "example": "80"
+      }
+    }
+  },
+  "muteAction": "Silenciar",
+  "@muteAction": {
+    "description": "Botón que pone el volumen del clip a cero."
+  },
+  "filtersLabel": "Filtros",
+  "@filtersLabel": {
+    "description": "Encabezado del grupo de chips de filtros."
+  },
+  "filterNone": "Ninguno",
+  "@filterNone": {
+    "description": "Chip que quita el filtro del clip."
+  },
+  "filterMono": "Mono",
+  "@filterMono": {
+    "description": "Nombre del filtro en blanco y negro."
+  },
+  "filterWarm": "Cálido",
+  "@filterWarm": {
+    "description": "Nombre del filtro de color cálido."
+  },
+  "filterCool": "Frío",
+  "@filterCool": {
+    "description": "Nombre del filtro de color frío."
+  },
+  "filterVintage": "Vintage",
+  "@filterVintage": {
+    "description": "Nombre del filtro vintage."
+  },
+  "adjustmentsLabel": "Ajustes",
+  "@adjustmentsLabel": {
+    "description": "Encabezado del grupo de controles de ajuste."
+  },
+  "brightnessLabel": "Brillo {value}",
+  "@brightnessLabel": {
+    "description": "Etiqueta del control de brillo con su valor actual.",
+    "placeholders": {
+      "value": {
+        "type": "String",
+        "example": "0.25"
+      }
+    }
+  },
+  "contrastLabel": "Contraste {value}",
+  "@contrastLabel": {
+    "description": "Etiqueta del control de contraste con su valor actual.",
+    "placeholders": {
+      "value": {
+        "type": "String",
+        "example": "0.25"
+      }
+    }
+  },
+  "saturationLabel": "Saturación {value}",
+  "@saturationLabel": {
+    "description": "Etiqueta del control de saturación con su valor actual.",
+    "placeholders": {
+      "value": {
+        "type": "String",
+        "example": "0.25"
+      }
+    }
+  },
+  "loadErrorTitle": "No se pudo abrir el proyecto",
+  "@loadErrorTitle": {
+    "description": "Título mostrado cuando el proyecto no se carga desde la base de datos local."
+  },
+  "loadErrorBody": "Tus datos siguen en el dispositivo. Inténtalo de nuevo.",
+  "@loadErrorBody": {
+    "description": "Explicación mostrada cuando el proyecto no se carga."
+  },
+  "retryAction": "Reintentar",
+  "@retryAction": {
+    "description": "Botón que reintenta una carga fallida."
+  },
+  "failureSplitOutsideClip": "Mueve el cabezal dentro del clip, lejos de sus bordes, para dividirlo.",
+  "@failureSplitOutsideClip": {
+    "description": "Mensaje cuando se intenta dividir en el borde o fuera del clip."
+  },
+  "failureInvalidTrim": "Ese recorte dejaría el clip sin duración. Se mantuvieron los puntos anteriores.",
+  "@failureInvalidTrim": {
+    "description": "Mensaje cuando un recorte produciría una duración cero o negativa."
+  },
+  "failureOverlap": "Esa posición se solapa con otro clip de esta capa. Elige un hueco libre.",
+  "@failureOverlap": {
+    "description": "Mensaje cuando un movimiento solaparía otro clip de la misma capa."
+  },
+  "failureNotReversible": "Los clips de audio aún no se pueden invertir.",
+  "@failureNotReversible": {
+    "description": "Mensaje cuando se pide invertir un clip de audio."
+  },
+  "failureInvalidVolume": "El volumen debe estar entre 0 y 100 %.",
+  "@failureInvalidVolume": {
+    "description": "Mensaje cuando un valor de volumen está fuera de rango."
+  },
+  "failureInvalidAdjustment": "Ese valor de ajuste está fuera de rango.",
+  "@failureInvalidAdjustment": {
+    "description": "Mensaje cuando un valor de ajuste está fuera de rango."
+  },
+  "failureFilterNotSupported": "Los filtros solo se aplican a clips de vídeo e imagen.",
+  "@failureFilterNotSupported": {
+    "description": "Mensaje cuando se pone un filtro a un clip de audio."
+  },
+  "failureClipNotFound": "Ese clip ya no existe. Selecciona otro clip.",
+  "@failureClipNotFound": {
+    "description": "Mensaje cuando no se encuentra el clip objetivo en el proyecto."
+  },
+  "failureGeneric": "Algo salió mal y el proyecto no cambió. Inténtalo de nuevo.",
+  "@failureGeneric": {
+    "description": "Mensaje de respaldo para un fallo de edición desconocido."
+  }
+}

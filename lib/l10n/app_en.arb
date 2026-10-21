@@ -1,691 +1,241 @@
 {
   "@@locale": "en",
-  "appTitle": "Field Visits",
-  "@appTitle": {
-    "description": "The application's display name, shown in the app title and on the home placeholder."
-  },
-  "editorTitle": "Cutter",
+  "editorTitle": "Editor",
   "@editorTitle": {
-    "description": "Title of the editor screen and the app title."
+    "description": "App bar title of the editor screen."
   },
-  "layerVideo": "Video",
-  "@layerVideo": {
-    "description": "Name of a video layer kind."
+  "emptyTitle": "No layers yet",
+  "@emptyTitle": {
+    "description": "Title of the empty state shown when the project has no layers."
   },
-  "layerImage": "Image",
-  "@layerImage": {
-    "description": "Name of an image layer kind."
+  "emptyBody": "Add a video, image or audio layer to start editing.",
+  "@emptyBody": {
+    "description": "One-sentence explanation in the empty state of the editor."
   },
-  "layerAudio": "Audio",
-  "@layerAudio": {
-    "description": "Name of an audio layer kind."
+  "previewPlaceholder": "Preview",
+  "@previewPlaceholder": {
+    "description": "Label of the preview canvas placeholder until the media engine is available."
   },
-  "actionPlay": "Play",
-  "@actionPlay": {
-    "description": "Label of the play button in the transport bar."
-  },
-  "actionPause": "Pause",
-  "@actionPause": {
-    "description": "Label of the play button while playing."
-  },
-  "actionSplit": "Split",
-  "@actionSplit": {
-    "description": "Toolbar action that splits the selected clip at the playhead."
-  },
-  "actionReverse": "Reverse",
-  "@actionReverse": {
-    "description": "Toolbar action that reverses the selected clip."
-  },
-  "actionAddMedia": "Add media",
-  "@actionAddMedia": {
-    "description": "Toolbar action that opens the media picker."
-  },
-  "actionRecord": "Record",
-  "@actionRecord": {
-    "description": "Toolbar action that opens the record sheet."
-  },
-  "actionFilters": "Filters",
-  "@actionFilters": {
-    "description": "Toolbar action that opens the filters sheet."
-  },
-  "actionPresets": "Presets",
-  "@actionPresets": {
-    "description": "Toolbar action that opens the presets sheet."
-  },
-  "actionTemplates": "Templates",
-  "@actionTemplates": {
-    "description": "Toolbar action that opens the templates page."
-  },
-  "actionInspector": "Clip settings",
-  "@actionInspector": {
-    "description": "Toolbar action that opens the clip inspector."
-  },
-  "actionClose": "Close",
-  "@actionClose": {
-    "description": "Accessible name of a close button."
-  },
-  "actionCancel": "Cancel",
-  "@actionCancel": {
-    "description": "Button that dismisses a sheet or page without changes."
-  },
-  "toolbarLabel": "Editing tools",
-  "@toolbarLabel": {
-    "description": "Accessible name of the editing toolbar."
-  },
-  "timeLabel": "{position} / {total}",
+  "timeLabel": "{time}",
   "@timeLabel": {
-    "description": "Playhead position and total project duration, already formatted as m:ss.t.",
+    "description": "Playhead time shown above the timeline, formatted as mm:ss.mmm.",
     "placeholders": {
-      "position": {
-        "type": "String"
-      },
-      "total": {
-        "type": "String"
+      "time": {
+        "type": "String",
+        "example": "00:01.250"
       }
     }
   },
-  "playheadSliderLabel": "Playhead position",
-  "@playheadSliderLabel": {
-    "description": "Accessible name of the playhead slider."
+  "playheadStepBackAction": "Step playhead back",
+  "@playheadStepBackAction": {
+    "description": "Accessible name of the button that moves the playhead earlier."
   },
-  "previewLabel": "Preview",
-  "@previewLabel": {
-    "description": "Accessible name of the preview canvas."
-  },
-  "previewEmpty": "No clip at the playhead",
-  "@previewEmpty": {
-    "description": "Shown in the preview when no clip is under the playhead."
-  },
-  "previewFilter": "Filter: {name}",
-  "@previewFilter": {
-    "description": "Label in the preview naming the filter applied to the clip.",
-    "placeholders": {
-      "name": {
-        "type": "String"
-      }
-    }
-  },
-  "previewReversed": "Reversed",
-  "@previewReversed": {
-    "description": "Indicator in the preview that the clip plays in reverse."
+  "playheadStepForwardAction": "Step playhead forward",
+  "@playheadStepForwardAction": {
+    "description": "Accessible name of the button that moves the playhead later."
   },
   "timelineLabel": "Timeline",
   "@timelineLabel": {
-    "description": "Accessible name of the timeline."
+    "description": "Accessible name of the timeline region."
   },
-  "layerMute": "Mute {name}",
-  "@layerMute": {
-    "description": "Accessible name of the button that mutes a layer.",
+  "rulerLabel": "Timeline ruler. Tap to move the playhead.",
+  "@rulerLabel": {
+    "description": "Accessible name of the timeline ruler that seeks on tap."
+  },
+  "layerKindVideo": "Video",
+  "@layerKindVideo": {
+    "description": "Name of a video layer."
+  },
+  "layerKindImage": "Image",
+  "@layerKindImage": {
+    "description": "Name of an image layer."
+  },
+  "layerKindAudio": "Audio",
+  "@layerKindAudio": {
+    "description": "Name of an audio layer."
+  },
+  "layerLabel": "Layer {index}: {kind}",
+  "@layerLabel": {
+    "description": "Label of a timeline row.",
     "placeholders": {
-      "name": {
-        "type": "String"
-      }
-    }
-  },
-  "layerUnmute": "Unmute {name}",
-  "@layerUnmute": {
-    "description": "Accessible name of the button that unmutes a layer.",
-    "placeholders": {
-      "name": {
-        "type": "String"
-      }
-    }
-  },
-  "layerReorder": "Reorder {name}",
-  "@layerReorder": {
-    "description": "Accessible name of the drag handle that reorders a layer.",
-    "placeholders": {
-      "name": {
-        "type": "String"
-      }
-    }
-  },
-  "layerVolumeLabel": "Volume of {name}",
-  "@layerVolumeLabel": {
-    "description": "Accessible name of a layer volume slider.",
-    "placeholders": {
-      "name": {
-        "type": "String"
-      }
-    }
-  },
-  "clipSemantics": "{name}, {layer} layer, starts at {start}, lasts {duration}",
-  "@clipSemantics": {
-    "description": "Spoken description of a clip on the timeline.",
-    "placeholders": {
-      "name": {
-        "type": "String"
-      },
-      "layer": {
-        "type": "String"
-      },
-      "start": {
-        "type": "String"
-      },
-      "duration": {
-        "type": "String"
-      }
-    }
-  },
-  "clipSelected": "Selected",
-  "@clipSelected": {
-    "description": "Spoken state of a selected clip."
-  },
-  "clipTrimStart": "Trim start of {name}",
-  "@clipTrimStart": {
-    "description": "Accessible name of the handle that trims the start of a clip.",
-    "placeholders": {
-      "name": {
-        "type": "String"
-      }
-    }
-  },
-  "clipTrimEnd": "Trim end of {name}",
-  "@clipTrimEnd": {
-    "description": "Accessible name of the handle that trims the end of a clip.",
-    "placeholders": {
-      "name": {
-        "type": "String"
-      }
-    }
-  },
-  "clipReversedBadge": "Reversed",
-  "@clipReversedBadge": {
-    "description": "Accessible name of the reverse badge on a clip."
-  },
-  "clipVolumeBadge": "Volume {percent}%",
-  "@clipVolumeBadge": {
-    "description": "Accessible name of the volume badge on a clip.",
-    "placeholders": {
-      "percent": {
-        "type": "int"
-      }
-    }
-  },
-  "inspectorTitle": "Clip settings",
-  "@inspectorTitle": {
-    "description": "Title of the clip inspector sheet."
-  },
-  "inspectorNoClip": "No clip selected",
-  "@inspectorNoClip": {
-    "description": "Title shown in the inspector when no clip is selected."
-  },
-  "inspectorNoClipBody": "Tap a clip on the timeline to change its settings.",
-  "@inspectorNoClipBody": {
-    "description": "Explanation shown in the inspector when no clip is selected."
-  },
-  "inspectorTrim": "Trim",
-  "@inspectorTrim": {
-    "description": "Label of the trim range slider."
-  },
-  "inspectorTrimRange": "{start} to {end}",
-  "@inspectorTrimRange": {
-    "description": "Current trim range, values already formatted as m:ss.t.",
-    "placeholders": {
-      "start": {
-        "type": "String"
-      },
-      "end": {
-        "type": "String"
-      }
-    }
-  },
-  "inspectorVolume": "Volume",
-  "@inspectorVolume": {
-    "description": "Label of the clip volume slider."
-  },
-  "inspectorBrightness": "Brightness",
-  "@inspectorBrightness": {
-    "description": "Label of the brightness adjustment slider."
-  },
-  "inspectorContrast": "Contrast",
-  "@inspectorContrast": {
-    "description": "Label of the contrast adjustment slider."
-  },
-  "inspectorSaturation": "Saturation",
-  "@inspectorSaturation": {
-    "description": "Label of the saturation adjustment slider."
-  },
-  "percentValue": "{percent}%",
-  "@percentValue": {
-    "description": "A percentage value next to a slider.",
-    "placeholders": {
-      "percent": {
-        "type": "int"
-      }
-    }
-  },
-  "outcomeSplitDone": "Clip split at the playhead.",
-  "@outcomeSplitDone": {
-    "description": "Snackbar confirming a split."
-  },
-  "outcomeNoClipSelected": "Select a clip first.",
-  "@outcomeNoClipSelected": {
-    "description": "Snackbar when an action needs a selected clip."
-  },
-  "outcomePlayheadOutsideClip": "Move the playhead inside the selected clip to split it.",
-  "@outcomePlayheadOutsideClip": {
-    "description": "Snackbar when a split is attempted outside the clip."
-  },
-  "outcomeZeroDuration": "A clip must stay at least 0.1 seconds long. The previous trim was restored.",
-  "@outcomeZeroDuration": {
-    "description": "Snackbar when a trim would make the clip too short."
-  },
-  "outcomeOverlap": "That spot is taken by another clip. Drop it in a free space.",
-  "@outcomeOverlap": {
-    "description": "Snackbar when a moved clip would overlap another one."
-  },
-  "outcomeWrongLayerKind": "That layer holds a different kind of media. Drop the clip on a matching layer.",
-  "@outcomeWrongLayerKind": {
-    "description": "Snackbar when a clip is dropped on a layer of another kind."
-  },
-  "outcomeUnsupportedMedia": "This file is not supported or is corrupt. Your project was not changed.",
-  "@outcomeUnsupportedMedia": {
-    "description": "Snackbar when imported media cannot be used."
-  },
-  "outcomeMediaAdded": "Media added to the timeline.",
-  "@outcomeMediaAdded": {
-    "description": "Snackbar confirming an import."
-  },
-  "mediaPickerTitle": "Choose media",
-  "@mediaPickerTitle": {
-    "description": "Title of the media picker page."
-  },
-  "mediaKindVideo": "Video",
-  "@mediaKindVideo": {
-    "description": "Media type label for video items."
-  },
-  "mediaKindImage": "Image",
-  "@mediaKindImage": {
-    "description": "Media type label for image items."
-  },
-  "mediaKindAudio": "Audio",
-  "@mediaKindAudio": {
-    "description": "Media type label for audio items."
-  },
-  "mediaItemSemantics": "{name}, {kind}, {duration}",
-  "@mediaItemSemantics": {
-    "description": "Spoken description of a media item in the picker.",
-    "placeholders": {
-      "name": {
-        "type": "String"
+      "index": {
+        "type": "int",
+        "example": "1"
       },
       "kind": {
-        "type": "String"
+        "type": "String",
+        "example": "Video"
+      }
+    }
+  },
+  "clipSemanticsLabel": "Clip on {layer}, starts at {start}, lasts {duration}",
+  "@clipSemanticsLabel": {
+    "description": "Screen reader label of a clip block in the timeline.",
+    "placeholders": {
+      "layer": {
+        "type": "String",
+        "example": "Layer 1: Video"
+      },
+      "start": {
+        "type": "String",
+        "example": "00:02.000"
       },
       "duration": {
-        "type": "String"
+        "type": "String",
+        "example": "00:05.500"
       }
     }
   },
-  "mediaPickerEmpty": "No media of this type",
-  "@mediaPickerEmpty": {
-    "description": "Title shown when the picker has nothing to list."
+  "clipReversedIcon": "Reversed",
+  "@clipReversedIcon": {
+    "description": "Accessible name of the reverse icon shown on a reversed clip block."
   },
-  "recordTitle": "Record",
-  "@recordTitle": {
-    "description": "Title of the record sheet."
+  "clipMutedIcon": "Muted",
+  "@clipMutedIcon": {
+    "description": "Accessible name of the muted icon shown on a clip with volume at zero."
   },
-  "recordMicrophone": "Microphone",
-  "@recordMicrophone": {
-    "description": "Option to record audio from the microphone."
+  "selectClipHint": "Select a clip",
+  "@selectClipHint": {
+    "description": "Hint shown in the inspector when no clip is selected."
   },
-  "recordCamera": "Camera",
-  "@recordCamera": {
-    "description": "Option to record video from the camera."
+  "inspectorTitle": "Clip",
+  "@inspectorTitle": {
+    "description": "Heading of the clip inspector."
   },
-  "recordStart": "Start recording",
-  "@recordStart": {
-    "description": "Button that starts a recording."
+  "splitAction": "Split",
+  "@splitAction": {
+    "description": "Button that splits the selected clip at the playhead."
   },
-  "recordStop": "Stop recording",
-  "@recordStop": {
-    "description": "Button that stops a recording and adds the clip."
+  "moveEarlierAction": "Move earlier",
+  "@moveEarlierAction": {
+    "description": "Button that moves the selected clip earlier in time."
   },
-  "recordElapsed": "Recording {time}",
-  "@recordElapsed": {
-    "description": "Elapsed recording time, already formatted as m:ss.t.",
+  "moveLaterAction": "Move later",
+  "@moveLaterAction": {
+    "description": "Button that moves the selected clip later in time."
+  },
+  "reverseLabel": "Reverse",
+  "@reverseLabel": {
+    "description": "Label of the switch that reverses clip playback."
+  },
+  "volumeLabel": "Volume {percent}%",
+  "@volumeLabel": {
+    "description": "Label of the volume slider with the current value.",
     "placeholders": {
-      "time": {
-        "type": "String"
+      "percent": {
+        "type": "int",
+        "example": "80"
       }
     }
   },
-  "recordStartsAt": "The clip will start at {time}.",
-  "@recordStartsAt": {
-    "description": "Explains where the recorded clip lands on the timeline.",
-    "placeholders": {
-      "time": {
-        "type": "String"
-      }
-    }
+  "muteAction": "Mute",
+  "@muteAction": {
+    "description": "Button that sets the clip volume to zero."
   },
-  "recordAdded": "Recording added to the timeline.",
-  "@recordAdded": {
-    "description": "Snackbar or message confirming a recording was added."
-  },
-  "recordCameraDeniedTitle": "Camera access is off",
-  "@recordCameraDeniedTitle": {
-    "description": "Title shown when the camera permission is denied."
-  },
-  "recordCameraDeniedBody": "Allow camera access in your device settings to record video. You can keep editing meanwhile.",
-  "@recordCameraDeniedBody": {
-    "description": "Explains how to grant the camera permission."
-  },
-  "recordMicrophoneDeniedBody": "Allow microphone access in your device settings to record audio.",
-  "@recordMicrophoneDeniedBody": {
-    "description": "Explains how to grant the microphone permission."
-  },
-  "filtersTitle": "Filters",
-  "@filtersTitle": {
-    "description": "Title of the filters sheet."
+  "filtersLabel": "Filters",
+  "@filtersLabel": {
+    "description": "Heading of the filter chips group."
   },
   "filterNone": "None",
   "@filterNone": {
-    "description": "Option that removes the filter from the clip."
+    "description": "Chip that removes the filter from the clip."
   },
-  "filtersNoClip": "Select a clip to choose a filter.",
-  "@filtersNoClip": {
-    "description": "Explanation in the filters sheet when no clip is selected."
+  "filterMono": "Mono",
+  "@filterMono": {
+    "description": "Name of the black and white filter."
   },
-  "filterSelectedSemantics": "{name}, selected",
-  "@filterSelectedSemantics": {
-    "description": "Spoken description of the selected filter chip.",
+  "filterWarm": "Warm",
+  "@filterWarm": {
+    "description": "Name of the warm color filter."
+  },
+  "filterCool": "Cool",
+  "@filterCool": {
+    "description": "Name of the cool color filter."
+  },
+  "filterVintage": "Vintage",
+  "@filterVintage": {
+    "description": "Name of the vintage filter."
+  },
+  "adjustmentsLabel": "Adjustments",
+  "@adjustmentsLabel": {
+    "description": "Heading of the adjustment sliders group."
+  },
+  "brightnessLabel": "Brightness {value}",
+  "@brightnessLabel": {
+    "description": "Label of the brightness slider with its current value.",
     "placeholders": {
-      "name": {
-        "type": "String"
+      "value": {
+        "type": "String",
+        "example": "0.25"
       }
     }
   },
-  "presetsTitle": "Presets",
-  "@presetsTitle": {
-    "description": "Title of the presets sheet."
-  },
-  "presetNameLabel": "Preset name",
-  "@presetNameLabel": {
-    "description": "Label of the preset name field."
-  },
-  "presetSave": "Save preset",
-  "@presetSave": {
-    "description": "Button that saves the selected clip settings as a preset."
-  },
-  "presetApply": "Apply",
-  "@presetApply": {
-    "description": "Button that applies a preset to the selected clip."
-  },
-  "presetApplyNamed": "Apply {name}",
-  "@presetApplyNamed": {
-    "description": "Accessible name of the apply button of a preset.",
+  "contrastLabel": "Contrast {value}",
+  "@contrastLabel": {
+    "description": "Label of the contrast slider with its current value.",
     "placeholders": {
-      "name": {
-        "type": "String"
+      "value": {
+        "type": "String",
+        "example": "0.25"
       }
     }
   },
-  "presetsEmptyTitle": "No presets yet",
-  "@presetsEmptyTitle": {
-    "description": "Title of the empty presets list."
-  },
-  "presetsEmptyBody": "Save a clip's look once and reuse it on other clips.",
-  "@presetsEmptyBody": {
-    "description": "Sentence explaining the benefit of presets."
-  },
-  "presetsNeedClip": "Select a clip to save its settings as a preset.",
-  "@presetsNeedClip": {
-    "description": "Explanation when saving a preset without a selected clip."
-  },
-  "presetNameRequired": "Enter a name for the preset.",
-  "@presetNameRequired": {
-    "description": "Error under the preset name field when it is empty."
-  },
-  "presetSaved": "Preset saved.",
-  "@presetSaved": {
-    "description": "Confirmation after saving a preset."
-  },
-  "presetApplied": "Preset applied.",
-  "@presetApplied": {
-    "description": "Confirmation after applying a preset."
-  },
-  "filtersSelectClip": "Select a clip to choose a filter.",
-  "@filtersSelectClip": {
-    "description": "Explanation in the filters sheet when no clip is selected."
-  },
-  "presetsSelectClipHint": "Select a clip to save or apply a preset.",
-  "@presetsSelectClipHint": {
-    "description": "Hint in the presets sheet when no clip is selected."
-  },
-  "presetSavedMessage": "Preset \"{name}\" saved.",
-  "@presetSavedMessage": {
-    "description": "Confirmation naming the preset that was just saved.",
+  "saturationLabel": "Saturation {value}",
+  "@saturationLabel": {
+    "description": "Label of the saturation slider with its current value.",
     "placeholders": {
-      "name": {
-        "type": "String"
+      "value": {
+        "type": "String",
+        "example": "0.25"
       }
     }
   },
-  "presetAppliedMessage": "Preset \"{name}\" applied.",
-  "@presetAppliedMessage": {
-    "description": "Confirmation naming the preset that was just applied.",
-    "placeholders": {
-      "name": {
-        "type": "String"
-      }
-    }
+  "loadErrorTitle": "Could not open the project",
+  "@loadErrorTitle": {
+    "description": "Title shown when the project fails to load from the local database."
   },
-  "presetSaveAction": "Save preset",
-  "@presetSaveAction": {
-    "description": "Button that saves the selected clip settings as a preset."
+  "loadErrorBody": "Your data is still on the device. Try again.",
+  "@loadErrorBody": {
+    "description": "Explanation shown when the project fails to load."
   },
-  "presetApplyAction": "Apply",
-  "@presetApplyAction": {
-    "description": "Button that applies a preset to the selected clip."
+  "retryAction": "Try again",
+  "@retryAction": {
+    "description": "Button that retries a failed load."
   },
-  "presetApplySemantics": "Apply preset {name}",
-  "@presetApplySemantics": {
-    "description": "Accessible name of the apply button of a preset.",
-    "placeholders": {
-      "name": {
-        "type": "String"
-      }
-    }
+  "failureSplitOutsideClip": "Move the playhead inside the clip, away from its edges, to split it.",
+  "@failureSplitOutsideClip": {
+    "description": "Message when a split is attempted at or outside the clip bounds."
   },
-  "templatesTitle": "Templates",
-  "@templatesTitle": {
-    "description": "Title of the templates page."
+  "failureInvalidTrim": "That trim would leave the clip with no duration. The previous points were kept.",
+  "@failureInvalidTrim": {
+    "description": "Message when a trim would produce zero or negative duration."
   },
-  "templateSlotsCount": "{count, plural, =1{1 media slot} other{{count} media slots}}",
-  "@templateSlotsCount": {
-    "description": "Number of media slots a template expects.",
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
+  "failureOverlap": "That position overlaps another clip on this layer. Choose a free spot.",
+  "@failureOverlap": {
+    "description": "Message when a move would overlap another clip on the same layer."
   },
-  "templateSlotVideo": "Video slot",
-  "@templateSlotVideo": {
-    "description": "Label of a template slot that expects video."
+  "failureNotReversible": "Audio clips cannot be reversed yet.",
+  "@failureNotReversible": {
+    "description": "Message when reverse is requested on an audio clip."
   },
-  "templateSlotImage": "Image slot",
-  "@templateSlotImage": {
-    "description": "Label of a template slot that expects an image."
+  "failureInvalidVolume": "Volume must be between 0 and 100%.",
+  "@failureInvalidVolume": {
+    "description": "Message when a volume value is out of range."
   },
-  "templateSlotAudio": "Audio slot",
-  "@templateSlotAudio": {
-    "description": "Label of a template slot that expects audio."
+  "failureInvalidAdjustment": "That adjustment value is out of range.",
+  "@failureInvalidAdjustment": {
+    "description": "Message when an adjustment value is out of range."
   },
-  "templateSlotChoose": "Choose media",
-  "@templateSlotChoose": {
-    "description": "Action on an empty template slot."
+  "failureFilterNotSupported": "Filters apply only to video and image clips.",
+  "@failureFilterNotSupported": {
+    "description": "Message when a filter is set on an audio clip."
   },
-  "templateSlotFilled": "{name} chosen",
-  "@templateSlotFilled": {
-    "description": "Shows the media chosen for a template slot.",
-    "placeholders": {
-      "name": {
-        "type": "String"
-      }
-    }
+  "failureClipNotFound": "That clip no longer exists. Select another clip.",
+  "@failureClipNotFound": {
+    "description": "Message when the targeted clip cannot be found in the project."
   },
-  "templateMissing": "{count, plural, =1{Choose media for 1 more slot} other{Choose media for {count} more slots}}",
-  "@templateMissing": {
-    "description": "States how many template slots still need media.",
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "templateCreate": "Create project",
-  "@templateCreate": {
-    "description": "Button that creates a project from the template."
-  },
-  "templateSelectPrompt": "Pick a template to start a new project.",
-  "@templateSelectPrompt": {
-    "description": "Prompt above the list of templates."
-  },
-  "templateCreated": "Project created from the template.",
-  "@templateCreated": {
-    "description": "Snackbar confirming a project was created from a template."
-  },
-  "recordTooShort": "Recording too short. Hold it for at least a moment and try again.",
-  "@recordTooShort": {
-    "description": "Message shown when a recording is too short to become a clip."
-  },
-  "recordPermissionDeniedTitle": "Permission needed",
-  "@recordPermissionDeniedTitle": {
-    "description": "Title shown when a recording permission is denied."
-  },
-  "recordPermissionDeniedBody": "Allow access in the system settings to record. The editor stays usable without it.",
-  "@recordPermissionDeniedBody": {
-    "description": "Explains how to grant a denied recording permission."
-  },
-  "templateSlotsHeading": "Media slots",
-  "@templateSlotsHeading": {
-    "description": "Heading above the media slots of the chosen template."
-  },
-  "templateSlotReplace": "Replace",
-  "@templateSlotReplace": {
-    "description": "Action on a filled template slot that picks different media."
-  },
-  "templateSlotUnsupported": "{name} cannot be used. Choose another file.",
-  "@templateSlotUnsupported": {
-    "description": "Message when the media chosen for a template slot is unsupported.",
-    "placeholders": {
-      "name": {
-        "type": "String"
-      }
-    }
-  },
-  "templateMissingSlots": "{count, plural, =1{Choose media for 1 more slot} other{Choose media for {count} more slots}}",
-  "@templateMissingSlots": {
-    "description": "States how many template slots still need media.",
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "templateCreateProject": "Create project",
-  "@templateCreateProject": {
-    "description": "Button that creates a project from the template."
-  },
-  "permissionMicrophone": "Microphone access",
-  "@permissionMicrophone": {
-    "description": "Name of the microphone permission."
-  },
-  "permissionCamera": "Camera access",
-  "@permissionCamera": {
-    "description": "Name of the camera permission."
-  },
-  "inspectorTrimValue": "{start} to {end}",
-  "@inspectorTrimValue": {
-    "description": "Current trim range of the selected clip, values already formatted as m:ss.t.",
-    "placeholders": {
-      "start": {
-        "type": "String"
-      },
-      "end": {
-        "type": "String"
-      }
-    }
-  },
-  "inspectorTrimRejected": "A clip must stay at least 0.1 seconds long. The previous trim was restored.",
-  "@inspectorTrimRejected": {
-    "description": "Message shown when a trim is rejected because the clip would be too short."
-  },
-  "inspectorPercent": "{percent}%",
-  "@inspectorPercent": {
-    "description": "A percentage value shown next to an inspector slider.",
-    "placeholders": {
-      "percent": {
-        "type": "int"
-      }
-    }
-  },
-  "trimStartHandle": "Trim start",
-  "@trimStartHandle": {
-    "description": "Accessible name of the handle that trims the start of a clip."
-  },
-  "trimEndHandle": "Trim end",
-  "@trimEndHandle": {
-    "description": "Accessible name of the handle that trims the end of a clip."
-  },
-  "dragLayerHandle": "Drag to reorder {name}",
-  "@dragLayerHandle": {
-    "description": "Accessible name of the drag handle that reorders a layer.",
-    "placeholders": {
-      "name": {
-        "type": "String"
-      }
-    }
-  },
-  "muteLayer": "Mute {name}",
-  "@muteLayer": {
-    "description": "Accessible name of the button that mutes a layer.",
-    "placeholders": {
-      "name": {
-        "type": "String"
-      }
-    }
-  },
-  "unmuteLayer": "Unmute {name}",
-  "@unmuteLayer": {
-    "description": "Accessible name of the button that unmutes a layer.",
-    "placeholders": {
-      "name": {
-        "type": "String"
-      }
-    }
-  },
-  "clipSemanticLabel": "{name}, {layer}, starts at {start} seconds, lasts {duration} seconds",
-  "@clipSemanticLabel": {
-    "description": "Spoken description of a clip on the timeline.",
-    "placeholders": {
-      "name": {
-        "type": "String"
-      },
-      "layer": {
-        "type": "String"
-      },
-      "start": {
-        "type": "String"
-      },
-      "duration": {
-        "type": "String"
-      }
-    }
-  },
-  "adjustBrightness": "Brightness",
-  "@adjustBrightness": {
-    "description": "Label of the brightness adjustment slider."
-  },
-  "adjustContrast": "Contrast",
-  "@adjustContrast": {
-    "description": "Label of the contrast adjustment slider."
-  },
-  "adjustSaturation": "Saturation",
-  "@adjustSaturation": {
-    "description": "Label of the saturation adjustment slider."
+  "failureGeneric": "Something went wrong and the project was not changed. Try again.",
+  "@failureGeneric": {
+    "description": "Fallback message for an unknown editing failure."
   }
 }
