@@ -2194,5 +2194,117 @@
         "example": "1 s"
       }
     }
+  },
+  "musicPackPause": "Pause",
+  "@musicPackPause": {
+    "description": "Tooltip of the button that pauses a music pack download."
+  },
+  "musicPackResume": "Resume",
+  "@musicPackResume": {
+    "description": "Tooltip of the button that resumes a paused music pack download."
+  },
+  "musicPackCancel": "Cancel download",
+  "@musicPackCancel": {
+    "description": "Tooltip of the button that cancels a music pack download and discards what was fetched."
+  },
+  "musicPackPaused": "Paused {percent}%",
+  "@musicPackPaused": {
+    "description": "Status of a music pack download that was paused.",
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      }
+    }
+  },
+  "musicPackPausedUnknown": "Paused",
+  "@musicPackPausedUnknown": {
+    "description": "Status of a paused music pack download whose progress is unknown."
+  },
+  "musicDownloadsContinue": "You can leave this screen: downloads keep going.",
+  "@musicDownloadsContinue": {
+    "description": "Reminder under the title of the music library while a pack downloads."
+  },
+  "settingsSectionMusic": "Music library",
+  "@settingsSectionMusic": {
+    "description": "Name of the settings section with the downloaded music packs."
+  },
+  "settingsSectionMusicHelp": "Downloaded packs and the space they take.",
+  "@settingsSectionMusicHelp": {
+    "description": "One line on what the music settings section holds."
+  },
+  "settingsMusicUsed": "Space used by music",
+  "@settingsMusicUsed": {
+    "description": "Title of the row that shows how much storage the music packs take."
+  },
+  "settingsMusicUsedValue": "{size} · {count, plural, =0{no packs} =1{1 pack} other{{count} packs}}",
+  "@settingsMusicUsedValue": {
+    "description": "Storage taken by music and the number of packs downloaded.",
+    "placeholders": {
+      "size": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "settingsMusicBrowse": "Browse packs",
+  "@settingsMusicBrowse": {
+    "description": "Row that opens the music library to download more packs."
+  },
+  "settingsMusicBrowseHelp": "Download more genres for your videos.",
+  "@settingsMusicBrowseHelp": {
+    "description": "Help under the row that opens the music library."
+  },
+  "settingsMusicNone": "No packs downloaded yet.",
+  "@settingsMusicNone": {
+    "description": "Shown in settings when no music pack is on the device."
+  },
+  "settingsMusicPacksTitle": "Downloaded packs",
+  "@settingsMusicPacksTitle": {
+    "description": "Heading above the list of music packs on the device."
+  },
+  "settingsMusicPackSummary": "{count, plural, =1{1 track} other{{count} tracks}} · {size}",
+  "@settingsMusicPackSummary": {
+    "description": "Tracks and storage of one downloaded music pack.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsMusicRemoveAll": "Remove all packs",
+  "@settingsMusicRemoveAll": {
+    "description": "Row that deletes every downloaded music pack."
+  },
+  "settingsMusicRemoveAllHelp": "Frees {size}. You can download them again.",
+  "@settingsMusicRemoveAllHelp": {
+    "description": "Help under the row that deletes every music pack.",
+    "placeholders": {
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsMusicRemoveTitle": "Remove {name}?",
+  "@settingsMusicRemoveTitle": {
+    "description": "Title of the dialog that confirms deleting a music pack.",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsMusicRemoveBody": "This frees {size}. You can download it again.",
+  "@settingsMusicRemoveBody": {
+    "description": "Body of the dialog that confirms deleting a music pack.",
+    "placeholders": {
+      "size": {
+        "type": "String"
+      }
+    }
   }
 }

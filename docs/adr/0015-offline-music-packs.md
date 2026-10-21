@@ -21,6 +21,15 @@ installer is not an option (the FreePD originals alone average 5 MB a track).
   `installed.json` is written last and marks a complete install), so no schema
   change and no outbox entry are involved. Packs are device data, not
   project data, and are never synced.
+- A download can be paused, resumed and cancelled. Pausing keeps the partial
+  zip under `.tmp/`; resuming sends a `Range` request and appends (a server
+  that answers 200 restarts the file). Cancel throws the partial away. A cut
+  connection also keeps it, so Retry goes on. Partials found at start show as
+  paused. The controller lives as long as the app, so a download goes on when
+  the screen is left; it does not survive the OS killing the app (that needs a
+  background-transfer package, not added).
+- Settings has a Music library section: space used, each installed pack with
+  its size and a delete, and remove-all, each behind a confirmation.
 - A zip is data from the network: the app refuses entries that are not
   sounds or `pack.json`, any path leaving the folder, and a zip whose size
   differs from the catalog's. A failed install leaves no files and keeps an
@@ -46,6 +55,8 @@ installer is not an option (the FreePD originals alone average 5 MB a track).
 - Licence checking is the owner's job: `sources.json` records each source's
   licence, the app shows it and any required credit, but only the owner can
   confirm a source's terms. FreePD's CC0 claim rests on its own statement.
+- Downloads stop if the OS kills the app in the background; they resume
+  from the partial file the next time.
 - No in-app preview of a track before it is placed; that needs the engine's
   audio playback outside a timeline and is left for later.
 - The archive.org download from the FreePD copy was not run from the

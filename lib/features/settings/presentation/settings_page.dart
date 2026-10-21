@@ -3,6 +3,7 @@ import 'package:cutter/features/settings/presentation/app_info_providers.dart';
 import 'package:cutter/features/settings/presentation/sections/about_section.dart';
 import 'package:cutter/features/settings/presentation/sections/appearance_section.dart';
 import 'package:cutter/features/settings/presentation/sections/export_section.dart';
+import 'package:cutter/features/settings/presentation/sections/music_section.dart';
 import 'package:cutter/features/settings/presentation/sections/permissions_section.dart';
 import 'package:cutter/features/settings/presentation/sections/share_section.dart';
 import 'package:cutter/features/settings/presentation/settings_widgets.dart';
@@ -27,6 +28,9 @@ enum SettingsSection {
   /// What shows after an export, and where to share.
   share(Icons.share_outlined),
 
+  /// The downloaded music packs and the space they take.
+  music(Icons.library_music_outlined),
+
   /// What the app may access.
   permissions(Icons.shield_outlined),
 
@@ -47,6 +51,8 @@ enum SettingsSection {
         return l10n.settingsSectionExport;
       case SettingsSection.share:
         return l10n.settingsSectionShare;
+      case SettingsSection.music:
+        return l10n.settingsSectionMusic;
       case SettingsSection.permissions:
         return l10n.settingsSectionPermissions;
       case SettingsSection.about:
@@ -63,6 +69,8 @@ enum SettingsSection {
         return l10n.settingsSectionExportHelp;
       case SettingsSection.share:
         return l10n.settingsSectionShareHelp;
+      case SettingsSection.music:
+        return l10n.settingsSectionMusicHelp;
       case SettingsSection.permissions:
         return l10n.settingsSectionPermissionsHelp;
       case SettingsSection.about:
@@ -79,6 +87,8 @@ enum SettingsSection {
         return const ExportSection();
       case SettingsSection.share:
         return const ShareSection();
+      case SettingsSection.music:
+        return const MusicSection();
       case SettingsSection.permissions:
         return const PermissionsSection();
       case SettingsSection.about:

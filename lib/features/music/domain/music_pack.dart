@@ -170,6 +170,7 @@ class InstalledPack {
     required this.pack,
     required this.directory,
     required this.tracks,
+    this.sizeBytes = 0,
   });
 
   /// What the catalog said about it when it was installed.
@@ -180,6 +181,9 @@ class InstalledPack {
 
   /// The tracks, in the order of the pack.
   final List<MusicTrack> tracks;
+
+  /// What the pack takes on disk.
+  final int sizeBytes;
 
   /// Absolute path of [track].
   String pathOf(MusicTrack track) => '$directory/${track.file}';

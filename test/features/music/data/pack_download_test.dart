@@ -1,5 +1,7 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:archive/archive.dart';
@@ -18,11 +20,49 @@ void main() {
   late Directory root;
   late Uint8List zip;
   var failNext = false;
+  var stall = false;
+  int? rangeStart;
+  final release = Completer<void>();
+
+  Future<void> serveZip(HttpRequest request) async {
+    final response = request.response;
+    final range = request.headers.value(HttpHeaders.rangeHeader);
+    var start = 0;
+    if (range != null) {
+      start = int.parse(RegExp(r'bytes=(\d+)-').firstMatch(range)!.group(1)!);
+      rangeStart = start;
+      response
+        ..statusCode = HttpStatus.partialContent
+        ..headers.set(
+          HttpHeaders.contentRangeHeader,
+          'bytes $start-${zip.length - 1}/${zip.length}',
+        );
+    }
+    response.headers.contentLength = zip.length - start;
+    try {
+      if (stall && start == 0) {
+        final half = zip.length ~/ 2;
+        response.add(zip.sublist(0, half));
+        await response.flush();
+        await Future.any([
+          release.future,
+          Future<void>.delayed(const Duration(seconds: 10)),
+        ]);
+        response.add(zip.sublist(half));
+      } else {
+        response.add(zip.sublist(start));
+      }
+      await response.close();
+    } on Object {
+      // The client hung up (a pause); nothing to do.
+    }
+  }
 
   setUp(() async {
     // flutter_test answers every request with 400 unless this is cleared.
     HttpOverrides.global = null;
     root = Directory.systemTemp.createTempSync('music_http_');
+    final noise = Random(1);
     final archive = Archive()
       ..add(
         ArchiveFile.bytes(
@@ -36,10 +76,15 @@ void main() {
           ),
         ),
       )
-      ..add(ArchiveFile.bytes('one.mp3', List.filled(4096, 5)));
+      ..add(
+        ArchiveFile.bytes(
+          'one.mp3',
+          List.generate(200000, (_) => noise.nextInt(256)),
+        ),
+      );
     zip = Uint8List.fromList(ZipEncoder().encode(archive));
     server = await HttpServer.bind(InternetAddress.loopbackIPv4, 0);
-    server.listen((request) {
+    server.listen((HttpRequest request) {
       final path = request.uri.path;
       if (failNext) {
         failNext = false;
@@ -47,10 +92,7 @@ void main() {
           ..statusCode = HttpStatus.internalServerError
           ..close();
       } else if (path == '/demo.zip') {
-        request.response
-          ..headers.contentLength = zip.length
-          ..add(zip)
-          ..close();
+        serveZip(request);
       } else if (path == '/catalog.json') {
         request.response
           ..write(_catalog(server.port, zip.length))
@@ -81,14 +123,61 @@ void main() {
       packs.single,
       onProgress: progress.add,
       onUnpacking: () {},
+      control: TransferControl(),
     );
 
     expect(progress.last, 1.0);
     expect(installed.tracks.single.title, 'One');
     expect(
       File(installed.pathOf(installed.tracks.single)).lengthSync(),
-      4096,
+      200000,
     );
+  });
+
+  test('a download paused over HTTP resumes with a Range request', () async {
+    final json =
+        jsonDecode(_catalog(server.port, zip.length)) as Map<String, Object?>;
+    final pack = MusicPack.fromJson(
+      ((json['packs']! as List).first as Map).cast<String, Object?>(),
+    );
+    final store = FileMusicPackStore(root: root);
+    stall = true;
+    final control = TransferControl();
+
+    final first = store.install(
+      pack,
+      onProgress: (p) {
+        // The first half has arrived: pause there.
+        if (p != null && p >= 0.45) control.pause();
+      },
+      onUnpacking: () {},
+      control: control,
+    );
+    await expectLater(
+      first,
+      throwsA(
+        isA<MusicTransferStopped>().having((e) => e.paused, 'paused', true),
+      ),
+    );
+    final kept = (await store.partials())['demo']!;
+    expect(kept, greaterThan(0));
+    expect(kept, lessThan(zip.length));
+    expect(await store.installed(), isEmpty);
+
+    stall = false;
+    final progress = <double?>[];
+    final done = await store.install(
+      pack,
+      onProgress: progress.add,
+      onUnpacking: () {},
+      control: TransferControl(),
+    );
+
+    expect(rangeStart, kept);
+    expect(progress.first, closeTo(kept / zip.length, 0.01));
+    expect(File(done.pathOf(done.tracks.single)).lengthSync(), 200000);
+    expect(await store.partials(), isEmpty);
+    release.complete();
   });
 
   test('an HTTP error is a network failure and leaves nothing', () async {
@@ -101,7 +190,12 @@ void main() {
     final store = FileMusicPackStore(root: root);
 
     await expectLater(
-      store.install(pack, onProgress: (_) {}, onUnpacking: () {}),
+      store.install(
+        pack,
+        onProgress: (_) {},
+        onUnpacking: () {},
+        control: TransferControl(),
+      ),
       throwsA(
         isA<MusicInstallException>()
             .having((e) => e.failure, 'failure', MusicFailure.network),

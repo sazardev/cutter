@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:cutter/features/music/domain/music_install_state.dart';
 import 'package:cutter/features/music/domain/music_pack.dart';
 import 'package:cutter/features/music/domain/music_ports.dart';
@@ -24,27 +26,55 @@ class FakeCatalog implements MusicCatalog {
   Future<List<MusicPack>?> load() async => packs;
 }
 
-/// A store in memory; installing succeeds unless `failWith` is set.
+/// A store in memory; installing succeeds unless `failWith` is set, and
+/// waits while `gate` is open so a test can pause or cancel it.
 class FakeStore implements MusicPackStore {
   final Map<String, InstalledPack> packs = {};
+  final Map<String, int> partialBytes = {};
+  final List<String> discarded = [];
   MusicFailure? failWith;
+  Completer<void>? gate;
 
   @override
   Future<List<InstalledPack>> installed() async => packs.values.toList();
+
+  @override
+  Future<Map<String, int>> partials() async => {...partialBytes};
+
+  @override
+  Future<void> discardPartial(String id) async {
+    partialBytes.remove(id);
+    discarded.add(id);
+  }
 
   @override
   Future<InstalledPack> install(
     MusicPack pack, {
     required void Function(double? progress) onProgress,
     required void Function() onUnpacking,
+    required TransferControl control,
   }) async {
-    onProgress(0.5);
+    onProgress(partialBytes.containsKey(pack.id) ? 0.5 : 0.1);
+    final open = gate;
+    if (open != null) {
+      await Future.any([open.future, control.whenStopped]);
+      if (control.stopRequested) {
+        if (control.cancelled) {
+          partialBytes.remove(pack.id);
+        } else {
+          partialBytes[pack.id] = 1000;
+        }
+        throw MusicTransferStopped(paused: !control.cancelled);
+      }
+    }
     onUnpacking();
     final failure = failWith;
     if (failure != null) throw MusicInstallException(failure);
+    partialBytes.remove(pack.id);
     return packs[pack.id] = InstalledPack(
       pack: pack,
       directory: '/music/${pack.id}',
+      sizeBytes: 4000000,
       tracks: const [
         MusicTrack(file: 'a.mp3', title: 'Anthem', artist: 'FreePD', bpm: 120),
         MusicTrack(file: 'b.mp3', title: 'Battle'),

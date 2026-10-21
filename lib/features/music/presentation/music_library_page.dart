@@ -33,11 +33,15 @@ class MusicLibraryPage extends ConsumerWidget {
             error: (_, __) => _Unavailable(
               onRetry: () => ref.invalidate(musicLibraryProvider),
             ),
-            data: (state) => state.packs.isEmpty
-                ? _Unavailable(
-                    onRetry: () => ref.invalidate(musicLibraryProvider),
-                  )
-                : _PackList(state: state),
+            data: (state) => state.packs.isNotEmpty
+                ? _PackList(state: state)
+                : state.catalogLoading
+                    ? const Center(child: CircularProgressIndicator())
+                    : _Unavailable(
+                        onRetry: () => ref
+                            .read(musicLibraryProvider.notifier)
+                            .reloadCatalog(),
+                      ),
           ),
         ),
       ),
@@ -106,7 +110,7 @@ class _PackList extends ConsumerWidget {
           return Padding(
             padding: const EdgeInsets.only(bottom: AppSpacing.sm),
             child: Text(
-              l10n.musicLibraryHint,
+              state.busy ? l10n.musicDownloadsContinue : l10n.musicLibraryHint,
               style: theme.textTheme.bodyMedium?.copyWith(
                 color: theme.colorScheme.onSurfaceVariant,
               ),
@@ -133,26 +137,61 @@ class _PackTile extends ConsumerWidget {
     final controller = ref.read(musicLibraryProvider.notifier);
     final name = pack.nameIn(Localizations.localeOf(context).languageCode);
     final installed = packState is PackInstalled;
-    final failed = packState is PackFailed ? packState as PackFailed : null;
+    final failed = packState is PackFailed;
 
     final status = switch (packState) {
       PackAvailable() => null,
       PackDownloading(:final progress) => progress == null
           ? l10n.musicPackDownloadingUnknown
           : l10n.musicPackDownloading((progress * 100).round()),
+      PackPaused(:final progress) => progress == null
+          ? l10n.musicPackPausedUnknown
+          : l10n.musicPackPaused((progress * 100).round()),
       PackUnpacking() => l10n.musicPackUnpacking,
       PackInstalled() => l10n.musicPackOffline,
       PackFailed(:final failure) => musicFailureMessage(l10n, failure),
     };
+    final barValue = switch (packState) {
+      PackDownloading(:final progress) => progress,
+      PackPaused(:final progress) => progress,
+      _ => null,
+    };
+    final showBar = packState is PackDownloading ||
+        packState is PackPaused ||
+        packState is PackUnpacking;
+
+    Widget cancelButton() => IconButton(
+          tooltip: l10n.musicPackCancel,
+          onPressed: () => controller.cancel(pack.id),
+          icon: const Icon(Icons.close),
+        );
 
     final trailing = switch (packState) {
       PackAvailable() => FilledButton.tonal(
           onPressed: () => controller.install(pack),
           child: Text(l10n.musicPackDownload),
         ),
-      PackDownloading(:final progress) => SizedBox.square(
-          dimension: 24,
-          child: CircularProgressIndicator(value: progress, strokeWidth: 3),
+      PackDownloading() => Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            IconButton.filledTonal(
+              tooltip: l10n.musicPackPause,
+              onPressed: () => controller.pause(pack.id),
+              icon: const Icon(Icons.pause),
+            ),
+            cancelButton(),
+          ],
+        ),
+      PackPaused() => Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            IconButton.filled(
+              tooltip: l10n.musicPackResume,
+              onPressed: () => controller.install(pack),
+              icon: const Icon(Icons.play_arrow),
+            ),
+            cancelButton(),
+          ],
         ),
       PackUnpacking() => const SizedBox.square(
           dimension: 24,
@@ -182,51 +221,61 @@ class _PackTile extends ConsumerWidget {
             : null,
         child: Padding(
           padding: const EdgeInsets.all(AppSpacing.md),
-          child: Row(
+          child: Column(
             children: [
-              DecoratedBox(
-                decoration: BoxDecoration(
-                  color: theme.colorScheme.secondaryContainer,
-                  shape: BoxShape.circle,
-                ),
-                child: SizedBox.square(
-                  dimension: 48,
-                  child: Icon(
-                    genreIcon(pack.genre),
-                    color: theme.colorScheme.onSecondaryContainer,
-                  ),
-                ),
-              ),
-              const SizedBox(width: AppSpacing.md),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(name, style: theme.textTheme.titleMedium),
-                    Text(
-                      l10n.musicPackSummary(
-                        pack.trackCount,
-                        pack.bytes > 0 ? formatBytes(pack.bytes) : '–',
-                        pack.source.name,
-                      ),
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: theme.colorScheme.onSurfaceVariant,
+              Row(
+                children: [
+                  DecoratedBox(
+                    decoration: BoxDecoration(
+                      color: theme.colorScheme.secondaryContainer,
+                      shape: BoxShape.circle,
+                    ),
+                    child: SizedBox.square(
+                      dimension: 48,
+                      child: Icon(
+                        genreIcon(pack.genre),
+                        color: theme.colorScheme.onSecondaryContainer,
                       ),
                     ),
-                    if (status != null)
-                      Text(
-                        status,
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          color: failed != null
-                              ? theme.colorScheme.error
-                              : theme.colorScheme.primary,
+                  ),
+                  const SizedBox(width: AppSpacing.md),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(name, style: theme.textTheme.titleMedium),
+                        Text(
+                          l10n.musicPackSummary(
+                            pack.trackCount,
+                            pack.bytes > 0 ? formatBytes(pack.bytes) : '–',
+                            pack.source.name,
+                          ),
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: theme.colorScheme.onSurfaceVariant,
+                          ),
                         ),
-                      ),
-                  ],
-                ),
+                        if (status != null)
+                          Text(
+                            status,
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: failed
+                                  ? theme.colorScheme.error
+                                  : theme.colorScheme.primary,
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: AppSpacing.sm),
+                  trailing,
+                ],
               ),
-              const SizedBox(width: AppSpacing.sm),
-              trailing,
+              if (showBar) ...[
+                const SizedBox(height: AppSpacing.sm),
+                LinearProgressIndicator(
+                  value: packState is PackUnpacking ? null : barValue,
+                ),
+              ],
             ],
           ),
         ),

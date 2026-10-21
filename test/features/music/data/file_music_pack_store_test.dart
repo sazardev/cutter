@@ -35,7 +35,8 @@ MusicPack _pack(Uint8List zip, {String id = 'epic', int? bytes}) => MusicPack(
       trackCount: 1,
     );
 
-PackDownloader _serving(Uint8List zip) => (url, target, onProgress) async {
+PackDownloader _serving(Uint8List zip) =>
+    (url, target, onProgress, control) async {
       await target.writeAsBytes(zip);
       onProgress(zip.length, zip.length);
     };
@@ -61,6 +62,7 @@ void main() {
       _pack(good),
       onProgress: progress.add,
       onUnpacking: () => unpacking++,
+      control: TransferControl(),
     );
 
     expect(installed.tracks.single.file, 'a.mp3');
@@ -72,7 +74,7 @@ void main() {
     // A new store over the same folder, with no network at all.
     final again = await FileMusicPackStore(
       root: root,
-      download: (_, __, ___) => throw const SocketException('offline'),
+      download: (_, __, ___, ____) => throw const SocketException('offline'),
     ).installed();
     expect(again.single.pack.id, 'epic');
     expect(again.single.tracks.single.title, 'a.mp3');
@@ -83,6 +85,7 @@ void main() {
       _pack(good),
       onProgress: (_) {},
       onUnpacking: () {},
+      control: TransferControl(),
     );
     final scratch = Directory('${root.path}/.tmp');
     final left =
@@ -91,9 +94,14 @@ void main() {
   });
 
   test('a download that fails is a network failure', () async {
-    final s = store((_, __, ___) => throw const SocketException('down'));
+    final s = store((_, __, ___, ____) => throw const SocketException('down'));
     await expectLater(
-      s.install(_pack(good), onProgress: (_) {}, onUnpacking: () {}),
+      s.install(
+        _pack(good),
+        onProgress: (_) {},
+        onUnpacking: () {},
+        control: TransferControl(),
+      ),
       throwsA(
         isA<MusicInstallException>()
             .having((e) => e.failure, 'failure', MusicFailure.network),
@@ -109,6 +117,7 @@ void main() {
         _pack(good, bytes: good.length + 1),
         onProgress: (_) {},
         onUnpacking: () {},
+        control: TransferControl(),
       ),
       throwsA(
         isA<MusicInstallException>()
@@ -125,6 +134,7 @@ void main() {
         _pack(junk),
         onProgress: (_) {},
         onUnpacking: () {},
+        control: TransferControl(),
       ),
       throwsA(
         isA<MusicInstallException>()
@@ -143,6 +153,7 @@ void main() {
         _pack(zip),
         onProgress: (_) {},
         onUnpacking: () {},
+        control: TransferControl(),
       ),
       throwsA(isA<MusicInstallException>()),
     );
@@ -159,6 +170,7 @@ void main() {
         _pack(zip),
         onProgress: (_) {},
         onUnpacking: () {},
+        control: TransferControl(),
       ),
       throwsA(
         isA<MusicInstallException>()
@@ -170,10 +182,21 @@ void main() {
 
   test('a failed reinstall keeps the copy that was there', () async {
     final s = store(_serving(good));
-    await s.install(_pack(good), onProgress: (_) {}, onUnpacking: () {});
-    final broken = store((_, __, ___) => throw const SocketException('down'));
+    await s.install(
+      _pack(good),
+      onProgress: (_) {},
+      onUnpacking: () {},
+      control: TransferControl(),
+    );
+    final broken =
+        store((_, __, ___, ____) => throw const SocketException('down'));
     await expectLater(
-      broken.install(_pack(good), onProgress: (_) {}, onUnpacking: () {}),
+      broken.install(
+        _pack(good),
+        onProgress: (_) {},
+        onUnpacking: () {},
+        control: TransferControl(),
+      ),
       throwsA(isA<MusicInstallException>()),
     );
     expect((await s.installed()).single.pack.id, 'epic');
@@ -187,9 +210,127 @@ void main() {
 
   test('remove deletes the pack', () async {
     final s = store(_serving(good));
-    await s.install(_pack(good), onProgress: (_) {}, onUnpacking: () {});
+    await s.install(
+      _pack(good),
+      onProgress: (_) {},
+      onUnpacking: () {},
+      control: TransferControl(),
+    );
     await s.remove('epic');
     expect(await s.installed(), isEmpty);
+  });
+
+  group('pause, resume and cancel', () {
+    // A downloader that serves [zip] in two halves: the first call writes the
+    // first half and then stops as asked; a later call appends the rest.
+    PackDownloader halves(Uint8List zip, {void Function()? beforeStop}) {
+      return (url, target, onProgress, control) async {
+        final have = target.existsSync() ? target.lengthSync() : 0;
+        final half = zip.length ~/ 2;
+        if (have == 0) {
+          await target.writeAsBytes(zip.sublist(0, half));
+          onProgress(half, zip.length);
+          beforeStop?.call();
+          await control.whenStopped;
+          throw MusicTransferStopped(paused: !control.cancelled);
+        }
+        await target.writeAsBytes(zip.sublist(have), mode: FileMode.append);
+        onProgress(zip.length, zip.length);
+      };
+    }
+
+    test('a paused download is kept and resumed from where it stopped',
+        () async {
+      final big = _zip({
+        'pack.json': utf8.encode(_manifest(['a.mp3'])),
+        'a.mp3': List.generate(2000, (i) => (i * 37) % 251),
+      });
+      final control = TransferControl();
+      final s = store(halves(big, beforeStop: control.pause));
+
+      await expectLater(
+        s.install(
+          _pack(big),
+          onProgress: (_) {},
+          onUnpacking: () {},
+          control: control,
+        ),
+        throwsA(
+          isA<MusicTransferStopped>().having((e) => e.paused, 'paused', true),
+        ),
+      );
+      expect((await s.partials())['epic'], big.length ~/ 2);
+      expect(await s.installed(), isEmpty);
+
+      final progress = <double?>[];
+      final done = await s.install(
+        _pack(big),
+        onProgress: progress.add,
+        onUnpacking: () {},
+        control: TransferControl(),
+      );
+      expect(progress.first, closeTo(0.5, 0.01));
+      expect(done.tracks.single.file, 'a.mp3');
+      expect(await s.partials(), isEmpty);
+    });
+
+    test('a cancelled download leaves nothing', () async {
+      final control = TransferControl();
+      final s = store(halves(good, beforeStop: control.cancel));
+
+      await expectLater(
+        s.install(
+          _pack(good),
+          onProgress: (_) {},
+          onUnpacking: () {},
+          control: control,
+        ),
+        throwsA(
+          isA<MusicTransferStopped>().having((e) => e.paused, 'paused', false),
+        ),
+      );
+      expect(await s.partials(), isEmpty);
+    });
+
+    test('a connection that drops keeps what arrived', () async {
+      final s = store((url, target, onProgress, control) async {
+        await target.writeAsBytes(good.sublist(0, 10));
+        throw const SocketException('reset');
+      });
+      await expectLater(
+        s.install(
+          _pack(good),
+          onProgress: (_) {},
+          onUnpacking: () {},
+          control: TransferControl(),
+        ),
+        throwsA(isA<MusicInstallException>()),
+      );
+      expect((await s.partials())['epic'], 10);
+    });
+
+    test('discardPartial deletes what was kept', () async {
+      Directory('${root.path}/.tmp').createSync(recursive: true);
+      File('${root.path}/.tmp/epic.zip').writeAsBytesSync([1, 2, 3]);
+      final s = store(_serving(good));
+      expect((await s.partials())['epic'], 3);
+
+      await s.discardPartial('epic');
+
+      expect(await s.partials(), isEmpty);
+    });
+
+    test('the installed size counts the files on disk', () async {
+      final s = store(_serving(good));
+      final done = await s.install(
+        _pack(good),
+        onProgress: (_) {},
+        onUnpacking: () {},
+        control: TransferControl(),
+      );
+      expect(done.sizeBytes, greaterThan(3));
+      expect((await s.installed()).single.sizeBytes, done.sizeBytes);
+    });
   });
 
   group('isAllowedEntry', () {

@@ -30,6 +30,19 @@ final class PackDownloading extends PackState {
   final double? progress;
 }
 
+/// The download was paused; what was fetched is kept, and resuming goes on
+/// from there. [progress] is 0 to 1, or null when the size is unknown.
+final class PackPaused extends PackState {
+  /// Creates the state.
+  const PackPaused(this.progress, this.receivedBytes);
+
+  /// Fraction downloaded.
+  final double? progress;
+
+  /// Bytes kept on disk.
+  final int receivedBytes;
+}
+
 /// Downloaded and being unpacked.
 final class PackUnpacking extends PackState {
   /// Creates the state.

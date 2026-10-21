@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:cutter/features/music/domain/music_install_state.dart';
 import 'package:cutter/features/music/presentation/music_library_page.dart';
 import 'package:cutter/features/music/presentation/music_providers.dart';
@@ -49,6 +51,37 @@ void main() {
     expect(find.text('Anthem'), findsOneWidget);
     expect(find.textContaining('120 BPM'), findsOneWidget);
     expect(find.byTooltip('Add to timeline'), findsNWidgets(2));
+  });
+
+  testWidgets('a download can be paused, resumed and cancelled', (
+    tester,
+  ) async {
+    final store = FakeStore()..gate = Completer<void>();
+    await _pump(tester, store, [testPack()]);
+
+    await tester.tap(find.text('Download'));
+    await tester.pump();
+    await tester.pump();
+    expect(find.byTooltip('Pause'), findsOneWidget);
+    expect(find.byTooltip('Cancel download'), findsOneWidget);
+    expect(find.textContaining('keep going'), findsOneWidget);
+
+    await tester.tap(find.byTooltip('Pause'));
+    await tester.pump();
+    await tester.pump();
+    expect(find.textContaining('Paused'), findsOneWidget);
+    expect(find.byTooltip('Resume'), findsOneWidget);
+
+    await tester.tap(find.byTooltip('Cancel download'));
+    await tester.pump();
+    await tester.pump();
+    expect(find.text('Download'), findsOneWidget);
+    expect(store.discarded, ['epic']);
+
+    store.gate = null;
+    await tester.tap(find.text('Download'));
+    await tester.pumpAndSettle();
+    expect(find.text('Ready offline'), findsOneWidget);
   });
 
   testWidgets('shows why an install failed and offers a retry', (

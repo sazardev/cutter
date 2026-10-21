@@ -2098,5 +2098,24 @@
         "example": "1 s"
       }
     }
-  }
+  },
+  "musicPackPause": "Pausar",
+  "musicPackResume": "Reanudar",
+  "musicPackCancel": "Cancelar descarga",
+  "musicPackPaused": "En pausa {percent} %",
+  "musicPackPausedUnknown": "En pausa",
+  "musicDownloadsContinue": "Puedes salir de esta pantalla: las descargas continúan.",
+  "settingsSectionMusic": "Biblioteca de música",
+  "settingsSectionMusicHelp": "Packs descargados y el espacio que ocupan.",
+  "settingsMusicUsed": "Espacio usado por la música",
+  "settingsMusicUsedValue": "{size} · {count, plural, =0{sin packs} =1{1 pack} other{{count} packs}}",
+  "settingsMusicBrowse": "Explorar packs",
+  "settingsMusicBrowseHelp": "Descarga más géneros para tus videos.",
+  "settingsMusicNone": "Aún no hay packs descargados.",
+  "settingsMusicPacksTitle": "Packs descargados",
+  "settingsMusicPackSummary": "{count, plural, =1{1 pista} other{{count} pistas}} · {size}",
+  "settingsMusicRemoveAll": "Quitar todos los packs",
+  "settingsMusicRemoveAllHelp": "Libera {size}. Puedes volver a descargarlos.",
+  "settingsMusicRemoveTitle": "¿Quitar {name}?",
+  "settingsMusicRemoveBody": "Esto libera {size}. Puedes volver a descargarlo."
 }
