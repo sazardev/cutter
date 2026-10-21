@@ -1,3 +1,4 @@
+import 'package:cutter/app/brand/brand_mark.dart';
 import 'package:cutter/app/theme/app_theme.dart';
 import 'package:cutter/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
@@ -5,6 +6,7 @@ import 'package:flutter/material.dart';
 const double _contentMaxWidth = 480;
 const double _heroSize = 120;
 const double _heroIconSize = 56;
+const double _heroMarkSize = 64;
 const double _dotSize = 8;
 const int _pageCount = 3;
 
@@ -57,7 +59,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
     final l10n = AppLocalizations.of(context)!;
     final pages = [
       (
-        icon: Icons.layers_outlined,
+        icon: null,
         title: l10n.onboardingLayersTitle,
         body: l10n.onboardingLayersBody,
       ),
@@ -133,7 +135,8 @@ class _OnboardingPageState extends State<OnboardingPage> {
 class _Page extends StatelessWidget {
   const _Page({required this.icon, required this.title, required this.body});
 
-  final IconData icon;
+  /// The page's hero icon; null shows the brand mark on a primary disc.
+  final IconData? icon;
   final String title;
   final String body;
 
@@ -152,16 +155,19 @@ class _Page extends StatelessWidget {
                 width: _heroSize,
                 height: _heroSize,
                 decoration: BoxDecoration(
-                  color: scheme.tertiaryContainer,
+                  color:
+                      icon == null ? scheme.primary : scheme.tertiaryContainer,
                   shape: BoxShape.circle,
                 ),
-                child: ExcludeSemantics(
-                  child: Icon(
-                    icon,
-                    size: _heroIconSize,
-                    color: scheme.onTertiaryContainer,
-                  ),
-                ),
+                child: icon == null
+                    ? const Center(child: BrandMark(size: _heroMarkSize))
+                    : ExcludeSemantics(
+                        child: Icon(
+                          icon,
+                          size: _heroIconSize,
+                          color: scheme.onTertiaryContainer,
+                        ),
+                      ),
               ),
               const SizedBox(height: AppSpacing.lg),
               Text(

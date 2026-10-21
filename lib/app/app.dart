@@ -1,3 +1,4 @@
+import 'package:cutter/app/brand/brand_splash.dart';
 import 'package:cutter/app/theme/app_theme.dart';
 import 'package:cutter/features/home/presentation/home_page.dart';
 import 'package:cutter/features/onboarding/presentation/onboarding_page.dart';
@@ -77,9 +78,7 @@ class _Root extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final completed = ref.watch(onboardingCompletedProvider);
     return completed.when(
-      loading: () => const Scaffold(
-        body: Center(child: CircularProgressIndicator()),
-      ),
+      loading: () => const BrandSplash(),
       // An unreadable flag must not lock the user out of the app.
       error: (error, stack) => const HomePage(),
       data: (done) {

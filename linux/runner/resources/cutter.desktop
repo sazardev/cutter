@@ -1,0 +1,11 @@
+[Desktop Entry]
+Type=Application
+Name=Cutter
+GenericName=Video Editor
+Comment=Multi-layer video editor: cut, layer and mix short videos
+Exec=cutter
+Icon=cutter
+Terminal=false
+Categories=AudioVideo;Video;AudioVideoEditing;
+Keywords=video;editor;cut;layers;timeline;clips;
+StartupWMClass=com.example.cutter

@@ -38,7 +38,7 @@ Same role system and baseline as M3 (seed `#6750A4`); Expressive leans on higher
 - Use **vibrant** container colors (`*-container`, `tertiary`) on the single hero element of a screen; keep surfaces neutral.
 - Every token has a light and a dark value; the app follows `prefers-color-scheme` (or the OS setting) and offers a manual Light / Dark / System switch.
 - Dark is not inverted light: surfaces get lighter as they rise, saturated colors are toned down (lower chroma) to avoid glare.
-- Keep the preset's palette; the brand color (one hex, TODO) replaces `primary`/`accent`.
+- Keep the preset's palette; the brand color is `#6750A4` (the seed above), used by the logo and splash; see [docs/BRAND.md](docs/BRAND.md).
 - Tints and shades in OKLCH: same hue, lightness steps 98, 95, 90, 80, 70, 60, 50, 40, 30, 20, 15% with chroma reduced near the extremes; each step checked for contrast with its `on-` color.
 - Neutrals take a trace of the brand hue (chroma ≤ 0.01) so greys feel related.
 - These values replace the base palette's for the same roles; contrast pairs are checked again after the swap.
