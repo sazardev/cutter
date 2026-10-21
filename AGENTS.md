@@ -36,7 +36,7 @@ The application tree below is the target structure from STACK.md; create files w
 
 - `lib/main.dart` — opens the database, registers background sync, mounts `ProviderScope`.
 - `lib/app/` — `app.dart`, `router.dart`, `theme/`.
-- `lib/core/db/` — `app_database.dart` (`@DriftDatabase`), `migrations/` (one step per schema version), `tables/outbox_table.dart`, `tables/sync_state_table.dart`.
+- `lib/core/db/` — `app_database.dart` (`@DriftDatabase`), `migrations/` (one step per schema version, `fromNToN+1.dart`), `schema/` (the dump of each version), `tables/outbox_table.dart`, `tables/sync_state_table.dart`.
 - `lib/core/sync/` — `sync_engine.dart` (push → pull → apply, one run at a time), `push_outbox.dart`, `pull_changes.dart`, `conflict_policy.dart`, `background_sync.dart`, `sync_status.dart`.
 - `lib/core/network/api_client.dart` — dio plus interceptors.
 - `lib/features/<feature>/` — `domain/` (entity, repository interface), `data/` (drift table, DAO, local repository, sync adapter), `presentation/` (controller, page). `visits/` is the reference feature.
@@ -70,7 +70,7 @@ Dependency direction: `presentation → domain ← data`. `core/sync` reaches pe
 - Never edit generated files: `*.g.dart`, `*.freezed.dart`, `lib/l10n/app_localizations*.dart`. Change the source and regenerate.
 - `pubspec.lock` is not hand-edited; dependency updates come through Renovate. Do not add a package without asking first.
 - Never commit `data/app.db`, `-wal` or `-shm`, build outputs, or any secret, API key or signing material.
-- Never edit an applied migration. Add a new numbered step and a `fromNToN+1.dart` in `lib/core/db/migrations/`.
+- Never edit an applied migration. Add a new numbered step and a `fromNToN+1.dart` in `lib/core/db/migrations/`, and run `dart run drift_dev make-migrations` to dump the new schema and write its test.
 - Never make a feature talk to the API, or make the UI wait on the network; the UI reads the database only.
 - Never block the Flutter UI thread with decode, compose, filter or timeline-mutation work; never reimplement in Dart what belongs in the Rust engine.
 - No raw colors, no hardcoded strings, no one-off spacing values outside the 4/8dp scale.

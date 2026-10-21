@@ -4,9 +4,26 @@ import 'dart:io';
 import 'package:cutter/core/db/app_database.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-/// The schema dump drift writes, next to the database it describes.
-/// Regenerate it with `dart run drift_dev make-migrations`.
-File _schemaDump() => File('lib/core/db/schema/cutter/drift_schema_v1.json');
+/// The schema dumps drift writes, next to the database they describe.
+/// Regenerate them with `dart run drift_dev make-migrations`.
+Directory _schemaDir() => Directory('lib/core/db/schema/cutter');
+
+/// The dump of the newest schema version.
+File _schemaDump() {
+  final dumps = <int, File>{
+    for (final file in _schemaDir().listSync().whereType<File>())
+      if (_versionOf(file.path) case final version?) version: file,
+  };
+  expect(dumps, isNotEmpty, reason: 'there is no schema dump to compare with');
+
+  return dumps[dumps.keys.reduce((a, b) => a > b ? a : b)]!;
+}
+
+/// The version a schema dump file holds, or null when the name has none.
+int? _versionOf(String path) {
+  final match = RegExp(r'drift_schema_v(\d+)\.json$').firstMatch(path);
+  return match == null ? null : int.parse(match.group(1)!);
+}
 
 /// One column of the dumped schema.
 class _DumpColumn {

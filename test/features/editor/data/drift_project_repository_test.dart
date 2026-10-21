@@ -193,6 +193,42 @@ void main() {
     expect(await repository.firstProjectId(), 'older');
   });
 
+  test('a trimmed clip keeps the duration of its source', () async {
+    final project = _project(
+      layers: [
+        Layer(
+          id: 'layer-1',
+          name: '',
+          kind: MediaKind.video,
+          clips: [
+            const Clip(
+              id: 'clip-1',
+              layerId: 'layer-1',
+              assetId: 'file:///media/clip-1.mp4',
+              sourceUri: 'file:///media/clip-1.mp4',
+              kind: MediaKind.video,
+              // The source lasts ten seconds and the clip plays the part
+              // between one and three seconds of it.
+              sourceDurationMs: 10000,
+              startMs: 0,
+              inPointMs: 1000,
+              outPointMs: 3000,
+            ),
+          ],
+        ),
+      ],
+    );
+
+    await repository.save(project);
+    final loaded = await repository.find('project-1');
+
+    final clip = loaded!.layers.single.clips.single;
+    expect(clip.sourceDurationMs, 10000);
+    expect(clip.inPointMs, 1000);
+    expect(clip.outPointMs, 3000);
+    expect(clip.durationMs, 2000);
+  });
+
   test('a failing save leaves the previous rows intact', () async {
     final original = _project(
       layers: [

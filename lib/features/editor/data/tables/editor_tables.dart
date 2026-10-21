@@ -82,6 +82,11 @@ class EditorClips extends Table {
   /// JSON map of adjustment key to value (brightness, contrast, saturation).
   TextColumn get adjustmentsJson => text().withDefault(const Constant('{}'))();
 
+  /// The full duration of the source media. Null for the rows written
+  /// before version 2, which did not store it; the repository falls back to
+  /// the out point for those.
+  IntColumn get sourceDurationMs => integer().nullable()();
+
   @override
   Set<Column<Object>> get primaryKey => {id};
 }

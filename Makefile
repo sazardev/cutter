@@ -1,6 +1,6 @@
 .DEFAULT_GOAL := setup
 
-.PHONY: setup generate schema format format-check analyze test check run
+.PHONY: setup generate schema format format-check analyze test check run build-apk
 
 setup:
 	flutter pub get
@@ -33,3 +33,8 @@ check: generate format-check analyze test
 
 run:
 	flutter run --dart-define-from-file=.env
+
+# The database path and the rest of the configuration come from .env, so the
+# build carries them too.
+build-apk:
+	flutter build apk --dart-define-from-file=.env

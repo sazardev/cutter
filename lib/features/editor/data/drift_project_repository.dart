@@ -85,7 +85,9 @@ class DriftProjectRepository implements ProjectRepository {
       assetId: row.sourceUri,
       kind: kind,
       sourceUri: row.sourceUri,
-      sourceDurationMs: row.outPointMs,
+      // Rows written before version 2 do not carry the duration of their
+      // source; version 1 rebuilt it from the out point.
+      sourceDurationMs: row.sourceDurationMs ?? row.outPointMs,
       startMs: row.startMs,
       inPointMs: row.inPointMs,
       outPointMs: row.outPointMs,
@@ -156,6 +158,7 @@ class DriftProjectRepository implements ProjectRepository {
       volume: clip.volume,
       filterId: clip.filterId,
       adjustmentsJson: jsonEncode(clip.adjustments),
+      sourceDurationMs: clip.sourceDurationMs,
     );
   }
 }
