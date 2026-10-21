@@ -4,16 +4,20 @@ Where the work stands, for whoever goes on with it. Rewritten after every build;
 
 ## Now
 
-- Last build: the whole project · ✓ builds, boots and passes its checks · 2026-10-21
-- Files: 46 Dart files (30 in `lib/`, 16 in `test/`) · 9 076 lines
-- What it builds: the editor slice of ADR 0004, repaired. A drift database stores projects, layers and clips and implements the domain's `ProjectRepository` port. A Riverpod controller runs the domain use cases against the playhead and the selected clip: split, move, trim, reverse, volume, filter and adjustments. The editor page shows the preview placeholder, the time label, the timeline (layers as rows, clips as blocks), the playhead and the clip inspector, in one pane under 600dp and in two panes above. Domain failures are mapped once to localized messages, with an exhaustive switch. The Rust/FFI engine, recording, import pickers and sync are still out: the preview canvas is a placeholder and the outbox waits on Q10.
-- The database is at schema version 2: `editor_clips` stores the duration of the source media, so a trimmed clip no longer forgets it. The step from 1 to 2 lives in `lib/core/db/migrations/from1To2.dart`; a test checks the live schema against the dump of the newest version, and the migration test checks that the rows survive the step.
-- The file of the database comes from `DATABASE_PATH` in `.env`: a relative path resolves against the app-data directory, an absolute path is taken as it is.
-- Verified: `flutter analyze` clean, `dart format --set-exit-if-changed .` clean, `flutter test` green (134 tests), `flutter build apk --debug` green, and the app installed and driven on an Android 16 emulator: it boots to the empty state, loads a project, selects a clip, seeks and splits it, the split reaches the database, and a file written by version 1 is migrated to version 2 on open with its rows intact.
-- To resume: `make setup`, then `make check`, then `flutter run`.
+- Last build: restore points, rename, preview handles, timeline from the left (ADR 0013); before it: media bank (schema 6), filtered picker with in-app browser, collapsible side bar, timeline below/above/beside (ADR 0011) · ✓ format clean, editor and core analyze clean, 254 Flutter tests and 37 Rust tests green · 2026-10-21 · driven on Linux (WSLg) at 1280x800, 900x412 and 412x900, not yet on Android
+- Verified with real material: without a portal (WSL) Add opens the in-app browser, which shows only media (no .js/.zip/.md) with thumbnails; three PNGs picked in order landed on the timeline; the bank listed the 11 files migrated from existing clips with "on the timeline" marks; a tap placed a file; the three layouts and the rail work in landscape and portrait.
+- Previous build verified: a 5-min, two-video project with cuts, overlay images and four sound tracks; a 720p export at 4.2x real time.
+- Measured (profile build): paused 0% CPU, playing ~250% (about 150% of it software OpenGL in WSL); RSS about 440 MB in the editor.
+- To resume: `make setup`, `make check`, `make run`.
 
 ## Done
 
+- 2026-10-21 · autosave and preview · ✓ built · automatic restore points, rename in place, handles on the preview, tap no longer plays, timeline starts at the left (see ADR 0013)
+- 2026-10-21 · media and layout · ✓ built · media bank with recents, schema v6, filtered picker and media browser, side bar, timeline layouts (see ADR 0011)
+- 2026-10-21 · studio and library · ✓ built · clip editors, Your videos, export presets, schema v5, performance budgets (see ADR 0010)
+- 2026-10-21 · pro editing · ✓ built · canvas, framing, versions, inline tools, diagnostics, gallery, schema v4 (see ADR 0009)
+- 2026-10-21 · engine · ✓ built · Rust media engine, import, preview, undo/redo, export, editor redesign (see ADR 0008)
+- 2026-10-21 · home · ✓ built · home, onboarding, create project, add layer, built-in templates, schema v3 (see ADR 0007)
 - 2026-10-21 · database · ✓ built · the schema evolves with a migration step per version and the file comes from the configuration (see ADR 0006)
 - 2026-10-21 · repair · ✓ built · 38 files · checks pass · the project compiles again after three builds had been layered on each other (see ADR 0005)
 - 2026-10-21 · domain · ✓ built · 20 files · checks pass · $3.673
@@ -23,10 +27,14 @@ Where the work stands, for whoever goes on with it. Rewritten after every build;
 
 ## Open
 
-- SPEC.md has 16 open questions: the build decided them in its plan, the answer is yours.
+- Android: install the SDK and NDK, cross-compile FFmpeg for arm64 (LGPL, with `h264_mediacodec`), then `flutter build apk`.
+- GPU composition, and pitch-correct speed for sound (sound at another speed is muted).
+- Memory stays near its peak after the editor closes (allocator does not return freed pages); measure on a device before acting.
+- GPU composition for 1080p multi-layer at 60 fps (NFR-1), measured on a device.
+- SPEC.md open questions still unanswered: Q3, Q4 (speed, crop, rotation), Q5, Q6, Q7, Q13, Q14, Q15 (camera and microphone recording).
 
 ## Next
 
-- FR-16 Rust engine over FFI. The system must perform all media decode, composition, effect application and timeline mutation in the Rust engine, exposed to Flutter through FFI.: no test proves it yet
-- FR-3 Music and audio layers. The system must place music and audio files on audio layers.: no test proves it yet
-- FR-5 Camera video capture. The system must record video from the device camera and place it on a video layer.: no test proves it yet
+- FR-5 / FR-4 camera and microphone recording (Q15).
+- Keyframes for framing, transitions, text and titles.
+- Text and titles, transitions, speed.

@@ -87,7 +87,7 @@ M3 type scale plus an **emphasized** variant of every role (heavier weight). Var
 
 | Token | Radius | Use |
 | --- | --- | --- |
-| extra-small | 4dp | Menus, snackbars |
+| extra-small | 4dp | Menus |
 | small | 8dp | Chips |
 | medium | 12dp | Cards |
 | large | 16dp | FABs, sheets |
@@ -227,6 +227,8 @@ Motion is built from **springs** (damping ratio + stiffness), not duration + eas
 - Toasts live in a `role="status"` region (`role="alert"` for errors) and must not steal focus; the action is reachable by keyboard; important messages are never toast-only.
 
 ## Rules for agents
+
+- Editor (Cutter): tools open as inline panels (above the tool bar on phones, in the side panel on wide windows), never as dialogs or modal sheets, so the preview stays visible and live; actions that can be undone act at once with an Undo toast instead of asking. The editor is always dark.
 
 - Jetpack Compose: use the Material 3 Expressive APIs (`MaterialExpressiveTheme`, `MotionScheme.expressive()`, `ButtonGroup`, `SplitButtonLayout`, `FloatingToolbar`, `LoadingIndicator`, `MaterialShapes`; reference, check the current `material3` release). Flutter/web: follow M3 tokens and approximate springs with the platform's spring physics.
 - Never hardcode colors, radii or durations: read M3 roles, shape tokens and motion scheme springs.
