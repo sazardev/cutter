@@ -1,0 +1,8 @@
+# Architecture decisions
+
+Why the code is the way it is: one record per decision, never edited after it is accepted (a new one supersedes it).
+
+| ADR | Decision | Date | Status |
+|---|---|---|---|
+| [0001](0001-foundation-use-field-visits-as-the.md) | Foundation: Use field_visits as the Dart package name and 'Field Visits' as the localized display name; the appTitle ARB key is the single source of visible text | 2026-10-21 | accepted |
+| [0002](0002-design-no-new-packages-state-is.md) | Design: No new packages: state is a ChangeNotifier (EditorController) listened to with ListenableBuilder, because AGENTS.md forbids adding a dependency without asking and Riverpod is not declared | 2026-10-21 | accepted |

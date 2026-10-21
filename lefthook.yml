@@ -1,0 +1,23 @@
+pre-commit:
+  parallel: true
+  commands:
+    format:
+      glob: "*.dart"
+      run: dart format {staged_files}
+      stage_fixed: true
+    analyze:
+      glob: "*.dart"
+      run: flutter analyze
+
+commit-msg:
+  commands:
+    conventional:
+      run: |
+        message=$(head -n 1 "{1}")
+        pattern='^(feat|fix|docs|style|refactor|perf|test|build|ci|chore|revert)(\([a-z0-9._/-]+\))?!?: .+'
+        if ! printf '%s' "$message" | grep -Eq "$pattern"; then
+          echo "Commit message must follow Conventional Commits: <type>(<scope>): <subject>"
+          echo "Allowed types: feat fix docs style refactor perf test build ci chore revert"
+          echo "Received: $message"
+          exit 1
+        fi

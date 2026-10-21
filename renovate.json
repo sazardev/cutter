@@ -1,0 +1,22 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": ["config:recommended"],
+  "timezone": "UTC",
+  "schedule": ["before 6am on monday"],
+  "lockFileMaintenance": {
+    "enabled": true,
+    "automerge": true
+  },
+  "packageRules": [
+    {
+      "description": "Group Flutter and Dart pub updates into one pull request",
+      "matchManagers": ["pub"],
+      "groupName": "Flutter and Dart packages"
+    },
+    {
+      "description": "Automerge patch updates once CI is green",
+      "matchUpdateTypes": ["patch"],
+      "automerge": true
+    }
+  ]
+}
