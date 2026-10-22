@@ -11,7 +11,7 @@ Where the work stands, for whoever goes on with it. Rewritten after every build;
 - Verified with real material: without a portal (WSL) Add opens the in-app browser, which shows only media (no .js/.zip/.md) with thumbnails; three PNGs picked in order landed on the timeline; the bank listed the 11 files migrated from existing clips with "on the timeline" marks; a tap placed a file; the three layouts and the rail work in landscape and portrait.
 - Previous build verified: a 5-min, two-video project with cuts, overlay images and four sound tracks; a 720p export at 4.2x real time.
 - Measured (profile build): paused 0% CPU, playing ~250% (about 150% of it software OpenGL in WSL); RSS about 440 MB in the editor.
-- To resume: `make setup`, `make check`, `make run`. Android: build FFmpeg per ABI with `tool/android/build_ffmpeg.sh <ffmpeg-src> <prefix> arm64|x86_64`, then `FFMPEG_DIR=<prefix> flutter build apk --profile --target-platform android-x64` (or `android-arm64`).
+- To resume: `make setup`, `make check`, `make run`. Android: build FFmpeg per ABI with `tool/android/build_ffmpeg.sh <ffmpeg-src> <prefix> arm64|x86_64`, then `FFMPEG_DIR=<prefix> flutter build apk --release --target-platform android-arm64` (arm64 also needs the `BINDGEN_EXTRA_CLANG_ARGS` in ADR 0020) and again with `android-x64`, and merge the two with `tool/android/universal_apk.sh`.
 
 ## Done
 
