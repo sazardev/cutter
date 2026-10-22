@@ -102,6 +102,14 @@ Scenarios:
 - Given a screen reader is enabled, when the user navigates the timeline and controls, then every control exposes a label and the timeline is operable.
 - Given a phone or tablet form factor, then every primary editing action is reachable without a hardware keyboard or mouse (see Q7).
 
+**FR-18 — Text layers.** The system must place text over the video on layers of its own, as many as the user wants, each with its own time, position and look.
+- Given the Add layer button, then a menu asks which kind of layer (video, image, audio or text) before anything opens; choosing Text adds a text and opens its tool, and the left tool bar has no Text entry.
+- Given the text tool, when the user adds a text, then it appears at the playhead for 3 seconds, centred, selected and ready to type over; a text that starts while another is showing goes on a layer of its own and is nudged down so neither hides the other, and texts one after the other share a layer.
+- Given a selected text, when the user types or changes its font, size, colour, outline, shadow, background, letter spacing, alignment or entrance, then the preview shows it as it changes and one pause saves it as one step of undo.
+- Given a text in the preview, when the user drags, pinches or turns it, then it moves, scales and rotates like any picture; a double tap opens the text tool.
+- Given a text clip on the timeline, then it can be moved, trimmed to either side, split, duplicated and deleted like any clip, and layers of text can be reordered among the others.
+- Given a text, when the project is exported, then the video shows the same words, font and look as the preview, drawn by the engine from the fonts bundled with the app.
+
 ## Non-functional requirements
 - NFR-1 Performance: preview playback, scrubbing, trimming and dragging must sustain 60 FPS with zero dropped frames; every frame completes within 16.67 ms, verified over a continuous 60-second session per interaction on target devices. Any frame over budget is a defect, not a warning.
 - NFR-2 UI responsiveness: no Flutter UI-thread operation may block longer than one frame budget; all Rust engine work runs off the UI thread.
@@ -115,7 +123,7 @@ Scenarios:
 | Entity | Fields | Relations |
 |---|---|---|
 | Project | id, name, created_at, updated_at, canvas width/height/fps (pending Q5), layer order | has many Layers; may originate from a Template |
-| Layer | id, project_id, type (video \| image \| audio), index, volume, muted | has many Clips; belongs to Project |
+| Layer | id, project_id, type (video \| image \| audio \| text), index, volume, muted | has many Clips; belongs to Project |
 | Clip | id, layer_id, source_uri, media_type, start_time, duration, in_point, out_point, reversed, volume, filter_id, adjustments | belongs to Layer; references Filter and Adjustment set |
 | MediaAsset | id, uri, media_type, duration, width, height, codec, audio_present | referenced by Clips; source for imports and recordings |
 | Recording | id, kind (microphone \| camera), uri, duration, created_at | produces a MediaAsset and a Clip |

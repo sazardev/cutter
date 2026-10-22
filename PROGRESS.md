@@ -5,6 +5,7 @@ Where the work stands, for whoever goes on with it. Rewritten after every build;
 ## Now
 
 - Last build: restore points, rename, preview handles, timeline from the left (ADR 0013); before it: media bank (schema 6), filtered picker with in-app browser, collapsible side bar, timeline below/above/beside (ADR 0011) · ✓ format clean, editor and core analyze clean, 254 Flutter tests and 37 Rust tests green · 2026-10-21 · driven on Linux (WSLg) at 1280x800, 900x412 and 412x900, not yet on Android
+- Text layers (ADR 0017, FR-18, schema 7): the engine draws text from nine bundled fonts; Text tool with words, font, size, colour, outline, shadow, background, letter spacing, alignment and entrance; drag, pinch and turn in the preview; texts on layers of their own that move, trim, split and chain like clips · ✓ 59 Rust tests, controller, domain, repository, migration and page tests green; not yet driven by hand on a device or exported to check the video
 - Verified with real material: without a portal (WSL) Add opens the in-app browser, which shows only media (no .js/.zip/.md) with thumbnails; three PNGs picked in order landed on the timeline; the bank listed the 11 files migrated from existing clips with "on the timeline" marks; a tap placed a file; the three layouts and the rail work in landscape and portrait.
 - Previous build verified: a 5-min, two-video project with cuts, overlay images and four sound tracks; a 720p export at 4.2x real time.
 - Measured (profile build): paused 0% CPU, playing ~250% (about 150% of it software OpenGL in WSL); RSS about 440 MB in the editor.
@@ -36,5 +37,5 @@ Where the work stands, for whoever goes on with it. Rewritten after every build;
 
 ## Next
 
-- Keyframes for framing, transitions, text and titles.
-- Text and titles, transitions, speed.
+- Keyframes for framing, transitions.
+- Text: wrap to a width, per-word styling, user fonts.

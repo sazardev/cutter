@@ -20,3 +20,5 @@ Why the code is the way it is: one record per decision, never edited after it is
 | [0014](0014-home-redesign-guide-filters-covers.md) | Home redesign: guided new project, search with suggestions, sort and filter modal, pinned section, first-frame covers, delete | 2026-10-21 | accepted |
 | [0015](0015-offline-music-packs.md) | Offline music packs: genre zips from a hosted catalog, downloaded, unpacked and kept on the device; `tool/music_packs` builds them | 2026-10-21 | accepted |
 | [0016](0016-capture-safe-media-backup.md) | Capture (photo, video, voice), every file kept by the app, import limits that warn, relinking missing media, project backup and restore | 2026-10-21 | accepted |
+| [0017](0017-text-layers.md) | Text layers: the engine draws text from bundled fonts, text clips live on `text` layers, schema v7 | 2026-10-21 | accepted |
+| [0018](0018-animation-presets-and-transitions.md) | Animation presets (built-in and saved) and transitions between neighbouring clips built from the clip animations and sound fades | 2026-10-21 | accepted |
