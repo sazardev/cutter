@@ -128,6 +128,16 @@ pub fn clip(
         speed: 1.0,
         fade_in_ms: 0,
         fade_out_ms: 0,
+        blur: 0.0,
+        vignette: 0.0,
+        grain: 0.0,
+        pixelate: 0.0,
+        sharpen: 0.0,
+        anim_in: None,
+        anim_in_ms: 0,
+        anim_out: None,
+        anim_out_ms: 0,
+        text: None,
     }
 }
 

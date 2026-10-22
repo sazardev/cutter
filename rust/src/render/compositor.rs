@@ -2,8 +2,11 @@ use std::collections::{HashMap, HashSet};
 use std::sync::Arc;
 use std::thread::JoinHandle;
 
+use super::animation::{self, Anim};
 use super::effects::{apply_fixed, ColorMatrix};
-use crate::api::types::{EngineMediaKind, Timeline, TimelineClip};
+use super::fx::Fx;
+use super::text;
+use crate::api::types::{EngineMediaKind, TextAnimation, Timeline, TimelineClip};
 use crate::media::video::{DecodeLoad, RgbaFrame, VideoReader};
 
 /// How far ahead a clip's decoder is opened and positioned, so a cut does
@@ -40,7 +43,12 @@ pub struct Compositor {
     threads: usize,
     /// How hard the clip decoders work.
     load: Option<DecodeLoad>,
+    /// Pictures of the texts drawn lately, by look and canvas height.
+    texts: HashMap<String, Arc<RgbaFrame>>,
 }
+
+/// Most text pictures kept; past it the cache starts over.
+const MAX_TEXTS: usize = 48;
 
 /// Below this many pixels a frame is drawn on one thread: splitting costs
 /// more than it saves.
@@ -103,6 +111,28 @@ pub struct Placement {
     /// The kept part of the source: left and top offsets, width and height,
     /// as fractions of the source.
     pub crop: (f64, f64, f64, f64),
+}
+
+/// [place] with the entrance or exit animation of [clip] applied at [t_ms].
+fn animated(mut place: Placement, clip: &TimelineClip, t_ms: i64, cw: u32, ch: u32) -> Placement {
+    let anim = animation::at(
+        clip.anim_in.as_deref(),
+        clip.anim_in_ms,
+        clip.anim_out.as_deref(),
+        clip.anim_out_ms,
+        clip.duration_ms(),
+        t_ms - clip.start_ms,
+    );
+    if anim == Anim::NONE {
+        return place;
+    }
+    place.cx += f64::from(anim.dx) * f64::from(cw);
+    place.cy += f64::from(anim.dy) * f64::from(ch);
+    place.w *= f64::from(anim.scale);
+    place.h *= f64::from(anim.scale);
+    place.rotation = (place.rotation + f64::from(anim.rotation)).rem_euclid(360.0);
+    place.opacity = (place.opacity * anim.opacity).clamp(0.0, 1.0);
+    place
 }
 
 /// The kept part of [clip]'s source as (left, top, width, height)
@@ -191,7 +221,7 @@ impl Compositor {
     /// [PREFETCH_MS] after [t_ms], positioned at their first frame.
     fn prefetch(&mut self, timeline: &Timeline, t_ms: i64, cw: u32, ch: u32) {
         for (index, layer) in timeline.layers.iter().enumerate() {
-            if layer.kind == EngineMediaKind::Audio {
+            if matches!(layer.kind, EngineMediaKind::Audio | EngineMediaKind::Text) {
                 continue;
             }
             let next = layer
@@ -265,6 +295,15 @@ impl Compositor {
             if layer.kind == EngineMediaKind::Audio {
                 continue;
             }
+            if layer.kind == EngineMediaKind::Text {
+                // Texts of one layer may share time: all that are active show.
+                for clip in layer.clips.iter().filter(|c| c.is_active_at(t_ms)) {
+                    if let Some((frame, place)) = self.text_frame(clip, t_ms, width, height) {
+                        jobs.push((frame, place, None, true));
+                    }
+                }
+                continue;
+            }
             let Some(clip) = layer.clips.iter().find(|c| c.is_active_at(t_ms)) else {
                 continue;
             };
@@ -273,6 +312,11 @@ impl Compositor {
             }
             let key = clip_key(index, clip);
             if let Some((frame, place)) = self.frame_for(&key, clip, t_ms, width, height) {
+                let frame = match Fx::of(clip) {
+                    Some(fx) => Arc::new(fx.apply(&frame)),
+                    None => frame,
+                };
+                let place = animated(place, clip, t_ms, width, height);
                 let matrix = ColorMatrix::for_clip(clip).map(|m| m.fixed());
                 let blend = clip.kind == EngineMediaKind::Image || place.opacity < 1.0;
                 jobs.push((frame, place, matrix, blend));
@@ -324,6 +368,65 @@ impl Compositor {
         self.evict();
     }
 
+    /// The picture of a text clip at [t_ms] and where it goes on a
+    /// [cw]x[ch] canvas, with its entrance or exit applied.
+    fn text_frame(
+        &mut self,
+        clip: &TimelineClip,
+        t_ms: i64,
+        cw: u32,
+        ch: u32,
+    ) -> Option<(Arc<RgbaFrame>, Placement)> {
+        let spec = clip.text.as_ref()?;
+        if clip.opacity <= 0.0 || spec.content.trim().is_empty() {
+            return None;
+        }
+        let key = {
+            let mut look = spec.clone();
+            look.animation = TextAnimation::None;
+            format!("{ch}|{look:?}")
+        };
+        if self.texts.len() >= MAX_TEXTS && !self.texts.contains_key(&key) {
+            self.texts.clear();
+        }
+        let frame = self
+            .texts
+            .entry(key)
+            .or_insert_with(|| Arc::new(text::render(spec, ch)))
+            .clone();
+        let mut scale = f64::from(clip.scale.max(0.01));
+        let mut opacity = clip.opacity.clamp(0.0, 1.0);
+        let mut lift = 0.0;
+        let progress = text_progress(clip, t_ms);
+        match spec.animation {
+            TextAnimation::None => {}
+            TextAnimation::Fade => opacity *= progress as f32,
+            TextAnimation::Pop => {
+                // Grows from small with a little overshoot.
+                let back =
+                    1.0 + 2.70158 * (progress - 1.0).powi(3) + 1.70158 * (progress - 1.0).powi(2);
+                scale *= 0.5 + 0.5 * back;
+                opacity *= progress.min(1.0) as f32;
+            }
+            TextAnimation::SlideUp => {
+                let eased = 1.0 - (1.0 - progress).powi(3);
+                lift = (1.0 - eased) * 0.06 * f64::from(ch);
+                opacity *= eased as f32;
+            }
+        }
+        let place = Placement {
+            cx: f64::from(cw) / 2.0 + f64::from(clip.x) * f64::from(cw),
+            cy: f64::from(ch) / 2.0 + f64::from(clip.y) * f64::from(ch) + lift,
+            w: f64::from(frame.width) * scale,
+            h: f64::from(frame.height) * scale,
+            rotation: f64::from(clip.rotation).rem_euclid(360.0),
+            flip_x: clip.flip_x,
+            opacity,
+            crop: (0.0, 0.0, 1.0, 1.0),
+        };
+        Some((frame, place))
+    }
+
     fn frame_for(
         &mut self,
         key: &str,
@@ -368,6 +471,18 @@ impl Compositor {
         }
     }
 }
+
+/// How far into its entrance or exit a text clip is at [t_ms]: 0 when it
+/// has just appeared or is about to go, 1 in between.
+fn text_progress(clip: &TimelineClip, t_ms: i64) -> f64 {
+    let ramp = TEXT_RAMP_MS.min(clip.duration_ms() / 3).max(1) as f64;
+    let since = (t_ms - clip.start_ms) as f64 / ramp;
+    let until = (clip.end_ms() - t_ms) as f64 / ramp;
+    since.min(until).clamp(0.0, 1.0)
+}
+
+/// How long a text's entrance or exit lasts, at most.
+const TEXT_RAMP_MS: i64 = 350;
 
 /// Draws [frame] at [place]: a straight copy when the picture is upright and
 /// at its decoded size, otherwise sampled through the inverse transform.
@@ -669,6 +784,43 @@ mod render_tests {
         assert!(is_black(pixel(&out, 360, 20, 320)));
     }
 
+    fn brightness_sum(b: &[u8]) -> u64 {
+        b.chunks_exact(4)
+            .map(|p| u64::from(p[0]) + u64::from(p[1]) + u64::from(p[2]))
+            .sum()
+    }
+
+    #[test]
+    fn a_fade_in_is_dim_at_the_start_of_the_clip() {
+        let full = render_one(|_| {});
+        let dim = render_one(|c| {
+            c.anim_in = Some("fade".into());
+            c.anim_in_ms = 3000;
+        });
+        let ratio = brightness_sum(&dim) as f64 / brightness_sum(&full) as f64;
+        assert!((0.2..0.7).contains(&ratio), "{ratio}");
+    }
+
+    #[test]
+    fn an_exit_animation_leaves_the_middle_of_the_clip_alone() {
+        let full = render_one(|_| {});
+        let same = render_one(|c| {
+            c.anim_out = Some("spin".into());
+            c.anim_out_ms = 1000;
+        });
+        assert_eq!(full, same);
+    }
+
+    #[test]
+    fn a_slide_in_moves_the_picture_off_its_place() {
+        let full = render_one(|_| {});
+        let moved = render_one(|c| {
+            c.anim_in = Some("slide_left".into());
+            c.anim_in_ms = 3000;
+        });
+        assert_ne!(full, moved);
+    }
+
     #[test]
     fn half_opacity_darkens_over_black() {
         let full = render_one(|_| {});
@@ -714,6 +866,99 @@ mod render_tests {
         let out = render_one(|c| c.scale = 10.0);
         assert!(!is_black(pixel(&out, 360, 180, 320)));
         assert!(crate::diagnostics::snapshot().cache_bytes < 64 * 1024 * 1024);
+    }
+
+    fn text_clip(words: &str, start: i64, end: i64) -> crate::api::types::TimelineClip {
+        use crate::api::types::{TextAlign, TextAnimation, TextSpec};
+        let mut c = clip("", EngineMediaKind::Text, start, 0, end - start);
+        c.text = Some(TextSpec {
+            content: words.to_owned(),
+            font: "sans".to_owned(),
+            size: 0.2,
+            color: 0xFFFF_0000,
+            bold: true,
+            italic: false,
+            align: TextAlign::Center,
+            stroke_color: 0xFF00_0000,
+            stroke_width: 0.0,
+            shadow: 0.0,
+            background: 0,
+            letter_spacing: 0.0,
+            animation: TextAnimation::None,
+        });
+        c
+    }
+
+    fn red_pixels(buf: &[u8]) -> usize {
+        buf.chunks_exact(4)
+            .filter(|p| p[0] > 200 && p[1] < 60 && p[2] < 60)
+            .count()
+    }
+
+    #[test]
+    fn draws_a_text_only_while_its_clip_is_active() {
+        let timeline = vertical(vec![layer(
+            EngineMediaKind::Text,
+            vec![text_clip("Hola", 1000, 2000)],
+        )]);
+        let mut compositor = Compositor::default();
+        let mut out = Vec::new();
+        compositor.render(&timeline, 500, 360, 640, &mut out);
+        assert_eq!(red_pixels(&out), 0);
+        compositor.render(&timeline, 1500, 360, 640, &mut out);
+        assert!(red_pixels(&out) > 300);
+        compositor.render(&timeline, 2500, 360, 640, &mut out);
+        assert_eq!(red_pixels(&out), 0);
+    }
+
+    #[test]
+    fn texts_of_one_layer_that_overlap_both_show() {
+        let mut upper = text_clip("Arriba", 0, 2000);
+        upper.y = -0.3;
+        let mut lower = text_clip("Abajo", 500, 2000);
+        lower.y = 0.3;
+        let timeline = vertical(vec![layer(EngineMediaKind::Text, vec![upper, lower])]);
+        let mut out = Vec::new();
+        let mut compositor = Compositor::default();
+        compositor.render(&timeline, 400, 360, 640, &mut out);
+        let alone = red_pixels(&out);
+        compositor.render(&timeline, 1000, 360, 640, &mut out);
+        assert!(red_pixels(&out) > alone * 3 / 2);
+    }
+
+    #[test]
+    fn a_text_moves_with_its_position() {
+        let mut moved = text_clip("Hola", 0, 1000);
+        moved.x = 0.3;
+        moved.y = -0.4;
+        let timeline = vertical(vec![layer(EngineMediaKind::Text, vec![moved])]);
+        let mut out = Vec::new();
+        Compositor::default().render(&timeline, 500, 360, 640, &mut out);
+        let (mut sx, mut sy, mut n) = (0usize, 0usize, 0usize);
+        for (i, p) in out.chunks_exact(4).enumerate() {
+            if p[0] > 200 && p[1] < 60 {
+                sx += i % 360;
+                sy += i / 360;
+                n += 1;
+            }
+        }
+        assert!(n > 0);
+        // Centre of the red pixels: right of and above the canvas centre.
+        assert!(sx / n > 180 + 60 && sy / n < 320 - 150);
+    }
+
+    #[test]
+    fn a_fade_starts_invisible_and_ends_visible() {
+        use crate::api::types::TextAnimation;
+        let mut c = text_clip("Hola", 0, 3000);
+        c.text.as_mut().unwrap().animation = TextAnimation::Fade;
+        let timeline = vertical(vec![layer(EngineMediaKind::Text, vec![c])]);
+        let mut out = Vec::new();
+        let mut compositor = Compositor::default();
+        compositor.render(&timeline, 0, 360, 640, &mut out);
+        assert_eq!(red_pixels(&out), 0);
+        compositor.render(&timeline, 1500, 360, 640, &mut out);
+        assert!(red_pixels(&out) > 300);
     }
 }
 

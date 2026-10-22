@@ -26,7 +26,8 @@ impl Mixer {
         out.fill(0.0);
         let to = from + (out.len() / CHANNELS) as i64;
         for (index, layer) in timeline.layers.iter().enumerate() {
-            if layer.muted || layer.volume <= 0.0 || layer.kind == EngineMediaKind::Image {
+            let silent_kind = matches!(layer.kind, EngineMediaKind::Image | EngineMediaKind::Text);
+            if layer.muted || layer.volume <= 0.0 || silent_kind {
                 continue;
             }
             for clip in &layer.clips {

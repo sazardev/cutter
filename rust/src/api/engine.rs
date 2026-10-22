@@ -11,7 +11,7 @@ use parking_lot::Mutex;
 
 use super::types::{
     EngineDiagnostics, ExportEvent, ExportSettings, ExportStage, MediaInfo, PlaybackState,
-    SuggestedAdjustments, Thumbnail, Timeline,
+    SuggestedAdjustments, TextSize, TextSpec, Thumbnail, Timeline,
 };
 use crate::frb_generated::StreamSink;
 use crate::media::video::{DecodeLoad, VideoReader};
@@ -28,6 +28,14 @@ pub fn init_app() {
 #[frb(sync)]
 pub fn engine_diagnostics() -> EngineDiagnostics {
     crate::diagnostics::snapshot()
+}
+
+/// The size of the picture [spec] draws on a canvas [canvas_height] pixels
+/// tall, so the editor can frame a text without drawing it.
+#[frb(sync)]
+pub fn measure_text(spec: TextSpec, canvas_height: u32) -> TextSize {
+    let (width, height) = crate::render::text::measure(&spec, canvas_height);
+    TextSize { width, height }
 }
 
 /// Describes the file at [path]; fails when it cannot be played.
@@ -251,6 +259,16 @@ impl Drop for PreviewPlayer {
             });
         }
     }
+}
+
+/// Cuts the subject out of the picture at [input_path] and writes it to
+/// [output_path] as a PNG with a transparent background; returns the width
+/// and height written. A picture larger than 2048 px on its long side is
+/// shrunk first.
+pub fn remove_background(input_path: String, output_path: String) -> Result<(u32, u32)> {
+    crate::render::background::remove_background(&input_path, &output_path).inspect_err(|e| {
+        crate::diagnostics::warn(format!("remove background {input_path}: {e:#}"));
+    })
 }
 
 /// Adjustments that balance the picture of [path] between [from_ms] and

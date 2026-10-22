@@ -7,6 +7,8 @@ pub enum EngineMediaKind {
     Video,
     Image,
     Audio,
+    /// Words drawn by the engine; the clip has no file.
+    Text,
 }
 
 /// What the engine learned about a file when it probed it.
@@ -80,6 +82,71 @@ pub struct TimelineClip {
     /// Sound fades, in timeline milliseconds.
     pub fade_in_ms: i64,
     pub fade_out_ms: i64,
+    /// Spatial effects, each in 0.0..=1.0 with 0 meaning off.
+    pub blur: f32,
+    pub vignette: f32,
+    pub grain: f32,
+    pub pixelate: f32,
+    pub sharpen: f32,
+    /// How the clip comes in and goes out: one of `render::animation`'s ids
+    /// or None, and how long each lasts in timeline milliseconds.
+    pub anim_in: Option<String>,
+    pub anim_in_ms: i64,
+    pub anim_out: Option<String>,
+    pub anim_out_ms: i64,
+    /// What a text clip says and how it looks; None for any other clip.
+    pub text: Option<TextSpec>,
+}
+
+/// How the lines of a text sit against each other.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum TextAlign {
+    Left,
+    Center,
+    Right,
+}
+
+/// How a text comes in and goes out, over the first and last moments of its
+/// clip.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum TextAnimation {
+    None,
+    Fade,
+    Pop,
+    SlideUp,
+}
+
+/// The words of a text clip and their look. Colours are `0xAARRGGBB`.
+#[derive(Debug, Clone, PartialEq)]
+pub struct TextSpec {
+    /// The words; `\n` starts a new line.
+    pub content: String,
+    /// One of `sans`, `serif`, `mono`, `anton`, `bebas`, `bangers`, `lobster`,
+    /// `pacifico`, `marker`; anything else draws as `sans`.
+    pub font: String,
+    /// Font size as a fraction of the canvas height.
+    pub size: f32,
+    pub color: u32,
+    pub bold: bool,
+    pub italic: bool,
+    pub align: TextAlign,
+    pub stroke_color: u32,
+    /// Outline thickness as a fraction of the font size; 0 is none.
+    pub stroke_width: f32,
+    /// Shadow strength, 0.0 (none) to 1.0.
+    pub shadow: f32,
+    /// Fill behind the words; an alpha of 0 is none.
+    pub background: u32,
+    /// Extra space between letters, as a fraction of the font size.
+    pub letter_spacing: f32,
+    pub animation: TextAnimation,
+}
+
+/// The size of the picture a text draws.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct TextSize {
+    pub width: u32,
+    pub height: u32,
 }
 
 impl TimelineClip {

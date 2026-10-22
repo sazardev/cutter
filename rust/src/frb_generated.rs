@@ -40,7 +40,7 @@ flutter_rust_bridge::frb_generated_boilerplate!(
     default_rust_auto_opaque = RustAutoOpaqueMoi,
 );
 pub(crate) const FLUTTER_RUST_BRIDGE_CODEGEN_VERSION: &str = "2.13.0";
-pub(crate) const FLUTTER_RUST_BRIDGE_CODEGEN_CONTENT_HASH: i32 = -1552336941;
+pub(crate) const FLUTTER_RUST_BRIDGE_CODEGEN_CONTENT_HASH: i32 = -1231742787;
 
 // Section: executor
 
@@ -759,6 +759,40 @@ fn wire__crate__api__engine__init_app_impl(
         },
     )
 }
+fn wire__crate__api__engine__measure_text_impl(
+    ptr_: flutter_rust_bridge::for_generated::PlatformGeneralizedUint8ListPtr,
+    rust_vec_len_: i32,
+    data_len_: i32,
+) -> flutter_rust_bridge::for_generated::WireSyncRust2DartSse {
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap_sync::<flutter_rust_bridge::for_generated::SseCodec, _>(
+        flutter_rust_bridge::for_generated::TaskInfo {
+            debug_name: "measure_text",
+            port: None,
+            mode: flutter_rust_bridge::for_generated::FfiCallMode::Sync,
+        },
+        move || {
+            let message = unsafe {
+                flutter_rust_bridge::for_generated::Dart2RustMessageSse::from_wire(
+                    ptr_,
+                    rust_vec_len_,
+                    data_len_,
+                )
+            };
+            let mut deserializer =
+                flutter_rust_bridge::for_generated::SseDeserializer::new(message);
+            let api_spec = <crate::api::types::TextSpec>::sse_decode(&mut deserializer);
+            let api_canvas_height = <u32>::sse_decode(&mut deserializer);
+            deserializer.end();
+            transform_result_sse::<_, ()>((move || {
+                let output_ok = Ok::<_, ()>(crate::api::engine::measure_text(
+                    api_spec,
+                    api_canvas_height,
+                ))?;
+                std::result::Result::Ok(output_ok)
+            })())
+        },
+    )
+}
 fn wire__crate__api__engine__probe_media_impl(
     port_: flutter_rust_bridge::for_generated::MessagePort,
     ptr_: flutter_rust_bridge::for_generated::PlatformGeneralizedUint8ListPtr,
@@ -787,6 +821,43 @@ fn wire__crate__api__engine__probe_media_impl(
                 transform_result_sse::<_, flutter_rust_bridge::for_generated::anyhow::Error>(
                     (move || {
                         let output_ok = crate::api::engine::probe_media(api_path)?;
+                        std::result::Result::Ok(output_ok)
+                    })(),
+                )
+            }
+        },
+    )
+}
+fn wire__crate__api__engine__remove_background_impl(
+    port_: flutter_rust_bridge::for_generated::MessagePort,
+    ptr_: flutter_rust_bridge::for_generated::PlatformGeneralizedUint8ListPtr,
+    rust_vec_len_: i32,
+    data_len_: i32,
+) {
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap_normal::<flutter_rust_bridge::for_generated::SseCodec, _, _>(
+        flutter_rust_bridge::for_generated::TaskInfo {
+            debug_name: "remove_background",
+            port: Some(port_),
+            mode: flutter_rust_bridge::for_generated::FfiCallMode::Normal,
+        },
+        move || {
+            let message = unsafe {
+                flutter_rust_bridge::for_generated::Dart2RustMessageSse::from_wire(
+                    ptr_,
+                    rust_vec_len_,
+                    data_len_,
+                )
+            };
+            let mut deserializer =
+                flutter_rust_bridge::for_generated::SseDeserializer::new(message);
+            let api_input_path = <String>::sse_decode(&mut deserializer);
+            let api_output_path = <String>::sse_decode(&mut deserializer);
+            deserializer.end();
+            move |context| {
+                transform_result_sse::<_, flutter_rust_bridge::for_generated::anyhow::Error>(
+                    (move || {
+                        let output_ok =
+                            crate::api::engine::remove_background(api_input_path, api_output_path)?;
                         std::result::Result::Ok(output_ok)
                     })(),
                 )
@@ -1282,6 +1353,7 @@ impl SseDecode for crate::api::types::EngineMediaKind {
             0 => crate::api::types::EngineMediaKind::Video,
             1 => crate::api::types::EngineMediaKind::Image,
             2 => crate::api::types::EngineMediaKind::Audio,
+            3 => crate::api::types::EngineMediaKind::Text,
             _ => unreachable!("Invalid variant for EngineMediaKind: {}", inner),
         };
     }
@@ -1480,6 +1552,17 @@ impl SseDecode for Option<String> {
     }
 }
 
+impl SseDecode for Option<crate::api::types::TextSpec> {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        if (<bool>::sse_decode(deserializer)) {
+            return Some(<crate::api::types::TextSpec>::sse_decode(deserializer));
+        } else {
+            return None;
+        }
+    }
+}
+
 impl SseDecode for crate::api::types::PlaybackState {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
@@ -1489,6 +1572,15 @@ impl SseDecode for crate::api::types::PlaybackState {
             position_ms: var_positionMs,
             playing: var_playing,
         };
+    }
+}
+
+impl SseDecode for (u32, u32) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        let mut var_field0 = <u32>::sse_decode(deserializer);
+        let mut var_field1 = <u32>::sse_decode(deserializer);
+        return (var_field0, var_field1);
     }
 }
 
@@ -1502,6 +1594,79 @@ impl SseDecode for crate::api::types::SuggestedAdjustments {
             brightness: var_brightness,
             contrast: var_contrast,
             saturation: var_saturation,
+        };
+    }
+}
+
+impl SseDecode for crate::api::types::TextAlign {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        let mut inner = <i32>::sse_decode(deserializer);
+        return match inner {
+            0 => crate::api::types::TextAlign::Left,
+            1 => crate::api::types::TextAlign::Center,
+            2 => crate::api::types::TextAlign::Right,
+            _ => unreachable!("Invalid variant for TextAlign: {}", inner),
+        };
+    }
+}
+
+impl SseDecode for crate::api::types::TextAnimation {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        let mut inner = <i32>::sse_decode(deserializer);
+        return match inner {
+            0 => crate::api::types::TextAnimation::None,
+            1 => crate::api::types::TextAnimation::Fade,
+            2 => crate::api::types::TextAnimation::Pop,
+            3 => crate::api::types::TextAnimation::SlideUp,
+            _ => unreachable!("Invalid variant for TextAnimation: {}", inner),
+        };
+    }
+}
+
+impl SseDecode for crate::api::types::TextSize {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        let mut var_width = <u32>::sse_decode(deserializer);
+        let mut var_height = <u32>::sse_decode(deserializer);
+        return crate::api::types::TextSize {
+            width: var_width,
+            height: var_height,
+        };
+    }
+}
+
+impl SseDecode for crate::api::types::TextSpec {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        let mut var_content = <String>::sse_decode(deserializer);
+        let mut var_font = <String>::sse_decode(deserializer);
+        let mut var_size = <f32>::sse_decode(deserializer);
+        let mut var_color = <u32>::sse_decode(deserializer);
+        let mut var_bold = <bool>::sse_decode(deserializer);
+        let mut var_italic = <bool>::sse_decode(deserializer);
+        let mut var_align = <crate::api::types::TextAlign>::sse_decode(deserializer);
+        let mut var_strokeColor = <u32>::sse_decode(deserializer);
+        let mut var_strokeWidth = <f32>::sse_decode(deserializer);
+        let mut var_shadow = <f32>::sse_decode(deserializer);
+        let mut var_background = <u32>::sse_decode(deserializer);
+        let mut var_letterSpacing = <f32>::sse_decode(deserializer);
+        let mut var_animation = <crate::api::types::TextAnimation>::sse_decode(deserializer);
+        return crate::api::types::TextSpec {
+            content: var_content,
+            font: var_font,
+            size: var_size,
+            color: var_color,
+            bold: var_bold,
+            italic: var_italic,
+            align: var_align,
+            stroke_color: var_strokeColor,
+            stroke_width: var_strokeWidth,
+            shadow: var_shadow,
+            background: var_background,
+            letter_spacing: var_letterSpacing,
+            animation: var_animation,
         };
     }
 }
@@ -1566,6 +1731,16 @@ impl SseDecode for crate::api::types::TimelineClip {
         let mut var_speed = <f32>::sse_decode(deserializer);
         let mut var_fadeInMs = <i64>::sse_decode(deserializer);
         let mut var_fadeOutMs = <i64>::sse_decode(deserializer);
+        let mut var_blur = <f32>::sse_decode(deserializer);
+        let mut var_vignette = <f32>::sse_decode(deserializer);
+        let mut var_grain = <f32>::sse_decode(deserializer);
+        let mut var_pixelate = <f32>::sse_decode(deserializer);
+        let mut var_sharpen = <f32>::sse_decode(deserializer);
+        let mut var_animIn = <Option<String>>::sse_decode(deserializer);
+        let mut var_animInMs = <i64>::sse_decode(deserializer);
+        let mut var_animOut = <Option<String>>::sse_decode(deserializer);
+        let mut var_animOutMs = <i64>::sse_decode(deserializer);
+        let mut var_text = <Option<crate::api::types::TextSpec>>::sse_decode(deserializer);
         return crate::api::types::TimelineClip {
             path: var_path,
             kind: var_kind,
@@ -1592,6 +1767,16 @@ impl SseDecode for crate::api::types::TimelineClip {
             speed: var_speed,
             fade_in_ms: var_fadeInMs,
             fade_out_ms: var_fadeOutMs,
+            blur: var_blur,
+            vignette: var_vignette,
+            grain: var_grain,
+            pixelate: var_pixelate,
+            sharpen: var_sharpen,
+            anim_in: var_animIn,
+            anim_in_ms: var_animInMs,
+            anim_out: var_animOut,
+            anim_out_ms: var_animOutMs,
+            text: var_text,
         };
     }
 }
@@ -1662,32 +1847,33 @@ fn pde_ffi_dispatcher_primary_impl(
         }
         15 => wire__crate__api__types__export_event_running_impl(port, ptr, rust_vec_len, data_len),
         16 => wire__crate__api__engine__init_app_impl(port, ptr, rust_vec_len, data_len),
-        17 => wire__crate__api__engine__probe_media_impl(port, ptr, rust_vec_len, data_len),
-        18 => wire__crate__api__engine__suggest_adjustments_impl(port, ptr, rust_vec_len, data_len),
-        19 => wire__crate__api__engine__thumbnails_impl(port, ptr, rust_vec_len, data_len),
-        20 => wire__crate__api__types__timeline_clip_duration_ms_impl(
+        18 => wire__crate__api__engine__probe_media_impl(port, ptr, rust_vec_len, data_len),
+        19 => wire__crate__api__engine__remove_background_impl(port, ptr, rust_vec_len, data_len),
+        20 => wire__crate__api__engine__suggest_adjustments_impl(port, ptr, rust_vec_len, data_len),
+        21 => wire__crate__api__engine__thumbnails_impl(port, ptr, rust_vec_len, data_len),
+        22 => wire__crate__api__types__timeline_clip_duration_ms_impl(
             port,
             ptr,
             rust_vec_len,
             data_len,
         ),
-        21 => wire__crate__api__types__timeline_clip_end_ms_impl(port, ptr, rust_vec_len, data_len),
-        22 => wire__crate__api__types__timeline_clip_is_active_at_impl(
+        23 => wire__crate__api__types__timeline_clip_end_ms_impl(port, ptr, rust_vec_len, data_len),
+        24 => wire__crate__api__types__timeline_clip_is_active_at_impl(
             port,
             ptr,
             rust_vec_len,
             data_len,
         ),
-        23 => wire__crate__api__types__timeline_clip_rate_impl(port, ptr, rust_vec_len, data_len),
-        24 => wire__crate__api__types__timeline_clip_source_ms_at_impl(
+        25 => wire__crate__api__types__timeline_clip_rate_impl(port, ptr, rust_vec_len, data_len),
+        26 => wire__crate__api__types__timeline_clip_source_ms_at_impl(
             port,
             ptr,
             rust_vec_len,
             data_len,
         ),
-        25 => wire__crate__api__types__timeline_default_impl(port, ptr, rust_vec_len, data_len),
-        26 => wire__crate__api__types__timeline_duration_ms_impl(port, ptr, rust_vec_len, data_len),
-        27 => wire__crate__api__engine__waveform_impl(port, ptr, rust_vec_len, data_len),
+        27 => wire__crate__api__types__timeline_default_impl(port, ptr, rust_vec_len, data_len),
+        28 => wire__crate__api__types__timeline_duration_ms_impl(port, ptr, rust_vec_len, data_len),
+        29 => wire__crate__api__engine__waveform_impl(port, ptr, rust_vec_len, data_len),
         _ => unreachable!(),
     }
 }
@@ -1712,6 +1898,7 @@ fn pde_ffi_dispatcher_sync_impl(
         }
         12 => wire__crate__api__engine__PreviewPlayer_texture_id_impl(ptr, rust_vec_len, data_len),
         13 => wire__crate__api__engine__engine_diagnostics_impl(ptr, rust_vec_len, data_len),
+        17 => wire__crate__api__engine__measure_text_impl(ptr, rust_vec_len, data_len),
         _ => unreachable!(),
     }
 }
@@ -1783,6 +1970,7 @@ impl flutter_rust_bridge::IntoDart for crate::api::types::EngineMediaKind {
             Self::Video => 0.into_dart(),
             Self::Image => 1.into_dart(),
             Self::Audio => 2.into_dart(),
+            Self::Text => 3.into_dart(),
             _ => unreachable!(),
         }
     }
@@ -1935,6 +2123,95 @@ impl flutter_rust_bridge::IntoIntoDart<crate::api::types::SuggestedAdjustments>
     }
 }
 // Codec=Dco (DartCObject based), see doc to use other codecs
+impl flutter_rust_bridge::IntoDart for crate::api::types::TextAlign {
+    fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
+        match self {
+            Self::Left => 0.into_dart(),
+            Self::Center => 1.into_dart(),
+            Self::Right => 2.into_dart(),
+            _ => unreachable!(),
+        }
+    }
+}
+impl flutter_rust_bridge::for_generated::IntoDartExceptPrimitive for crate::api::types::TextAlign {}
+impl flutter_rust_bridge::IntoIntoDart<crate::api::types::TextAlign>
+    for crate::api::types::TextAlign
+{
+    fn into_into_dart(self) -> crate::api::types::TextAlign {
+        self
+    }
+}
+// Codec=Dco (DartCObject based), see doc to use other codecs
+impl flutter_rust_bridge::IntoDart for crate::api::types::TextAnimation {
+    fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
+        match self {
+            Self::None => 0.into_dart(),
+            Self::Fade => 1.into_dart(),
+            Self::Pop => 2.into_dart(),
+            Self::SlideUp => 3.into_dart(),
+            _ => unreachable!(),
+        }
+    }
+}
+impl flutter_rust_bridge::for_generated::IntoDartExceptPrimitive
+    for crate::api::types::TextAnimation
+{
+}
+impl flutter_rust_bridge::IntoIntoDart<crate::api::types::TextAnimation>
+    for crate::api::types::TextAnimation
+{
+    fn into_into_dart(self) -> crate::api::types::TextAnimation {
+        self
+    }
+}
+// Codec=Dco (DartCObject based), see doc to use other codecs
+impl flutter_rust_bridge::IntoDart for crate::api::types::TextSize {
+    fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
+        [
+            self.width.into_into_dart().into_dart(),
+            self.height.into_into_dart().into_dart(),
+        ]
+        .into_dart()
+    }
+}
+impl flutter_rust_bridge::for_generated::IntoDartExceptPrimitive for crate::api::types::TextSize {}
+impl flutter_rust_bridge::IntoIntoDart<crate::api::types::TextSize>
+    for crate::api::types::TextSize
+{
+    fn into_into_dart(self) -> crate::api::types::TextSize {
+        self
+    }
+}
+// Codec=Dco (DartCObject based), see doc to use other codecs
+impl flutter_rust_bridge::IntoDart for crate::api::types::TextSpec {
+    fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
+        [
+            self.content.into_into_dart().into_dart(),
+            self.font.into_into_dart().into_dart(),
+            self.size.into_into_dart().into_dart(),
+            self.color.into_into_dart().into_dart(),
+            self.bold.into_into_dart().into_dart(),
+            self.italic.into_into_dart().into_dart(),
+            self.align.into_into_dart().into_dart(),
+            self.stroke_color.into_into_dart().into_dart(),
+            self.stroke_width.into_into_dart().into_dart(),
+            self.shadow.into_into_dart().into_dart(),
+            self.background.into_into_dart().into_dart(),
+            self.letter_spacing.into_into_dart().into_dart(),
+            self.animation.into_into_dart().into_dart(),
+        ]
+        .into_dart()
+    }
+}
+impl flutter_rust_bridge::for_generated::IntoDartExceptPrimitive for crate::api::types::TextSpec {}
+impl flutter_rust_bridge::IntoIntoDart<crate::api::types::TextSpec>
+    for crate::api::types::TextSpec
+{
+    fn into_into_dart(self) -> crate::api::types::TextSpec {
+        self
+    }
+}
+// Codec=Dco (DartCObject based), see doc to use other codecs
 impl flutter_rust_bridge::IntoDart for crate::api::types::Thumbnail {
     fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
         [
@@ -2003,6 +2280,16 @@ impl flutter_rust_bridge::IntoDart for crate::api::types::TimelineClip {
             self.speed.into_into_dart().into_dart(),
             self.fade_in_ms.into_into_dart().into_dart(),
             self.fade_out_ms.into_into_dart().into_dart(),
+            self.blur.into_into_dart().into_dart(),
+            self.vignette.into_into_dart().into_dart(),
+            self.grain.into_into_dart().into_dart(),
+            self.pixelate.into_into_dart().into_dart(),
+            self.sharpen.into_into_dart().into_dart(),
+            self.anim_in.into_into_dart().into_dart(),
+            self.anim_in_ms.into_into_dart().into_dart(),
+            self.anim_out.into_into_dart().into_dart(),
+            self.anim_out_ms.into_into_dart().into_dart(),
+            self.text.into_into_dart().into_dart(),
         ]
         .into_dart()
     }
@@ -2140,6 +2427,7 @@ impl SseEncode for crate::api::types::EngineMediaKind {
                 crate::api::types::EngineMediaKind::Video => 0,
                 crate::api::types::EngineMediaKind::Image => 1,
                 crate::api::types::EngineMediaKind::Audio => 2,
+                crate::api::types::EngineMediaKind::Text => 3,
                 _ => {
                     unimplemented!("");
                 }
@@ -2309,11 +2597,29 @@ impl SseEncode for Option<String> {
     }
 }
 
+impl SseEncode for Option<crate::api::types::TextSpec> {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        <bool>::sse_encode(self.is_some(), serializer);
+        if let Some(value) = self {
+            <crate::api::types::TextSpec>::sse_encode(value, serializer);
+        }
+    }
+}
+
 impl SseEncode for crate::api::types::PlaybackState {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
         <i64>::sse_encode(self.position_ms, serializer);
         <bool>::sse_encode(self.playing, serializer);
+    }
+}
+
+impl SseEncode for (u32, u32) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        <u32>::sse_encode(self.0, serializer);
+        <u32>::sse_encode(self.1, serializer);
     }
 }
 
@@ -2323,6 +2629,68 @@ impl SseEncode for crate::api::types::SuggestedAdjustments {
         <f32>::sse_encode(self.brightness, serializer);
         <f32>::sse_encode(self.contrast, serializer);
         <f32>::sse_encode(self.saturation, serializer);
+    }
+}
+
+impl SseEncode for crate::api::types::TextAlign {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        <i32>::sse_encode(
+            match self {
+                crate::api::types::TextAlign::Left => 0,
+                crate::api::types::TextAlign::Center => 1,
+                crate::api::types::TextAlign::Right => 2,
+                _ => {
+                    unimplemented!("");
+                }
+            },
+            serializer,
+        );
+    }
+}
+
+impl SseEncode for crate::api::types::TextAnimation {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        <i32>::sse_encode(
+            match self {
+                crate::api::types::TextAnimation::None => 0,
+                crate::api::types::TextAnimation::Fade => 1,
+                crate::api::types::TextAnimation::Pop => 2,
+                crate::api::types::TextAnimation::SlideUp => 3,
+                _ => {
+                    unimplemented!("");
+                }
+            },
+            serializer,
+        );
+    }
+}
+
+impl SseEncode for crate::api::types::TextSize {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        <u32>::sse_encode(self.width, serializer);
+        <u32>::sse_encode(self.height, serializer);
+    }
+}
+
+impl SseEncode for crate::api::types::TextSpec {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        <String>::sse_encode(self.content, serializer);
+        <String>::sse_encode(self.font, serializer);
+        <f32>::sse_encode(self.size, serializer);
+        <u32>::sse_encode(self.color, serializer);
+        <bool>::sse_encode(self.bold, serializer);
+        <bool>::sse_encode(self.italic, serializer);
+        <crate::api::types::TextAlign>::sse_encode(self.align, serializer);
+        <u32>::sse_encode(self.stroke_color, serializer);
+        <f32>::sse_encode(self.stroke_width, serializer);
+        <f32>::sse_encode(self.shadow, serializer);
+        <u32>::sse_encode(self.background, serializer);
+        <f32>::sse_encode(self.letter_spacing, serializer);
+        <crate::api::types::TextAnimation>::sse_encode(self.animation, serializer);
     }
 }
 
@@ -2374,6 +2742,16 @@ impl SseEncode for crate::api::types::TimelineClip {
         <f32>::sse_encode(self.speed, serializer);
         <i64>::sse_encode(self.fade_in_ms, serializer);
         <i64>::sse_encode(self.fade_out_ms, serializer);
+        <f32>::sse_encode(self.blur, serializer);
+        <f32>::sse_encode(self.vignette, serializer);
+        <f32>::sse_encode(self.grain, serializer);
+        <f32>::sse_encode(self.pixelate, serializer);
+        <f32>::sse_encode(self.sharpen, serializer);
+        <Option<String>>::sse_encode(self.anim_in, serializer);
+        <i64>::sse_encode(self.anim_in_ms, serializer);
+        <Option<String>>::sse_encode(self.anim_out, serializer);
+        <i64>::sse_encode(self.anim_out_ms, serializer);
+        <Option<crate::api::types::TextSpec>>::sse_encode(self.text, serializer);
     }
 }
 

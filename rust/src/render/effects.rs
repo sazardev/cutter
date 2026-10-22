@@ -10,6 +10,13 @@ const IDENTITY: ColorMatrix = ColorMatrix([
     [0.0, 1.0, 0.0, 0.0],
     [0.0, 0.0, 1.0, 0.0],
 ]);
+/// Every filter id the engine renders; the editor lists the same ids (a Dart
+/// test compares both).
+#[cfg(test)]
+pub const FILTER_IDS: &[&str] = &[
+    "mono", "warm", "cool", "vintage", "sepia", "noir", "vivid", "fade", "cinema", "sunset",
+    "invert",
+];
 const LUMA: [f32; 3] = [0.2126, 0.7152, 0.0722];
 
 impl ColorMatrix {
@@ -68,6 +75,33 @@ impl ColorMatrix {
                 let faded = Self::scale_offset([0.85, 0.85, 0.85], [24.0, 20.0, 14.0]);
                 faded.after(&IDENTITY.blend(&sepia, 0.65))
             }
+            "sepia" => ColorMatrix([
+                [0.393, 0.769, 0.189, 0.0],
+                [0.349, 0.686, 0.168, 0.0],
+                [0.272, 0.534, 0.131, 0.0],
+            ]),
+            "noir" => {
+                let punch = Self::scale_offset([1.35; 3], [128.0 * (1.0 - 1.35); 3]);
+                punch.after(&Self::saturation(0.0))
+            }
+            "vivid" => {
+                let punch = Self::scale_offset([1.12; 3], [128.0 * (1.0 - 1.12); 3]);
+                punch.after(&Self::saturation(1.45))
+            }
+            "fade" => {
+                let lifted = Self::scale_offset([0.82; 3], [34.0; 3]);
+                lifted.after(&Self::saturation(0.75))
+            }
+            // Teal shadows, orange highlights.
+            "cinema" => {
+                let grade = Self::scale_offset([1.1, 0.98, 0.9], [4.0, -2.0, 8.0]);
+                grade.after(&Self::saturation(1.15))
+            }
+            "sunset" => {
+                let glow = Self::scale_offset([1.15, 0.95, 0.78], [14.0, 0.0, -6.0]);
+                glow.after(&Self::saturation(1.2))
+            }
+            "invert" => Self::scale_offset([-1.0; 3], [255.0; 3]),
             _ => IDENTITY,
         }
     }
@@ -136,6 +170,16 @@ mod tests {
             speed: 1.0,
             fade_in_ms: 0,
             fade_out_ms: 0,
+            blur: 0.0,
+            vignette: 0.0,
+            grain: 0.0,
+            pixelate: 0.0,
+            sharpen: 0.0,
+            anim_in: None,
+            anim_in_ms: 0,
+            anim_out: None,
+            anim_out_ms: 0,
+            text: None,
         }
     }
 
@@ -154,6 +198,49 @@ mod tests {
         .fixed();
         let (r, g, b) = apply_fixed(&m, 200, 40, 90);
         assert!(r.abs_diff(g) <= 1 && g.abs_diff(b) <= 1);
+    }
+
+    #[test]
+    fn every_catalog_filter_changes_the_picture() {
+        for id in FILTER_IDS {
+            let m = ColorMatrix::for_clip(&TimelineClip {
+                filter: Some((*id).into()),
+                ..clip()
+            });
+            assert!(m.is_some(), "filter {id} is the identity");
+        }
+    }
+
+    #[test]
+    fn an_unknown_filter_leaves_colours_alone() {
+        let m = ColorMatrix::for_clip(&TimelineClip {
+            filter: Some("nope".into()),
+            ..clip()
+        });
+        assert!(m.is_none());
+    }
+
+    #[test]
+    fn invert_flips_each_channel() {
+        let m = ColorMatrix::for_clip(&TimelineClip {
+            filter: Some("invert".into()),
+            ..clip()
+        })
+        .unwrap()
+        .fixed();
+        assert_eq!(apply_fixed(&m, 0, 100, 255), (255, 155, 0));
+    }
+
+    #[test]
+    fn sepia_warms_a_grey() {
+        let m = ColorMatrix::for_clip(&TimelineClip {
+            filter: Some("sepia".into()),
+            ..clip()
+        })
+        .unwrap()
+        .fixed();
+        let (r, _, b) = apply_fixed(&m, 120, 120, 120);
+        assert!(r > b);
     }
 
     #[test]
