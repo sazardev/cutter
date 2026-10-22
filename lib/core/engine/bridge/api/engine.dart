@@ -13,6 +13,12 @@ import 'types.dart';
 EngineDiagnostics engineDiagnostics() =>
     RustLib.instance.api.crateApiEngineEngineDiagnostics();
 
+/// The size of the picture [spec] draws on a canvas [canvas_height] pixels
+/// tall, so the editor can frame a text without drawing it.
+TextSize measureText({required TextSpec spec, required int canvasHeight}) =>
+    RustLib.instance.api
+        .crateApiEngineMeasureText(spec: spec, canvasHeight: canvasHeight);
+
 /// Describes the file at [path]; fails when it cannot be played.
 Future<MediaInfo> probeMedia({required String path}) =>
     RustLib.instance.api.crateApiEngineProbeMedia(path: path);
@@ -31,6 +37,15 @@ Future<List<Thumbnail>> thumbnails(
 /// Peak loudness of [path] in [buckets] slices, each 0.0 to 1.0.
 Future<Float32List> waveform({required String path, required int buckets}) =>
     RustLib.instance.api.crateApiEngineWaveform(path: path, buckets: buckets);
+
+/// Cuts the subject out of the picture at [input_path] and writes it to
+/// [output_path] as a PNG with a transparent background; returns the width
+/// and height written. A picture larger than 2048 px on its long side is
+/// shrunk first.
+Future<(int, int)> removeBackground(
+        {required String inputPath, required String outputPath}) =>
+    RustLib.instance.api.crateApiEngineRemoveBackground(
+        inputPath: inputPath, outputPath: outputPath);
 
 /// Adjustments that balance the picture of [path] between [from_ms] and
 /// [to_ms], measured on a few frames: brightness towards a mid exposure,

@@ -67,6 +67,18 @@ class FakeMediaEngine implements MediaEngine {
   Future<PreviewSession> openPreview() async => session = FakePreviewSession();
 
   @override
+  TextSize measureText(TextSpec spec, int canvasHeight) {
+    // A rough box: half the font size per letter, one line height per line.
+    final lines = spec.content.split('\n');
+    final longest = lines.fold<int>(0, (a, l) => l.length > a ? l.length : a);
+    final px = spec.size * canvasHeight;
+    return TextSize(
+      width: (longest * px * 0.5).ceil() + 2,
+      height: (lines.length * px * 1.2).ceil() + 2,
+    );
+  }
+
+  @override
   Future<MediaInfo> probe(String path) async {
     final info = media[path];
     if (info == null) throw StateError('unreadable $path');
@@ -119,6 +131,22 @@ class FakeMediaEngine implements MediaEngine {
     required int toMs,
   }) async =>
       const SuggestedAdjustments(brightness: 0.2, contrast: 0.1, saturation: 0);
+
+  /// The cutouts asked for, as (input, output) paths.
+  final List<(String, String)> cutouts = [];
+
+  /// Makes [removeBackground] throw when set.
+  bool failCutout = false;
+
+  @override
+  Future<({int width, int height})> removeBackground(
+    String inputPath,
+    String outputPath,
+  ) async {
+    if (failCutout) throw StateError('cannot cut $inputPath');
+    cutouts.add((inputPath, outputPath));
+    return (width: 640, height: 480);
+  }
 }
 
 /// A video file as the engine would describe it.

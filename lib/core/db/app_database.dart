@@ -6,6 +6,8 @@ import 'package:cutter/core/db/migrations/from2To3.dart';
 import 'package:cutter/core/db/migrations/from3To4.dart';
 import 'package:cutter/core/db/migrations/from4To5.dart';
 import 'package:cutter/core/db/migrations/from5To6.dart';
+import 'package:cutter/core/db/migrations/from6To7.dart';
+import 'package:cutter/core/db/migrations/from7To8.dart';
 
 import 'package:cutter/core/db/tables/app_settings_table.dart';
 import 'package:cutter/features/editor/data/tables/editor_tables.dart';
@@ -43,7 +45,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.inMemory() : super(NativeDatabase.memory());
 
   @override
-  int get schemaVersion => 6;
+  int get schemaVersion => 8;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -54,6 +56,8 @@ class AppDatabase extends _$AppDatabase {
           from3To4: migrateFrom3To4,
           from4To5: migrateFrom4To5,
           from5To6: migrateFrom5To6,
+          from6To7: migrateFrom6To7,
+          from7To8: migrateFrom7To8,
         ),
         beforeOpen: (details) async {
           await customStatement('PRAGMA journal_mode=WAL');

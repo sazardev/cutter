@@ -4,7 +4,6 @@ import 'package:cutter/app/theme/app_theme.dart';
 import 'package:cutter/features/editor/data/engine_timeline.dart';
 import 'package:cutter/features/editor/domain/media_asset.dart';
 import 'package:cutter/features/editor/domain/relink_media.dart';
-import 'package:cutter/features/editor/presentation/editor_controller.dart';
 import 'package:cutter/features/editor/presentation/editor_providers.dart';
 import 'package:cutter/features/editor/presentation/import_flow.dart';
 import 'package:cutter/l10n/app_localizations.dart';

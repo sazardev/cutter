@@ -2,8 +2,10 @@ import 'package:cutter/core/db/app_database.dart';
 import 'package:cutter/features/editor/data/drift_project_repository.dart';
 import 'package:cutter/features/editor/data/drift_version_repository.dart';
 import 'package:cutter/features/editor/data/editor_dao.dart';
+import 'package:cutter/features/editor/data/project_snapshot_codec.dart';
 import 'package:cutter/features/editor/domain/canvas.dart';
 import 'package:cutter/features/editor/domain/clip.dart';
+import 'package:cutter/features/editor/domain/clip_text.dart';
 import 'package:cutter/features/editor/domain/clip_transform.dart';
 import 'package:cutter/features/editor/domain/layer.dart';
 import 'package:cutter/features/editor/domain/media_asset.dart';
@@ -361,6 +363,49 @@ void main() {
 
     expect(loaded!.canvas, const Canvas(width: 1080, height: 1080, fps: 60));
     expect(loaded.clipById('c1')!.transform, transform);
+  });
+
+  test('a text layer and its clips survive a round trip and a version',
+      () async {
+    const text = ClipText(
+      content: 'Hola\nmundo',
+      font: 'anton',
+      size: 0.12,
+      color: 0xFFFFCC00,
+      italic: true,
+      align: ClipTextAlign.right,
+      strokeWidth: 0.1,
+      background: 0x88000000,
+      animation: ClipTextAnimation.pop,
+    );
+    const clip = Clip(
+      id: 't1',
+      layerId: 'lt',
+      assetId: '',
+      sourceUri: '',
+      kind: MediaKind.text,
+      startMs: 500,
+      inPointMs: textSourceSpanMs,
+      outPointMs: textSourceSpanMs + 2000,
+      sourceDurationMs: 2 * textSourceSpanMs,
+      sourceWidth: 640,
+      sourceHeight: 240,
+      text: text,
+    );
+    final project = _project(
+      layers: [
+        Layer(id: 'lt', name: '', kind: MediaKind.text, clips: [clip]),
+      ],
+    );
+
+    await repository.save(project);
+    final loaded = await repository.find(project.id);
+    expect(loaded, project);
+    expect(loaded!.clipById('t1')!.text, text);
+
+    final decoded = decodeProjectSnapshot(encodeProjectSnapshot(project));
+    expect(decoded.clipById('t1')!.text, text);
+    expect(decoded, project);
   });
 
   test('a saved version keeps a snapshot and marks the project saved',

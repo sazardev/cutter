@@ -49,6 +49,7 @@ class EngineMediaInspector implements MediaInspector {
       EngineMediaKind.video => MediaKind.video,
       EngineMediaKind.image => MediaKind.image,
       EngineMediaKind.audio => MediaKind.audio,
+      EngineMediaKind.text => MediaKind.text,
     };
     final String kept;
     try {

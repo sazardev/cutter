@@ -5,6 +5,7 @@ import 'package:cutter/features/editor/data/editor_dao.dart';
 import 'package:cutter/features/editor/domain/canvas.dart';
 import 'package:cutter/features/editor/domain/clip.dart';
 import 'package:cutter/features/editor/domain/clip_crop.dart';
+import 'package:cutter/features/editor/domain/clip_text.dart';
 import 'package:cutter/features/editor/domain/clip_transform.dart';
 import 'package:cutter/features/editor/domain/editor_ports.dart';
 import 'package:cutter/features/editor/domain/layer.dart';
@@ -126,6 +127,15 @@ class DriftProjectRepository implements ProjectRepository {
       speed: row.speed,
       fadeInMs: row.fadeInMs,
       fadeOutMs: row.fadeOutMs,
+      text: row.textJson == null
+          ? null
+          : ClipText.fromJson(
+              jsonDecode(row.textJson!) as Map<String, dynamic>,
+            ),
+      animIn: row.animIn,
+      animInMs: row.animInMs,
+      animOut: row.animOut,
+      animOutMs: row.animOutMs,
     );
   }
 
@@ -204,6 +214,11 @@ class DriftProjectRepository implements ProjectRepository {
       speed: clip.speed,
       fadeInMs: clip.fadeInMs,
       fadeOutMs: clip.fadeOutMs,
+      textJson: clip.text == null ? null : jsonEncode(clip.text!.toJson()),
+      animIn: clip.animIn,
+      animInMs: clip.animInMs,
+      animOut: clip.animOut,
+      animOutMs: clip.animOutMs,
     );
   }
 }

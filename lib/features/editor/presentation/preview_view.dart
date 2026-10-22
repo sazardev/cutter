@@ -196,9 +196,14 @@ class _PreviewViewState extends ConsumerState<PreviewView> {
       controller.selectClip(hit.id);
       _doubleTap.tap(hit.id);
     } else if (_doubleTap.tap(hit.id)) {
-      // A second tap on the selected picture opens its full options.
+      // A second tap on the selected picture opens its full options; on a
+      // text, the text tool, to type over it.
       HapticFeedback.selectionClick();
-      ref.read(clipDetailsProvider.notifier).state = hit.id;
+      if (hit.kind == MediaKind.text) {
+        ref.read(activeToolProvider.notifier).state = EditorTool.text;
+      } else {
+        ref.read(clipDetailsProvider.notifier).state = hit.id;
+      }
     }
   }
 

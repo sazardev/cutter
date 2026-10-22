@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:cutter/app/theme/app_theme.dart';
 import 'package:cutter/features/capture/presentation/capture_panel.dart';
 import 'package:cutter/features/capture/presentation/capture_providers.dart';
@@ -9,13 +11,17 @@ import 'package:cutter/features/editor/presentation/editor_providers.dart';
 import 'package:cutter/features/editor/presentation/layout/editor_layout.dart';
 import 'package:cutter/features/editor/presentation/playback_controller.dart';
 import 'package:cutter/features/editor/presentation/studio/clip_studio_page.dart';
+import 'package:cutter/features/editor/presentation/tools/animation_presets.dart';
+import 'package:cutter/features/editor/presentation/tools/transition_section.dart';
 import 'package:cutter/features/editor/presentation/tools/canvas_panel.dart';
 import 'package:cutter/features/editor/presentation/tools/diagnostics_panel.dart';
 import 'package:cutter/features/editor/presentation/tools/editor_tool.dart';
 import 'package:cutter/features/editor/presentation/tools/export_panel.dart';
 import 'package:cutter/features/editor/presentation/tools/layout_panel.dart';
 import 'package:cutter/features/editor/presentation/tools/media_bank_panel.dart';
+import 'package:cutter/features/editor/presentation/tools/panel_kit.dart';
 import 'package:cutter/features/editor/presentation/tools/project_settings_panel.dart';
+import 'package:cutter/features/editor/presentation/tools/text_panel.dart';
 import 'package:cutter/features/editor/presentation/tools/transform_panel.dart';
 import 'package:cutter/features/editor/presentation/tools/versions_panel.dart';
 import 'package:cutter/l10n/app_localizations.dart';
@@ -25,7 +31,19 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /// Identifiers of the filters the engine renders.
-const List<String> filterIds = ['mono', 'warm', 'cool', 'vintage'];
+const List<String> filterIds = [
+  'mono',
+  'warm',
+  'cool',
+  'vintage',
+  'sepia',
+  'noir',
+  'vivid',
+  'fade',
+  'cinema',
+  'sunset',
+  'invert',
+];
 
 /// The localized name of filter [id].
 String filterLabel(AppLocalizations l10n, String id) => switch (id) {
@@ -33,6 +51,27 @@ String filterLabel(AppLocalizations l10n, String id) => switch (id) {
       'warm' => l10n.filterWarm,
       'cool' => l10n.filterCool,
       'vintage' => l10n.filterVintage,
+      'sepia' => l10n.filterSepia,
+      'noir' => l10n.filterNoir,
+      'vivid' => l10n.filterVivid,
+      'fade' => l10n.filterFade,
+      'cinema' => l10n.filterCinema,
+      'sunset' => l10n.filterSunset,
+      'invert' => l10n.filterInvert,
+      _ => id,
+    };
+
+/// The localized name of animation [id].
+String animationLabel(AppLocalizations l10n, String id) => switch (id) {
+      'fade' => l10n.animationFade,
+      'slide_left' => l10n.animationSlideLeft,
+      'slide_right' => l10n.animationSlideRight,
+      'slide_up' => l10n.animationSlideUp,
+      'slide_down' => l10n.animationSlideDown,
+      'zoom_in' => l10n.animationZoomIn,
+      'zoom_out' => l10n.animationZoomOut,
+      'spin' => l10n.animationSpin,
+      'pop' => l10n.animationPop,
       _ => id,
     };
 
@@ -67,6 +106,16 @@ const List<EditorTool> projectTools = [
   EditorTool.project,
   EditorTool.diagnostics,
 ];
+
+/// Opens the editor of [clip]: the text tool for a text, the clip studio
+/// for anything else.
+void editClip(BuildContext context, WidgetRef ref, Clip clip) {
+  if (clip.kind == MediaKind.text) {
+    ref.read(activeToolProvider.notifier).state = EditorTool.text;
+  } else {
+    unawaited(openClipStudio(context, clip.id));
+  }
+}
 
 /// The project tools this device shows: Capture only where there is a camera
 /// and a microphone to capture with (phones and tablets).
@@ -193,6 +242,8 @@ class EditorToolbar extends ConsumerWidget {
       ];
     } else {
       final visual = clip.kind != MediaKind.audio;
+      // A text has no sound and no picture to filter or adjust.
+      final colourable = visual && clip.kind != MediaKind.text;
       tools = [
         _ToolButton(
           icon: Icons.keyboard_arrow_down,
@@ -202,7 +253,7 @@ class EditorToolbar extends ConsumerWidget {
         _ToolButton(
           icon: Icons.edit_outlined,
           label: l10n.editClipAction,
-          onPressed: () => openClipStudio(context, clip.id),
+          onPressed: () => editClip(context, ref, clip),
         ),
         _ToolButton(
           icon: Icons.content_cut,
@@ -226,21 +277,21 @@ class EditorToolbar extends ConsumerWidget {
             selected: !clip.transform.isIdentity,
             onPressed: () => open(EditorTool.transform),
           ),
-        if (clip.kind != MediaKind.image)
+        if (clip.kind != MediaKind.image && clip.kind != MediaKind.text)
           _ToolButton(
             icon: EditorTool.volume.icon,
             label: EditorTool.volume.label(l10n),
             selected: clip.volume < 1,
             onPressed: () => open(EditorTool.volume),
           ),
-        if (visual)
+        if (colourable)
           _ToolButton(
             icon: EditorTool.filters.icon,
             label: EditorTool.filters.label(l10n),
             selected: clip.filterId != null,
             onPressed: () => open(EditorTool.filters),
           ),
-        if (visual)
+        if (colourable)
           _ToolButton(
             icon: EditorTool.adjust.icon,
             label: EditorTool.adjust.label(l10n),
@@ -285,6 +336,7 @@ Widget toolContent(EditorTool tool) => switch (tool) {
       EditorTool.filters => const FilterPicker(),
       EditorTool.adjust => const AdjustPanel(),
       EditorTool.transform => const TransformPanel(),
+      EditorTool.text => const TextPanel(),
       EditorTool.media => const MediaBankPanel(),
       EditorTool.capture => const CapturePanel(),
       EditorTool.canvas => const CanvasPanel(),
@@ -357,25 +409,24 @@ class _VolumePanelState extends ConsumerState<VolumePanel> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final theme = Theme.of(context);
     final editor = ref.watch(editorControllerProvider).valueOrNull;
     final clip = editor?.selectedClip;
     final layer = editor?.selectedLayer;
     if (clip == null || layer == null) return const SizedBox.shrink();
     final value = _dragging ?? clip.volume;
     final controller = ref.read(editorControllerProvider.notifier);
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.start,
+    final percent = (value * 100).round();
+    return ToolSection(
+      icon: Icons.volume_up_outlined,
+      title: l10n.volumeTool,
+      summary: layer.muted ? l10n.muteLayerAction : '$percent%',
+      initiallyExpanded: true,
       children: [
-        Text(
-          l10n.volumeLabel((value * 100).round()),
-          style: theme.textTheme.titleSmall,
-        ),
-        Slider(
+        SliderTile(
+          title: l10n.volumeLabel(percent),
+          valueLabel: '$percent%',
           value: value,
           divisions: 20,
-          label: '${(value * 100).round()}%',
           onChanged: (v) => setState(() => _dragging = v),
           onChangeEnd: (v) async {
             setState(() => _dragging = null);
@@ -383,7 +434,7 @@ class _VolumePanelState extends ConsumerState<VolumePanel> {
           },
         ),
         SwitchListTile(
-          contentPadding: EdgeInsets.zero,
+          contentPadding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
           title: Text(l10n.muteLayerAction),
           value: layer.muted,
           onChanged: (muted) =>
@@ -410,23 +461,33 @@ class FilterPicker extends ConsumerWidget {
       (null, l10n.filterNone, Icons.block),
       for (final id in filterIds) (id, filterLabel(l10n, id), _filterIcon(id)),
     ];
+    final current = options.firstWhere(
+      (o) => o.$1 == clip.filterId,
+      orElse: () => options.first,
+    );
     return Column(
       mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Wrap(
-          spacing: AppSpacing.sm,
-          runSpacing: AppSpacing.sm,
+        ToolSection(
+          icon: Icons.auto_awesome_outlined,
+          title: l10n.filtersLabel,
+          summary: current.$2,
+          initiallyExpanded: true,
           children: [
             for (final (id, label, icon) in options)
-              ChoiceChip(
-                avatar: Icon(icon, size: 18),
-                label: Text(label),
+              OptionTile(
+                icon: icon,
+                title: label,
                 selected: clip.filterId == id,
-                onSelected: (_) => controller.setFilter(id),
+                onTap: () => controller.setFilter(id),
               ),
           ],
         ),
+        const EffectsPanel(),
+        const TransitionSection(),
+        const AnimationPresets(),
+        const AnimationPanel(),
       ],
     );
   }
@@ -436,8 +497,192 @@ class FilterPicker extends ConsumerWidget {
         'warm' => Icons.wb_sunny_outlined,
         'cool' => Icons.ac_unit,
         'vintage' => Icons.filter_vintage_outlined,
+        'sepia' => Icons.brightness_5_outlined,
+        'noir' => Icons.contrast,
+        'vivid' => Icons.palette_outlined,
+        'fade' => Icons.blur_on,
+        'cinema' => Icons.movie_filter_outlined,
+        'sunset' => Icons.wb_twilight,
+        'invert' => Icons.invert_colors,
         _ => Icons.auto_awesome,
       };
+}
+
+/// How the selected clip comes in and goes out: an animation and a length
+/// for each side. The length slider saves when let go.
+class AnimationPanel extends ConsumerStatefulWidget {
+  /// Creates the animation panel.
+  const AnimationPanel({super.key});
+
+  @override
+  ConsumerState<AnimationPanel> createState() => _AnimationPanelState();
+}
+
+class _AnimationPanelState extends ConsumerState<AnimationPanel> {
+  static const _defaultMs = 500;
+
+  /// Length being dragged, by side (true is the entrance).
+  final Map<bool, int> _dragged = {};
+
+  /// Saves one side of the clip: [id] (null removes it) and [ms]; the other
+  /// side stays as it is. A side with an id and no length gets the default.
+  Future<void> _save(
+    Clip clip, {
+    required bool enter,
+    String? id,
+    int? ms,
+    bool removed = false,
+  }) async {
+    final stored = enter ? clip.animInMs : clip.animOutMs;
+    final side = (
+      removed ? null : (id ?? (enter ? clip.animIn : clip.animOut)),
+      ms ?? (stored > 0 ? stored : _defaultMs),
+    );
+    await ref.read(editorControllerProvider.notifier).setAnimation(
+          animIn: enter ? side.$1 : clip.animIn,
+          animInMs: enter ? side.$2 : clip.animInMs,
+          animOut: enter ? clip.animOut : side.$1,
+          animOutMs: enter ? clip.animOutMs : side.$2,
+        );
+    if (mounted) setState(_dragged.clear);
+  }
+
+  Widget _row(
+    BuildContext context,
+    Clip clip, {
+    required bool enter,
+  }) {
+    final l10n = AppLocalizations.of(context)!;
+    final current = enter ? clip.animIn : clip.animOut;
+    final stored = enter ? clip.animInMs : clip.animOutMs;
+    final ms = _dragged[enter] ?? stored;
+    final name = enter ? l10n.animationIn : l10n.animationOut;
+    return ToolSection(
+      icon: enter ? Icons.login : Icons.logout,
+      title: name,
+      summary:
+          current == null ? l10n.animationNone : animationLabel(l10n, current),
+      children: [
+        OptionTile(
+          title: l10n.animationNone,
+          selected: current == null,
+          onTap: () => _save(clip, enter: enter, removed: true),
+        ),
+        for (final id in clipAnimationIds)
+          OptionTile(
+            title: animationLabel(l10n, id),
+            selected: current == id,
+            onTap: () => _save(clip, enter: enter, id: id),
+          ),
+        if (current != null)
+          SliderTile(
+            title: l10n.animationDurationLabel(
+              name,
+              (ms / 1000).toStringAsFixed(1),
+            ),
+            value: ms.clamp(100, maxClipAnimationMs).toDouble(),
+            min: 100,
+            max: maxClipAnimationMs.toDouble(),
+            divisions: 29,
+            onChanged: (v) => setState(() => _dragged[enter] = v.round()),
+            onChangeEnd: (v) => _save(clip, enter: enter, ms: v.round()),
+          ),
+      ],
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final clip = ref.watch(editorControllerProvider).valueOrNull?.selectedClip;
+    // A text clip has its own animation; sound has no picture.
+    if (clip == null || clip.kind == MediaKind.audio || clip.text != null) {
+      return const SizedBox.shrink();
+    }
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        _row(context, clip, enter: true),
+        _row(context, clip, enter: false),
+      ],
+    );
+  }
+}
+
+/// Blur, vignette, grain, pixelate and sharpen of the selected clip. Moving
+/// a slider updates the preview live; letting go saves.
+class EffectsPanel extends ConsumerStatefulWidget {
+  /// Creates the effects panel.
+  const EffectsPanel({super.key});
+
+  @override
+  ConsumerState<EffectsPanel> createState() => _EffectsPanelState();
+}
+
+class _EffectsPanelState extends ConsumerState<EffectsPanel> {
+  Map<String, double>? _draft;
+  String? _clipId;
+
+  String _name(AppLocalizations l10n, String key) => switch (key) {
+        'blur' => l10n.effectBlur,
+        'vignette' => l10n.effectVignette,
+        'grain' => l10n.effectGrain,
+        'pixelate' => l10n.effectPixelate,
+        _ => l10n.effectSharpen,
+      };
+
+  Future<void> _commit() async {
+    final draft = _draft;
+    if (draft == null) return;
+    await ref.read(editorControllerProvider.notifier).setAdjustments(draft);
+    if (mounted) setState(() => _draft = null);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final clip = ref.watch(editorControllerProvider).valueOrNull?.selectedClip;
+    if (clip == null) return const SizedBox.shrink();
+    if (_clipId != clip.id) {
+      _clipId = clip.id;
+      _draft = null;
+    }
+    final values = _draft ?? clip.adjustments;
+    final playback = ref.read(playbackControllerProvider.notifier);
+    final active = effectKeys.where((key) => (values[key] ?? 0) != 0).length;
+    return ToolSection(
+      icon: Icons.blur_on,
+      title: l10n.effectsLabel,
+      summary: active == 0 ? null : '$active',
+      children: [
+        for (final key in effectKeys)
+          SliderTile(
+            title: _name(l10n, key),
+            valueLabel: '${((values[key] ?? 0) * 100).round()}%',
+            value: values[key] ?? 0,
+            divisions: 20,
+            onChanged: (v) {
+              setState(() => _draft = {...values, key: v});
+              playback.previewAdjustments(clip.id, _draft);
+            },
+            onChangeEnd: (_) => _commit(),
+          ),
+        ListTile(
+          contentPadding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
+          leading: const Icon(Icons.restart_alt),
+          title: Text(l10n.resetAction),
+          enabled: active != 0,
+          onTap: () async {
+            _draft = {
+              ...values,
+              for (final key in effectKeys) key: 0,
+            };
+            await _commit();
+          },
+        ),
+      ],
+    );
+  }
 }
 
 /// Brightness, contrast and saturation of the selected clip. Moving a
@@ -454,7 +699,7 @@ class _AdjustPanelState extends ConsumerState<AdjustPanel> {
   Map<String, double>? _draft;
   String? _clipId;
 
-  static const _keys = ['brightness', 'contrast', 'saturation'];
+  static const _keys = colorAdjustmentKeys;
 
   String _label(AppLocalizations l10n, String key, double value) {
     final shown = (value * 100).round().toString();
@@ -475,7 +720,6 @@ class _AdjustPanelState extends ConsumerState<AdjustPanel> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final theme = Theme.of(context);
     final clip = ref.watch(editorControllerProvider).valueOrNull?.selectedClip;
     if (clip == null) return const SizedBox.shrink();
     if (_clipId != clip.id) {
@@ -484,54 +728,41 @@ class _AdjustPanelState extends ConsumerState<AdjustPanel> {
     }
     final values = _draft ?? clip.adjustments;
     final playback = ref.read(playbackControllerProvider.notifier);
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.start,
+    final untouched = _keys.every((key) => (values[key] ?? 0) == 0);
+    return ToolSection(
+      icon: Icons.tune,
+      title: l10n.adjustmentsLabel,
+      initiallyExpanded: true,
       children: [
-        Row(
-          children: [
-            Expanded(
-              child: Text(
-                l10n.adjustmentsLabel,
-                style: theme.textTheme.titleSmall,
-              ),
-            ),
-            TextButton.icon(
-              onPressed: () => ref
-                  .read(editorControllerProvider.notifier)
-                  .autoAdjust(clip.id),
-              icon: const Icon(Icons.auto_fix_high, size: 18),
-              label: Text(l10n.autoAdjustAction),
-            ),
-            TextButton(
-              onPressed: values.values.every((v) => v == 0)
-                  ? null
-                  : () async {
-                      _draft = {for (final key in _keys) key: 0};
-                      await _commit(clip);
-                    },
-              child: Text(l10n.resetAction),
-            ),
-          ],
+        ListTile(
+          contentPadding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
+          leading: const Icon(Icons.auto_fix_high),
+          title: Text(l10n.autoAdjustAction),
+          onTap: () =>
+              ref.read(editorControllerProvider.notifier).autoAdjust(clip.id),
         ),
-        for (final key in _keys) ...[
-          Text(
-            _label(l10n, key, values[key] ?? 0),
-            style: theme.textTheme.bodyMedium,
-          ),
-          Slider(
-            value: (values[key] ?? 0).clamp(adjustmentMin, adjustmentMax),
+        for (final key in _keys)
+          SliderTile(
+            title: _label(l10n, key, values[key] ?? 0),
+            value: values[key] ?? 0,
             min: adjustmentMin,
             divisions: 40,
             onChanged: (v) {
-              setState(() {
-                _draft = {...values, key: v};
-              });
+              setState(() => _draft = {...values, key: v});
               playback.previewAdjustments(clip.id, _draft);
             },
             onChangeEnd: (_) => _commit(clip),
           ),
-        ],
+        ListTile(
+          contentPadding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
+          leading: const Icon(Icons.restart_alt),
+          title: Text(l10n.resetAction),
+          enabled: !untouched,
+          onTap: () async {
+            _draft = {...values, for (final key in _keys) key: 0};
+            await _commit(clip);
+          },
+        ),
       ],
     );
   }
@@ -558,17 +789,6 @@ class ClipPropertiesPanel extends ConsumerWidget {
     final playhead =
         ref.watch(playbackControllerProvider.select((p) => p.positionMs));
     if (clip == null) return const SizedBox.shrink();
-    Widget section(String title, Widget child) => Padding(
-          padding: const EdgeInsets.only(top: AppSpacing.md),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Text(title, style: theme.textTheme.titleSmall),
-              const SizedBox(height: AppSpacing.xs),
-              child,
-            ],
-          ),
-        );
     return Material(
       color: scheme.surfaceContainerLow,
       child: ListView(
@@ -597,7 +817,7 @@ class ClipPropertiesPanel extends ConsumerWidget {
               _ToolButton(
                 icon: Icons.edit_outlined,
                 label: l10n.editClipAction,
-                onPressed: () => openClipStudio(context, clip.id),
+                onPressed: () => editClip(context, ref, clip),
               ),
               _ToolButton(
                 icon: Icons.content_cut,
@@ -624,13 +844,14 @@ class ClipPropertiesPanel extends ConsumerWidget {
               ),
             ],
           ),
-          if (clip.kind != MediaKind.audio)
-            section(EditorTool.transform.label(l10n), const TransformPanel()),
-          if (clip.kind != MediaKind.image)
-            section(EditorTool.volume.label(l10n), const VolumePanel()),
-          if (clip.kind != MediaKind.audio) ...[
-            section(EditorTool.filters.label(l10n), const FilterPicker()),
-            section(EditorTool.adjust.label(l10n), const AdjustPanel()),
+          const SizedBox(height: AppSpacing.md),
+          if (clip.kind == MediaKind.text) const TextPanel(),
+          if (clip.kind != MediaKind.audio) const TransformPanel(),
+          if (clip.kind != MediaKind.image && clip.kind != MediaKind.text)
+            const VolumePanel(),
+          if (clip.kind != MediaKind.audio && clip.kind != MediaKind.text) ...[
+            const FilterPicker(),
+            const AdjustPanel(),
           ],
         ],
       ),

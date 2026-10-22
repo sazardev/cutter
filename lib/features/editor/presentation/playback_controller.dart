@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:cutter/core/engine/media_engine.dart';
 import 'package:cutter/features/editor/data/engine_timeline.dart';
+import 'package:cutter/features/editor/domain/clip_text.dart';
 import 'package:cutter/features/editor/domain/clip_transform.dart';
 import 'package:cutter/features/editor/domain/project.dart';
 import 'package:cutter/features/editor/presentation/editor_providers.dart';
@@ -62,6 +63,7 @@ class PlaybackController extends AutoDisposeNotifier<PlaybackUi> {
   Project? _project;
   final Map<String, Map<String, double>> _adjustmentPreviews = {};
   final Map<String, ClipTransform> _transformPreviews = {};
+  final Map<String, ClipText> _textPreviews = {};
   String? _isolated;
   bool _disposed = false;
   (int, int)? _bounds;
@@ -81,6 +83,7 @@ class PlaybackController extends AutoDisposeNotifier<PlaybackUi> {
           _project = next;
           _adjustmentPreviews.clear();
           _transformPreviews.clear();
+          _textPreviews.clear();
           _push();
         },
         fireImmediately: true,
@@ -161,6 +164,7 @@ class PlaybackController extends AutoDisposeNotifier<PlaybackUi> {
             ref.read(missingSourcesProvider).valueOrNull ?? const {},
         adjustmentOverrides: _adjustmentPreviews,
         transformOverrides: _transformPreviews,
+        textOverrides: _textPreviews,
       ),
     );
   }
@@ -217,6 +221,17 @@ class PlaybackController extends AutoDisposeNotifier<PlaybackUi> {
       _transformPreviews.remove(clipId);
     } else {
       _transformPreviews[clipId] = transform;
+    }
+    _push();
+  }
+
+  /// Shows [text] on clip [clipId] while it is being typed or styled; null
+  /// goes back to the saved one.
+  void previewText(String clipId, ClipText? text) {
+    if (text == null) {
+      _textPreviews.remove(clipId);
+    } else {
+      _textPreviews[clipId] = text;
     }
     _push();
   }

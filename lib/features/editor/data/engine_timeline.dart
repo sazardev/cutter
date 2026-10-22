@@ -1,5 +1,6 @@
 import 'package:cutter/core/engine/media_engine.dart';
 import 'package:cutter/features/editor/domain/clip.dart';
+import 'package:cutter/features/editor/domain/clip_text.dart';
 import 'package:cutter/features/editor/domain/clip_transform.dart';
 import 'package:cutter/features/editor/domain/media_asset.dart';
 import 'package:cutter/features/editor/domain/project.dart';
@@ -9,16 +10,44 @@ EngineMediaKind engineKindOf(MediaKind kind) => switch (kind) {
       MediaKind.video => EngineMediaKind.video,
       MediaKind.image => EngineMediaKind.image,
       MediaKind.audio => EngineMediaKind.audio,
+      MediaKind.text => EngineMediaKind.text,
     };
+
+/// The text the engine draws for [text].
+TextSpec engineTextOf(ClipText text) => TextSpec(
+      content: text.content,
+      font: text.font,
+      size: text.size,
+      color: text.color,
+      bold: text.bold,
+      italic: text.italic,
+      align: switch (text.align) {
+        ClipTextAlign.left => TextAlign.left,
+        ClipTextAlign.center => TextAlign.center,
+        ClipTextAlign.right => TextAlign.right,
+      },
+      strokeColor: text.strokeColor,
+      strokeWidth: text.strokeWidth,
+      shadow: text.shadow,
+      background: text.background,
+      letterSpacing: text.letterSpacing,
+      animation: switch (text.animation) {
+        ClipTextAnimation.none => TextAnimation.none,
+        ClipTextAnimation.fade => TextAnimation.fade,
+        ClipTextAnimation.pop => TextAnimation.pop,
+        ClipTextAnimation.slideUp => TextAnimation.slideUp,
+      },
+    );
 
 /// A file path for a stored source URI: clips store plain paths, older ones
 /// `file://` URIs.
 String filePathOf(String uri) =>
     uri.startsWith('file://') ? Uri.parse(uri).toFilePath() : uri;
 
-/// What the engine renders for [project]. [adjustmentOverrides] and
-/// [transformOverrides] replace the values of clips by id, so a slider or a
-/// gesture shows its result before it is saved. Clips whose source is in
+/// What the engine renders for [project]. [adjustmentOverrides],
+/// [transformOverrides] and [textOverrides] replace the values of clips by
+/// id, so a slider, a gesture or typing shows its result before it is
+/// saved. Clips whose source is in
 /// [missingSources] are left out, so a file that went missing never reaches
 /// the engine.
 Timeline engineTimelineOf(
@@ -26,6 +55,7 @@ Timeline engineTimelineOf(
   Set<String> missingSources = const {},
   Map<String, Map<String, double>> adjustmentOverrides = const {},
   Map<String, ClipTransform> transformOverrides = const {},
+  Map<String, ClipText> textOverrides = const {},
 }) {
   return Timeline(
     width: project.canvas.width,
@@ -70,6 +100,19 @@ Timeline engineTimelineOf(
                     speed: clip.speed,
                     fadeInMs: clip.fadeInMs,
                     fadeOutMs: clip.fadeOutMs,
+                    text: switch (textOverrides[clip.id] ?? clip.text) {
+                      final text? => engineTextOf(text),
+                      null => null,
+                    },
+                    blur: adjustments['blur'] ?? 0,
+                    vignette: adjustments['vignette'] ?? 0,
+                    grain: adjustments['grain'] ?? 0,
+                    pixelate: adjustments['pixelate'] ?? 0,
+                    sharpen: adjustments['sharpen'] ?? 0,
+                    animIn: clip.animIn,
+                    animInMs: clip.animInMs,
+                    animOut: clip.animOut,
+                    animOutMs: clip.animOutMs,
                   );
                 }(),
           ],
@@ -91,6 +134,18 @@ Timeline engineTimelineOf(
   double canvasHeight,
 ) {
   if (clip.sourceWidth <= 0 || clip.sourceHeight <= 0) return null;
+  if (clip.kind == MediaKind.text) {
+    // A text is drawn at its own size: its picture is measured at a canvas
+    // of [textReferenceHeight] and grows with the real canvas.
+    final unit = canvasHeight / textReferenceHeight;
+    return (
+      cx: canvasWidth / 2 + transform.x * canvasWidth,
+      cy: canvasHeight / 2 + transform.y * canvasHeight,
+      width: clip.sourceWidth * unit * transform.scale,
+      height: clip.sourceHeight * unit * transform.scale,
+      rotation: transform.rotation,
+    );
+  }
   // Fit and fill work on the kept part of the picture, as in the engine.
   final sw = clip.sourceWidth * clip.crop.keptWidth;
   final sh = clip.sourceHeight * clip.crop.keptHeight;

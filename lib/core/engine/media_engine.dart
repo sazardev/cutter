@@ -64,6 +64,10 @@ abstract interface class MediaEngine {
   /// Renders [timeline] into an MP4 file at [path].
   ExportTask export(Timeline timeline, ExportSettings settings, String path);
 
+  /// The size of the picture [spec] draws on a canvas [canvasHeight] pixels
+  /// tall; answers at once, so an editor can frame a text as it is typed.
+  TextSize measureText(TextSpec spec, int canvasHeight);
+
   /// Counters and recent log lines of the engine.
   EngineDiagnostics diagnostics();
 
@@ -74,6 +78,14 @@ abstract interface class MediaEngine {
     required int fromMs,
     required int toMs,
   });
+
+  /// Cuts the subject out of the picture at [inputPath] and writes it to
+  /// [outputPath] as a PNG with a transparent background. Returns the size
+  /// written. Throws when the picture cannot be read or written.
+  Future<({int width, int height})> removeBackground(
+    String inputPath,
+    String outputPath,
+  );
 }
 
 /// The engine. `main` overrides it once the native library is loaded;

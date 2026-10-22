@@ -5,7 +5,10 @@ import 'package:drift/drift.dart';
 // ignore_for_file: public_member_api_docs, recursive_getters
 
 /// Layer kinds allowed by the `kind` CHECK constraint.
-const editorLayerKinds = ['video', 'image', 'audio'];
+const editorLayerKinds = ['video', 'image', 'audio', 'text'];
+
+/// Media kinds the bank allows: files only, a text has none.
+const editorMediaKinds = ['video', 'image', 'audio'];
 
 /// Clip fit modes allowed by the `fit` CHECK constraint.
 const editorClipFits = ['fit', 'fill'];
@@ -132,6 +135,23 @@ class EditorClips extends Table {
 
   IntColumn get fadeOutMs => integer().withDefault(const Constant(0))();
 
+  // Version 7: the words and look of a text clip.
+
+  /// JSON of the text (see ClipText); null for clips that are not text.
+  TextColumn get textJson => text().nullable()();
+
+  // Version 8: how a clip comes in and goes out (see ClipAnimation).
+
+  /// Id of the entrance animation; null for none.
+  TextColumn get animIn => text().nullable()();
+
+  IntColumn get animInMs => integer().withDefault(const Constant(0))();
+
+  /// Id of the exit animation; null for none.
+  TextColumn get animOut => text().nullable()();
+
+  IntColumn get animOutMs => integer().withDefault(const Constant(0))();
+
   @override
   Set<Column<Object>> get primaryKey => {id};
 }
@@ -203,7 +223,7 @@ class EditorMedia extends Table {
 
   TextColumn get path => text()();
 
-  TextColumn get kind => text().check(kind.isIn(editorLayerKinds))();
+  TextColumn get kind => text().check(kind.isIn(editorMediaKinds))();
 
   IntColumn get durationMs => integer()();
 

@@ -13,6 +13,8 @@ enum MediaKind {
   /// An audio file.
   audio,
 
+  /// Words drawn by the engine; a text clip has no file.
+  text,
 }
 
 /// An imported media file as the engine described it.

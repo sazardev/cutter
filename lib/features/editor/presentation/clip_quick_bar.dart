@@ -2,7 +2,6 @@ import 'package:cutter/app/theme/app_theme.dart';
 import 'package:cutter/features/editor/presentation/clip_tools.dart';
 import 'package:cutter/features/editor/presentation/editor_providers.dart';
 import 'package:cutter/features/editor/presentation/playback_controller.dart';
-import 'package:cutter/features/editor/presentation/studio/clip_studio_page.dart';
 import 'package:cutter/features/editor/presentation/tools/editor_tool.dart';
 import 'package:cutter/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
@@ -58,7 +57,7 @@ class ClipQuickBar extends ConsumerWidget {
             button(
               Icons.edit_outlined,
               l10n.editClipAction,
-              () => openClipStudio(context, clip.id),
+              () => editClip(context, ref, clip),
             ),
             button(
               Icons.copy_outlined,

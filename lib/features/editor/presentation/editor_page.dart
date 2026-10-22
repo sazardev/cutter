@@ -1,7 +1,7 @@
 import 'package:cutter/app/theme/app_theme.dart';
 import 'package:cutter/app/theme/app_tokens.dart'
     show WindowClass, windowClassOf;
-import 'package:cutter/features/editor/domain/import_media.dart';
+import 'package:cutter/features/editor/presentation/add_layer_menu.dart';
 import 'package:cutter/features/editor/presentation/checkpoint_labels.dart';
 import 'package:cutter/features/editor/presentation/clip_quick_bar.dart';
 import 'package:cutter/features/editor/presentation/clip_tools.dart';
@@ -99,11 +99,7 @@ class _EditorPageState extends ConsumerState<EditorPage> {
   /// theme, so dialogs and sheets they open are dark too.
   EditorActions _actionsFor(BuildContext themed) => EditorActions(
         onAddMedia: () => pickAndImport(themed, ref),
-        onAddLayer: () => pickAndImport(
-          themed,
-          ref,
-          placement: ImportPlacement.overlay,
-        ),
+        onAddLayer: () => showAddLayerMenu(themed, ref),
         onSplit: _split,
       );
 

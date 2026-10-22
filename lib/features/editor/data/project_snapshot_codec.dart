@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:cutter/features/editor/domain/canvas.dart';
 import 'package:cutter/features/editor/domain/clip.dart';
 import 'package:cutter/features/editor/domain/clip_crop.dart';
+import 'package:cutter/features/editor/domain/clip_text.dart';
 import 'package:cutter/features/editor/domain/clip_transform.dart';
 import 'package:cutter/features/editor/domain/layer.dart';
 import 'package:cutter/features/editor/domain/media_asset.dart';
@@ -10,8 +11,8 @@ import 'package:cutter/features/editor/domain/project.dart';
 
 /// Version of the snapshot format, stored in every snapshot so a later
 /// format can still read older versions. Format 2 adds crop, speed and
-/// fades; format 1 snapshots read with their defaults.
-const snapshotFormat = 2;
+/// fades; format 3 adds text clips; format 4 adds animations. Older snapshots read with defaults.
+const snapshotFormat = 4;
 
 /// A whole project as JSON, for saved versions.
 String encodeProjectSnapshot(Project project) => jsonEncode({
@@ -61,6 +62,11 @@ Map<String, Object?> _clip(Clip clip) => {
       'speed': clip.speed,
       'fadeInMs': clip.fadeInMs,
       'fadeOutMs': clip.fadeOutMs,
+      'text': clip.text?.toJson(),
+      'animIn': clip.animIn,
+      'animInMs': clip.animInMs,
+      'animOut': clip.animOut,
+      'animOutMs': clip.animOutMs,
       'transform': {
         'x': clip.transform.x,
         'y': clip.transform.y,
@@ -143,6 +149,13 @@ Clip _clipFrom(Map<String, dynamic> map, String layerId) {
     speed: (map['speed'] as num?)?.toDouble() ?? 1,
     fadeInMs: map['fadeInMs'] as int? ?? 0,
     fadeOutMs: map['fadeOutMs'] as int? ?? 0,
+    text: map['text'] == null
+        ? null
+        : ClipText.fromJson(map['text'] as Map<String, dynamic>),
+    animIn: map['animIn'] as String?,
+    animInMs: map['animInMs'] as int? ?? 0,
+    animOut: map['animOut'] as String?,
+    animOutMs: map['animOutMs'] as int? ?? 0,
     transform: ClipTransform(
       x: (t['x'] as num).toDouble(),
       y: (t['y'] as num).toDouble(),

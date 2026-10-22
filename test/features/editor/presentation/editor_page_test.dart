@@ -148,6 +148,60 @@ Future<AppLocalizations> _strings(Locale locale) =>
     AppLocalizations.delegate.load(locale);
 
 void main() {
+  group('text', () {
+    testWidgets('the text tool adds a text, types over it and styles it',
+        (tester) async {
+      final db = AppDatabase.inMemory();
+      addTearDown(() => tester.runAsync(db.close));
+      await tester.runAsync(() => _seed(db, layerKind: 'video'));
+      final l10n = await _strings(const Locale('en'));
+      final engine = await _pumpPage(tester, db, const Locale('en'));
+
+      await tester.tap(find.byTooltip(l10n.addLayerAction));
+      // The sheet is pushed on one frame and slides up over the next ones.
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 500));
+      await tester.tap(find.text(l10n.addLayerTextHint));
+      // The sheet closes, then the text is saved.
+      for (var i = 0; i < 3; i++) {
+        await _settle(tester);
+      }
+
+      expect(
+        engine.session!.timelines.last.layers.map((l) => l.kind),
+        contains(EngineMediaKind.text),
+      );
+      Text? sentText() {
+        final layer = engine.session!.timelines.last.layers
+            .firstWhere((l) => l.kind == EngineMediaKind.text);
+        return layer.clips.single.text == null
+            ? null
+            : Text(layer.clips.single.text!.content);
+      }
+
+      expect(sentText()!.data, l10n.textDefaultContent);
+
+      await tester.enterText(find.byType(TextField), 'Hola mundo');
+      await tester.pump(const Duration(milliseconds: 500));
+      await _settle(tester);
+      expect(sentText()!.data, 'Hola mundo');
+
+      await tester.ensureVisible(find.text(l10n.textSectionFont));
+      await tester.tap(find.text(l10n.textSectionFont));
+      await _settle(tester);
+      await tester.pump(const Duration(milliseconds: 400));
+      await tester.ensureVisible(find.text('Anton'));
+      await tester.tap(find.text('Anton'));
+      await _settle(tester);
+      final clip = engine.session!.timelines.last.layers
+          .firstWhere((l) => l.kind == EngineMediaKind.text)
+          .clips
+          .single;
+      expect(clip.text!.font, 'anton');
+      expect(clip.text!.content, 'Hola mundo');
+    });
+  });
+
   for (final locale in const [Locale('en'), Locale('es')]) {
     final tag = locale.languageCode;
 
@@ -449,10 +503,19 @@ void main() {
     await _settle(tester);
     await tester.tap(find.bySemanticsLabel(l10n.transformTool));
     await _settle(tester);
-    await tester.tap(find.text(l10n.fillAction));
-    await _settle(tester);
-    await tester.tap(find.text(l10n.rotateAction));
-    await _settle(tester);
+    // The panel is a list of folded sections: open one, then use it.
+    Future<void> open(String section, String item) async {
+      await tester.ensureVisible(find.text(section));
+      await tester.tap(find.text(section));
+      await _settle(tester);
+      await tester.pump(const Duration(milliseconds: 400));
+      await tester.ensureVisible(find.text(item));
+      await tester.tap(find.text(item));
+      await _settle(tester);
+    }
+
+    await open(l10n.transformSectionFit, l10n.fillAction);
+    await open(l10n.transformSectionActions, l10n.rotateAction);
 
     final clip = engine.session!.timelines.last.layers.single.clips.single;
     expect(clip.fill, isTrue);
@@ -737,6 +800,10 @@ void main() {
     );
 
     await tester.tap(find.byTooltip(l10n.addLayerAction));
+    await _settle(tester);
+    // The menu asks which kind of layer first.
+    expect(find.text(l10n.addLayerTitle), findsOneWidget);
+    await tester.tap(find.text(l10n.addLayerVideoHint));
     await _settle(tester);
 
     final layers = engine.session!.timelines.last.layers;
@@ -1160,6 +1227,244 @@ void main() {
 
       expect(find.text(l10n.captureTool), findsNothing);
       expect(find.text(l10n.mediaTool), findsWidgets);
+    });
+  });
+
+  group('animation presets', () {
+    Future<void> openPresets(
+      WidgetTester tester,
+      AppLocalizations l10n,
+    ) async {
+      await _tapClip(tester, l10n.layerKindVideo);
+      await tester.tap(find.byTooltip(l10n.moreActions));
+      await _settle(tester);
+      final section = find.widgetWithText(
+        ExpansionTile,
+        l10n.animationPresetsTitle,
+      );
+      await tester.ensureVisible(section);
+      await tester.pumpAndSettle();
+      await tester.tap(section);
+      await tester.pumpAndSettle();
+    }
+
+    Future<void> tapText(WidgetTester tester, String text) async {
+      final target = find.text(text);
+      await tester.ensureVisible(target);
+      await tester.pumpAndSettle();
+      await tester.tap(target);
+    }
+
+    Future<void> seedTwoClips(AppDatabase db) async {
+      await _seed(db, layerKind: 'video');
+      await db.into(db.editorClips).insert(
+            const EditorClipsCompanion(
+              id: Value('clip-2'),
+              layerId: Value('layer-1'),
+              sortKey: Value(1),
+              sourceUri: Value('/media/clip.mp4'),
+              startMs: Value(11000),
+              durationMs: Value(2000),
+              inPointMs: Value(0),
+              outPointMs: Value(2000),
+              reversed: Value(false),
+              volume: Value(1),
+              filterId: Value(null),
+              adjustmentsJson: Value('{}'),
+            ),
+          );
+    }
+
+    testWidgets('a preset sets both sides of the selected clip',
+        (tester) async {
+      final db = AppDatabase.inMemory();
+      addTearDown(() => tester.runAsync(db.close));
+      await tester.runAsync(() => _seed(db, layerKind: 'video'));
+      final l10n = await _strings(const Locale('en'));
+      await _pumpPage(tester, db, const Locale('en'),
+          size: const Size(1200, 1800));
+      await openPresets(tester, l10n);
+
+      await tapText(tester, l10n.animationPresetZoom);
+      await _settle(tester);
+
+      final row = await tester.runAsync(
+        () => db.select(db.editorClips).getSingle(),
+      );
+      expect(row!.animIn, 'zoom_in');
+      expect(row.animInMs, 700);
+      expect(row.animOut, 'zoom_out');
+      expect(row.animOutMs, 500);
+
+      await tapText(tester, l10n.animationPresetNone);
+      await _settle(tester);
+      final cleared = await tester.runAsync(
+        () => db.select(db.editorClips).getSingle(),
+      );
+      expect(cleared!.animIn, isNull);
+      expect(cleared.animOut, isNull);
+    });
+
+    testWidgets('the switch gives the preset to every clip of the layer',
+        (tester) async {
+      final db = AppDatabase.inMemory();
+      addTearDown(() => tester.runAsync(db.close));
+      await tester.runAsync(() => seedTwoClips(db));
+      final l10n = await _strings(const Locale('en'));
+      await _pumpPage(tester, db, const Locale('en'),
+          size: const Size(1200, 1800));
+      await openPresets(tester, l10n);
+
+      await tapText(tester, l10n.animationPresetWholeLayer);
+      await tester.pump();
+      await tapText(tester, l10n.animationPresetPop);
+      await _settle(tester);
+
+      final rows = await tester.runAsync(
+        () => db.select(db.editorClips).get(),
+      );
+      expect(rows!.map((r) => r.animIn), ['pop', 'pop']);
+    });
+
+    testWidgets('an animation can be saved as a preset, used and deleted',
+        (tester) async {
+      final db = AppDatabase.inMemory();
+      addTearDown(() => tester.runAsync(db.close));
+      await tester.runAsync(() => _seed(db, layerKind: 'video'));
+      final l10n = await _strings(const Locale('en'));
+      await _pumpPage(tester, db, const Locale('en'),
+          size: const Size(1200, 1800));
+      await openPresets(tester, l10n);
+
+      // Nothing to save before the clip animates.
+      await tapText(tester, l10n.animationPresetSave);
+      await tester.pumpAndSettle();
+      expect(find.text(l10n.animationPresetNeedsAnimation), findsOneWidget);
+      await tapText(tester, l10n.importReportClose);
+      await tester.pumpAndSettle();
+
+      await tapText(tester, l10n.animationPresetSpin);
+      await _settle(tester);
+      await tapText(tester, l10n.animationPresetSave);
+      await tester.pumpAndSettle();
+      await tester.enterText(find.byType(TextField), 'My spin');
+      await tapText(tester, l10n.animationPresetSaveConfirm);
+      await _settle(tester);
+      await tester.pumpAndSettle();
+
+      expect(find.text(l10n.animationPresetYours), findsOneWidget);
+      expect(find.text('My spin'), findsOneWidget);
+
+      await tester.tap(find.byTooltip(l10n.animationPresetDelete));
+      await _settle(tester);
+      await tester.pumpAndSettle();
+      expect(find.text('My spin'), findsNothing);
+    });
+  });
+
+  group('transitions', () {
+    Future<void> seedJoined(AppDatabase db) async {
+      await _seed(db, layerKind: 'video');
+      await db.into(db.editorClips).insert(
+            const EditorClipsCompanion(
+              id: Value('clip-2'),
+              layerId: Value('layer-1'),
+              sortKey: Value(1),
+              sourceUri: Value('/media/clip.mp4'),
+              startMs: Value(10000),
+              durationMs: Value(4000),
+              inPointMs: Value(0),
+              outPointMs: Value(4000),
+              reversed: Value(false),
+              volume: Value(1),
+              filterId: Value(null),
+              adjustmentsJson: Value('{}'),
+            ),
+          );
+    }
+
+    Future<void> openTransition(
+      WidgetTester tester,
+      AppLocalizations l10n, {
+      required bool second,
+    }) async {
+      final clips = find.bySemanticsLabel(RegExp('${l10n.layerKindVideo}, '));
+      final clip = second ? clips.last : clips.first;
+      await tester.ensureVisible(clip);
+      await tester.pumpAndSettle();
+      await tester.tapAt(tester.getTopLeft(clip) + const Offset(24, 24));
+      await _settle(tester);
+      await tester.tap(find.byTooltip(l10n.moreActions));
+      await _settle(tester);
+      final section = find.widgetWithText(
+        ExpansionTile,
+        l10n.transitionTitle,
+      );
+      await tester.ensureVisible(section);
+      await tester.pumpAndSettle();
+      await tester.tap(section);
+      await tester.pumpAndSettle();
+    }
+
+    testWidgets('joins the selected clip to the one before it', (tester) async {
+      final db = AppDatabase.inMemory();
+      addTearDown(() => tester.runAsync(db.close));
+      await tester.runAsync(() => seedJoined(db));
+      final l10n = await _strings(const Locale('en'));
+      await _pumpPage(
+        tester,
+        db,
+        const Locale('en'),
+        size: const Size(1800, 1800),
+      );
+      await openTransition(tester, l10n, second: true);
+
+      final push = find.text(l10n.transitionPushLeft);
+      await tester.ensureVisible(push);
+      await tester.pumpAndSettle();
+      await tester.tap(push);
+      await _settle(tester);
+
+      final rows = await tester.runAsync(
+        () => (db.select(db.editorClips)
+              ..orderBy([(c) => OrderingTerm.asc(c.startMs)]))
+            .get(),
+      );
+      expect(rows![0].animOut, 'slide_left');
+      expect(rows[0].animOutMs, 600);
+      expect(rows[1].animIn, 'slide_right');
+      expect(rows[1].animInMs, 600);
+
+      final none = find.text(l10n.transitionNone);
+      await tester.ensureVisible(none);
+      await tester.pumpAndSettle();
+      await tester.tap(none);
+      await _settle(tester);
+      final cleared = await tester.runAsync(
+        () => (db.select(db.editorClips)
+              ..orderBy([(c) => OrderingTerm.asc(c.startMs)]))
+            .get(),
+      );
+      expect(cleared![0].animOut, isNull);
+      expect(cleared[1].animIn, isNull);
+    });
+
+    testWidgets('the first clip of a layer explains what is needed',
+        (tester) async {
+      final db = AppDatabase.inMemory();
+      addTearDown(() => tester.runAsync(db.close));
+      await tester.runAsync(() => seedJoined(db));
+      final l10n = await _strings(const Locale('en'));
+      await _pumpPage(
+        tester,
+        db,
+        const Locale('en'),
+        size: const Size(1800, 1800),
+      );
+      await openTransition(tester, l10n, second: false);
+
+      expect(find.text(l10n.transitionNeedsNeighbour), findsWidgets);
+      expect(find.text(l10n.transitionPushLeft), findsNothing);
     });
   });
 }

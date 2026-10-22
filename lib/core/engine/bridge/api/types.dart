@@ -6,7 +6,7 @@
 import '../frb_generated.dart';
 import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart';
 
-// These function are ignored because they are on traits that is not defined in current crate (put an empty `#[frb]` on it to unignore): `assert_fields_are_eq`, `assert_fields_are_eq`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `eq`, `eq`, `eq`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`
+// These function are ignored because they are on traits that is not defined in current crate (put an empty `#[frb]` on it to unignore): `assert_fields_are_eq`, `assert_fields_are_eq`, `assert_fields_are_eq`, `assert_fields_are_eq`, `assert_fields_are_eq`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `eq`, `eq`, `eq`, `eq`, `eq`, `eq`, `eq`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`
 
 /// What the engine has been doing, for the diagnostics panel and logs.
 class EngineDiagnostics {
@@ -76,6 +76,9 @@ enum EngineMediaKind {
   video,
   image,
   audio,
+
+  /// Words drawn by the engine; the clip has no file.
+  text,
   ;
 }
 
@@ -268,6 +271,128 @@ class SuggestedAdjustments {
           saturation == other.saturation;
 }
 
+/// How the lines of a text sit against each other.
+enum TextAlign {
+  left,
+  center,
+  right,
+  ;
+}
+
+/// How a text comes in and goes out, over the first and last moments of its
+/// clip.
+enum TextAnimation {
+  none,
+  fade,
+  pop,
+  slideUp,
+  ;
+}
+
+/// The size of the picture a text draws.
+class TextSize {
+  final int width;
+  final int height;
+
+  const TextSize({
+    required this.width,
+    required this.height,
+  });
+
+  @override
+  int get hashCode => width.hashCode ^ height.hashCode;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is TextSize &&
+          runtimeType == other.runtimeType &&
+          width == other.width &&
+          height == other.height;
+}
+
+/// The words of a text clip and their look. Colours are `0xAARRGGBB`.
+class TextSpec {
+  /// The words; `\n` starts a new line.
+  final String content;
+
+  /// One of `sans`, `serif`, `mono`, `anton`, `bebas`, `bangers`, `lobster`,
+  /// `pacifico`, `marker`; anything else draws as `sans`.
+  final String font;
+
+  /// Font size as a fraction of the canvas height.
+  final double size;
+  final int color;
+  final bool bold;
+  final bool italic;
+  final TextAlign align;
+  final int strokeColor;
+
+  /// Outline thickness as a fraction of the font size; 0 is none.
+  final double strokeWidth;
+
+  /// Shadow strength, 0.0 (none) to 1.0.
+  final double shadow;
+
+  /// Fill behind the words; an alpha of 0 is none.
+  final int background;
+
+  /// Extra space between letters, as a fraction of the font size.
+  final double letterSpacing;
+  final TextAnimation animation;
+
+  const TextSpec({
+    required this.content,
+    required this.font,
+    required this.size,
+    required this.color,
+    required this.bold,
+    required this.italic,
+    required this.align,
+    required this.strokeColor,
+    required this.strokeWidth,
+    required this.shadow,
+    required this.background,
+    required this.letterSpacing,
+    required this.animation,
+  });
+
+  @override
+  int get hashCode =>
+      content.hashCode ^
+      font.hashCode ^
+      size.hashCode ^
+      color.hashCode ^
+      bold.hashCode ^
+      italic.hashCode ^
+      align.hashCode ^
+      strokeColor.hashCode ^
+      strokeWidth.hashCode ^
+      shadow.hashCode ^
+      background.hashCode ^
+      letterSpacing.hashCode ^
+      animation.hashCode;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is TextSpec &&
+          runtimeType == other.runtimeType &&
+          content == other.content &&
+          font == other.font &&
+          size == other.size &&
+          color == other.color &&
+          bold == other.bold &&
+          italic == other.italic &&
+          align == other.align &&
+          strokeColor == other.strokeColor &&
+          strokeWidth == other.strokeWidth &&
+          shadow == other.shadow &&
+          background == other.background &&
+          letterSpacing == other.letterSpacing &&
+          animation == other.animation;
+}
+
 /// A small RGBA picture of a source at one point in time.
 class Thumbnail {
   final PlatformInt64 timeMs;
@@ -381,6 +506,23 @@ class TimelineClip {
   final PlatformInt64 fadeInMs;
   final PlatformInt64 fadeOutMs;
 
+  /// Spatial effects, each in 0.0..=1.0 with 0 meaning off.
+  final double blur;
+  final double vignette;
+  final double grain;
+  final double pixelate;
+  final double sharpen;
+
+  /// How the clip comes in and goes out: one of `render::animation`'s ids
+  /// or None, and how long each lasts in timeline milliseconds.
+  final String? animIn;
+  final PlatformInt64 animInMs;
+  final String? animOut;
+  final PlatformInt64 animOutMs;
+
+  /// What a text clip says and how it looks; None for any other clip.
+  final TextSpec? text;
+
   const TimelineClip({
     required this.path,
     required this.kind,
@@ -407,6 +549,16 @@ class TimelineClip {
     required this.speed,
     required this.fadeInMs,
     required this.fadeOutMs,
+    required this.blur,
+    required this.vignette,
+    required this.grain,
+    required this.pixelate,
+    required this.sharpen,
+    this.animIn,
+    required this.animInMs,
+    this.animOut,
+    required this.animOutMs,
+    this.text,
   });
 
   Future<PlatformInt64> durationMs() =>
@@ -457,7 +609,17 @@ class TimelineClip {
       cropBottom.hashCode ^
       speed.hashCode ^
       fadeInMs.hashCode ^
-      fadeOutMs.hashCode;
+      fadeOutMs.hashCode ^
+      blur.hashCode ^
+      vignette.hashCode ^
+      grain.hashCode ^
+      pixelate.hashCode ^
+      sharpen.hashCode ^
+      animIn.hashCode ^
+      animInMs.hashCode ^
+      animOut.hashCode ^
+      animOutMs.hashCode ^
+      text.hashCode;
 
   @override
   bool operator ==(Object other) =>
@@ -488,7 +650,17 @@ class TimelineClip {
           cropBottom == other.cropBottom &&
           speed == other.speed &&
           fadeInMs == other.fadeInMs &&
-          fadeOutMs == other.fadeOutMs;
+          fadeOutMs == other.fadeOutMs &&
+          blur == other.blur &&
+          vignette == other.vignette &&
+          grain == other.grain &&
+          pixelate == other.pixelate &&
+          sharpen == other.sharpen &&
+          animIn == other.animIn &&
+          animInMs == other.animInMs &&
+          animOut == other.animOut &&
+          animOutMs == other.animOutMs &&
+          text == other.text;
 }
 
 class TimelineLayer {

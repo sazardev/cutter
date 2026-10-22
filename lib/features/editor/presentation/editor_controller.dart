@@ -3,10 +3,13 @@ import 'dart:io';
 
 import 'package:cutter/core/engine/media_engine.dart';
 import 'package:cutter/features/editor/data/engine_timeline.dart';
+import 'package:cutter/features/editor/domain/animation_preset.dart';
 import 'package:cutter/features/editor/domain/canvas.dart';
 import 'package:cutter/features/editor/domain/clip.dart';
 import 'package:cutter/features/editor/domain/clip_crop.dart';
+import 'package:cutter/features/editor/domain/clip_text.dart';
 import 'package:cutter/features/editor/domain/clip_transform.dart';
+import 'package:cutter/features/editor/domain/clip_transition.dart';
 import 'package:cutter/features/editor/domain/edit_history.dart';
 import 'package:cutter/features/editor/domain/editor_result.dart';
 import 'package:cutter/features/editor/domain/import_limits.dart';
@@ -17,6 +20,7 @@ import 'package:cutter/features/editor/domain/media_bank.dart';
 import 'package:cutter/features/editor/domain/project.dart';
 import 'package:cutter/features/editor/domain/project_version.dart';
 import 'package:cutter/features/editor/domain/relink_media.dart';
+import 'package:cutter/features/editor/presentation/animation_preset_providers.dart';
 import 'package:cutter/features/editor/presentation/checkpoint_labels.dart';
 import 'package:cutter/features/editor/presentation/edit_log.dart';
 import 'package:cutter/features/editor/presentation/editor_providers.dart';
@@ -125,6 +129,10 @@ class ImportOutcome {
 /// open.
 class EditorController extends Notifier<AsyncValue<EditorUiState>> {
   EditHistory _history = EditHistory();
+
+  /// The last text edit, to join a burst of them into one undo step.
+  ({String clipId, int atMs})? _lastTextEdit;
+  static const _textBurstMs = 1500;
   CheckpointLabels? _labels;
   int _lastCheckpointMs = 0;
 
@@ -574,6 +582,87 @@ class EditorController extends Notifier<AsyncValue<EditorUiState>> {
     );
   }
 
+  /// Sets how the selected clip comes in and goes out; a null id removes
+  /// that animation.
+  Future<void> setAnimation({
+    String? animIn,
+    int animInMs = 0,
+    String? animOut,
+    int animOutMs = 0,
+  }) async {
+    final clip = state.valueOrNull?.selectedClip;
+    if (clip == null) return;
+    await _run(
+      'animation',
+      (project) => ref.read(setClipAnimationProvider).call(
+            projectId: project.id,
+            clipId: clip.id,
+            animIn: animIn,
+            animInMs: animInMs,
+            animOut: animOut,
+            animOutMs: animOutMs,
+          ),
+    );
+  }
+
+  /// Gives [preset]'s entrance and exit to the selected clip, or to every
+  /// clip of its layer when [wholeLayer] is set. One edit, one undo.
+  Future<void> applyAnimationPreset(
+    AnimationPreset preset, {
+    bool wholeLayer = false,
+  }) async {
+    final editor = state.valueOrNull;
+    final clip = editor?.selectedClip;
+    if (editor == null || clip == null) return;
+    final layer = editor.project.layerOfClip(clip.id);
+    final ids = wholeLayer && layer != null
+        ? [for (final c in layer.clips) c.id]
+        : [clip.id];
+    await _run(
+      'animation preset',
+      (project) => ref.read(applyAnimationPresetProvider).call(
+            projectId: project.id,
+            clipIds: ids,
+            preset: preset,
+          ),
+    );
+  }
+
+  /// Joins the selected clip to the one before it with [kind], [durationMs]
+  /// long on each side. One edit, one undo.
+  Future<void> applyTransition(
+    TransitionKind kind,
+    int durationMs, {
+    bool fadeSound = true,
+  }) async {
+    final clip = state.valueOrNull?.selectedClip;
+    if (clip == null) return;
+    await _run(
+      'transition',
+      (project) => ref.read(applyTransitionProvider).call(
+            projectId: project.id,
+            clipId: clip.id,
+            kind: kind,
+            durationMs: durationMs,
+            fadeSound: fadeSound,
+          ),
+    );
+  }
+
+  /// Takes the transition off the join of the selected clip with the one
+  /// before it.
+  Future<void> removeTransition() async {
+    final clip = state.valueOrNull?.selectedClip;
+    if (clip == null) return;
+    await _run(
+      'remove transition',
+      (project) => ref.read(removeTransitionProvider).call(
+            projectId: project.id,
+            clipId: clip.id,
+          ),
+    );
+  }
+
   /// Saves the adjustments of the selected clip.
   Future<void> setAdjustments(Map<String, double> adjustments) async {
     final clip = state.valueOrNull?.selectedClip;
@@ -663,6 +752,41 @@ class EditorController extends Notifier<AsyncValue<EditorUiState>> {
     return true;
   }
 
+  /// Cuts the subject out of image clip [clipId] and swaps the clip's
+  /// picture for the cutout, a PNG kept next to the project's media. The
+  /// original file stays where it was, and undo brings it back. Returns
+  /// false when the clip is not an image or the engine failed.
+  Future<bool> removeBackground(String clipId) async {
+    final clip = state.valueOrNull?.project.clipById(clipId);
+    if (clip == null || clip.kind != MediaKind.image || clip.text != null) {
+      return false;
+    }
+    final library = await ref.read(mediaLibraryProvider.future);
+    final dir =
+        Directory('${library.root.path}${Platform.pathSeparator}cutouts');
+    final out = '${dir.path}${Platform.pathSeparator}'
+        '${DateTime.now().microsecondsSinceEpoch}.png';
+    final ({int width, int height}) size;
+    try {
+      await dir.create(recursive: true);
+      size = await ref
+          .read(mediaEngineProvider)
+          .removeBackground(filePathOf(clip.sourceUri), out);
+    } on Object {
+      return false;
+    }
+    return _run(
+      'remove background',
+      (project) => ref.read(replaceClipPictureProvider).call(
+            projectId: project.id,
+            clipId: clipId,
+            sourceUri: out,
+            width: size.width,
+            height: size.height,
+          ),
+    );
+  }
+
   /// Changes the frame the project renders to.
   Future<void> setCanvas(Canvas canvas) async {
     await _run(
@@ -684,6 +808,56 @@ class EditorController extends Notifier<AsyncValue<EditorUiState>> {
           ),
     );
   }
+
+  /// Adds [text] over the video at [startMs], selects it and returns its
+  /// id; null when the edit was rejected.
+  Future<String?> addText(ClipText text, int startMs) async {
+    final before = state.valueOrNull?.project;
+    if (before == null) return null;
+    final size = _measure(text);
+    final ok = await _run(
+      'text',
+      (project) => ref.read(addTextClipProvider).call(
+            projectId: project.id,
+            text: text,
+            width: size.width,
+            height: size.height,
+            startMs: startMs,
+          ),
+    );
+    if (!ok) return null;
+    final added = _newClipIds(before, state.requireValue.project);
+    if (added.isEmpty) return null;
+    selectClip(added.first);
+    _lastTextEdit = null;
+    return added.first;
+  }
+
+  /// Saves the words and look of text clip [clipId]. Edits of one text in
+  /// quick succession (typing, dragging a slider) are one step of undo.
+  Future<void> setText(String clipId, ClipText text) async {
+    final size = _measure(text);
+    final now = DateTime.now().millisecondsSinceEpoch;
+    final last = _lastTextEdit;
+    final continuing =
+        last != null && last.clipId == clipId && now - last.atMs < _textBurstMs;
+    await _run(
+      'text',
+      (project) => ref.read(setClipTextProvider).call(
+            projectId: project.id,
+            clipId: clipId,
+            text: text,
+            width: size.width,
+            height: size.height,
+          ),
+      remember: !continuing,
+    );
+    _lastTextEdit = (clipId: clipId, atMs: now);
+  }
+
+  TextSize _measure(ClipText text) => ref
+      .read(mediaEngineProvider)
+      .measureText(engineTextOf(text), textReferenceHeight);
 
   /// Deletes the open project for good, with its versions, and forgets its
   /// own settings. Exported videos stay. Returns whether it was deleted; the
@@ -826,9 +1000,12 @@ class EditorController extends Notifier<AsyncValue<EditorUiState>> {
 
   /// The back-most layer holding pictures: the main sequence.
   static bool _isMainLayer(Project project, Layer layer) {
-    if (layer.kind == MediaKind.audio) return false;
-    final visual =
-        project.layers.where((l) => l.kind != MediaKind.audio).toList();
+    if (layer.kind == MediaKind.audio || layer.kind == MediaKind.text) {
+      return false;
+    }
+    final visual = project.layers
+        .where((l) => l.kind != MediaKind.audio && l.kind != MediaKind.text)
+        .toList();
     return visual.isNotEmpty && visual.last.id == layer.id;
   }
 
@@ -862,8 +1039,9 @@ class EditorController extends Notifier<AsyncValue<EditorUiState>> {
   /// Returns whether the edit was accepted.
   Future<bool> _run(
     String label,
-    Future<EditorResult<Project>> Function(Project project) action,
-  ) async {
+    Future<EditorResult<Project>> Function(Project project) action, {
+    bool remember = true,
+  }) async {
     final current = state.valueOrNull;
     if (current == null) return false;
     final watch = Stopwatch()..start();
@@ -872,7 +1050,7 @@ class EditorController extends Notifier<AsyncValue<EditorUiState>> {
     ref.read(editLogProvider).record(label, watch.elapsedMilliseconds, result);
     switch (result) {
       case Ok<Project>(:final value):
-        _history.record(latest.project);
+        if (remember) _history.record(latest.project);
         final tidy = await _dropEmptyLayers(value);
         state = AsyncValue.data(
           latest.copyWith(

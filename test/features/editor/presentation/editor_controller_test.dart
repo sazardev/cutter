@@ -2,6 +2,7 @@ import 'package:cutter/core/db/app_database.dart';
 import 'package:cutter/core/engine/media_engine.dart';
 import 'package:cutter/features/editor/data/engine_media_inspector.dart';
 import 'package:cutter/features/editor/domain/clip.dart';
+import 'package:cutter/features/editor/domain/clip_text.dart';
 import 'package:cutter/features/editor/domain/media_asset.dart';
 import 'package:cutter/features/editor/presentation/checkpoint_labels.dart';
 import 'package:cutter/features/editor/presentation/editor_controller.dart';
@@ -512,5 +513,56 @@ void main() {
     expect(await controller().moveLayer(_audioLayerId, -1), isFalse);
     await controller().undo();
     expect(uiState().project.layers.first.id, _videoLayerId);
+  });
+
+  group('text', () {
+    const hello = ClipText(content: 'Hola');
+
+    test('adds a text over the video, selects it and measures it', () async {
+      final id = await controller().addText(hello, 1000);
+
+      expect(id, isNotNull);
+      expect(uiState().selectedClipId, id);
+      final layer = uiState().project.layers.first;
+      expect(layer.kind, MediaKind.text);
+      final clip = clipById(id!);
+      expect(clip.text, hello);
+      expect(clip.startMs, 1000);
+      expect(clip.sourceWidth, greaterThan(0));
+      expect(clip.sourceHeight, greaterThan(0));
+      final stored = await container.read(projectRepositoryProvider).find(
+            _projectId,
+          );
+      expect(stored!.clipById(id)!.text, hello);
+    });
+
+    test('typing in a burst is one step of undo, and re-measures', () async {
+      final id = (await controller().addText(hello, 0))!;
+      final before = clipById(id).sourceWidth;
+
+      await controller().setText(id, hello.copyWith(content: 'Hola m'));
+      await controller().setText(id, hello.copyWith(content: 'Hola mundo!'));
+
+      expect(clipById(id).text!.content, 'Hola mundo!');
+      expect(clipById(id).sourceWidth, greaterThan(before));
+
+      await controller().undo();
+      expect(clipById(id).text, hello);
+      await controller().undo();
+      expect(
+        uiState().project.layers.any((l) => l.kind == MediaKind.text),
+        isFalse,
+      );
+    });
+
+    test('deleting the only text removes its layer', () async {
+      await controller().addText(hello, 0);
+      await controller().deleteSelected();
+
+      expect(
+        uiState().project.layers.any((l) => l.kind == MediaKind.text),
+        isFalse,
+      );
+    });
   });
 }

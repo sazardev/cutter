@@ -4,8 +4,14 @@ import 'package:cutter/features/editor/domain/editor_result.dart';
 import 'package:cutter/features/editor/domain/media_asset.dart';
 import 'package:cutter/features/editor/domain/project.dart';
 
+/// The color adjustment keys, each from [adjustmentMin] to [adjustmentMax].
+const colorAdjustmentKeys = ['brightness', 'contrast', 'saturation'];
+
+/// The effect keys, each a strength from 0 (off) to [adjustmentMax].
+const effectKeys = ['blur', 'vignette', 'grain', 'pixelate', 'sharpen'];
+
 /// The adjustment keys the editor supports.
-const adjustmentKeys = {'brightness', 'contrast', 'saturation'};
+const adjustmentKeys = {...colorAdjustmentKeys, ...effectKeys};
 
 /// Lowest value an adjustment may take.
 const adjustmentMin = -1.0;
@@ -119,6 +125,94 @@ class SetClipFilter {
         if (clip.kind == MediaKind.audio) return const Err(IncompatibleClip());
         if (filterId == null) return Ok(clip.copyWith(clearFilter: true));
         return Ok(clip.copyWith(filterId: filterId));
+      },
+    );
+  }
+}
+
+/// Sets how a clip comes in and goes out. A null id means no animation on
+/// that side; each length is in milliseconds, from 0 to
+/// [maxClipAnimationMs].
+class SetClipAnimation {
+  /// Creates the use case over [_projects].
+  const SetClipAnimation(this._projects);
+
+  final ProjectRepository _projects;
+
+  /// Sets the entrance ([animIn], [animInMs]) and the exit ([animOut],
+  /// [animOutMs]) of the clip.
+  Future<EditorResult<Project>> call({
+    required String projectId,
+    required String clipId,
+    String? animIn,
+    int animInMs = 0,
+    String? animOut,
+    int animOutMs = 0,
+  }) {
+    return _updateClip(
+      _projects,
+      projectId: projectId,
+      clipId: clipId,
+      change: (clip) {
+        if (clip.kind == MediaKind.audio || clip.text != null) {
+          return const Err(IncompatibleClip());
+        }
+        bool valid(String? id, int ms) =>
+            ms >= 0 &&
+            ms <= maxClipAnimationMs &&
+            (id == null || clipAnimationIds.contains(id));
+        if (!valid(animIn, animInMs) || !valid(animOut, animOutMs)) {
+          return const Err(InvalidAnimation());
+        }
+        return Ok(
+          clip.copyWith(
+            animIn: animIn,
+            clearAnimIn: animIn == null,
+            animInMs: animIn == null ? 0 : animInMs,
+            animOut: animOut,
+            clearAnimOut: animOut == null,
+            animOutMs: animOut == null ? 0 : animOutMs,
+          ),
+        );
+      },
+    );
+  }
+}
+
+/// Swaps the picture of an image clip for another file of the same scene,
+/// such as its cutout, keeping its place on the timeline, its framing and
+/// its look. The new file must have been made already.
+class ReplaceClipPicture {
+  /// Creates the use case over [_projects].
+  const ReplaceClipPicture(this._projects);
+
+  final ProjectRepository _projects;
+
+  /// Points the image clip at [sourceUri], whose picture is [width] x
+  /// [height].
+  Future<EditorResult<Project>> call({
+    required String projectId,
+    required String clipId,
+    required String sourceUri,
+    required int width,
+    required int height,
+  }) {
+    return _updateClip(
+      _projects,
+      projectId: projectId,
+      clipId: clipId,
+      change: (clip) {
+        if (clip.kind != MediaKind.image || clip.text != null) {
+          return const Err(IncompatibleClip());
+        }
+        return Ok(
+          clip.copyWith(
+            sourceUri: sourceUri,
+            assetId: sourceUri,
+            sourceWidth: width,
+            sourceHeight: height,
+          ),
+        );
       },
     );
   }

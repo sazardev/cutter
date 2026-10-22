@@ -59,6 +59,7 @@ enum StudioTab {
           ],
         MediaKind.image => const [duration, framing, crop, adjust, filters],
         MediaKind.audio => const [volume, fades],
+        MediaKind.text => const [],
       };
 
   /// The localized name of the tab.
@@ -143,6 +144,7 @@ class _ClipStudioPageState extends ConsumerState<ClipStudioPage> {
         MediaKind.video => l10n.studioVideoTitle,
         MediaKind.image => l10n.studioImageTitle,
         MediaKind.audio => l10n.studioAudioTitle,
+        MediaKind.text => l10n.textTool,
       };
 
   Future<void> _auto() async {

@@ -77,6 +77,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   ExportSettings dco_decode_box_autoadd_export_settings(dynamic raw);
 
   @protected
+  TextSpec dco_decode_box_autoadd_text_spec(dynamic raw);
+
+  @protected
   Timeline dco_decode_box_autoadd_timeline(dynamic raw);
 
   @protected
@@ -137,10 +140,28 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   String? dco_decode_opt_String(dynamic raw);
 
   @protected
+  TextSpec? dco_decode_opt_box_autoadd_text_spec(dynamic raw);
+
+  @protected
   PlaybackState dco_decode_playback_state(dynamic raw);
 
   @protected
+  (int, int) dco_decode_record_u_32_u_32(dynamic raw);
+
+  @protected
   SuggestedAdjustments dco_decode_suggested_adjustments(dynamic raw);
+
+  @protected
+  TextAlign dco_decode_text_align(dynamic raw);
+
+  @protected
+  TextAnimation dco_decode_text_animation(dynamic raw);
+
+  @protected
+  TextSize dco_decode_text_size(dynamic raw);
+
+  @protected
+  TextSpec dco_decode_text_spec(dynamic raw);
 
   @protected
   Thumbnail dco_decode_thumbnail(dynamic raw);
@@ -221,6 +242,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
       SseDeserializer deserializer);
 
   @protected
+  TextSpec sse_decode_box_autoadd_text_spec(SseDeserializer deserializer);
+
+  @protected
   Timeline sse_decode_box_autoadd_timeline(SseDeserializer deserializer);
 
   @protected
@@ -284,11 +308,29 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   String? sse_decode_opt_String(SseDeserializer deserializer);
 
   @protected
+  TextSpec? sse_decode_opt_box_autoadd_text_spec(SseDeserializer deserializer);
+
+  @protected
   PlaybackState sse_decode_playback_state(SseDeserializer deserializer);
+
+  @protected
+  (int, int) sse_decode_record_u_32_u_32(SseDeserializer deserializer);
 
   @protected
   SuggestedAdjustments sse_decode_suggested_adjustments(
       SseDeserializer deserializer);
+
+  @protected
+  TextAlign sse_decode_text_align(SseDeserializer deserializer);
+
+  @protected
+  TextAnimation sse_decode_text_animation(SseDeserializer deserializer);
+
+  @protected
+  TextSize sse_decode_text_size(SseDeserializer deserializer);
+
+  @protected
+  TextSpec sse_decode_text_spec(SseDeserializer deserializer);
 
   @protected
   Thumbnail sse_decode_thumbnail(SseDeserializer deserializer);
@@ -370,6 +412,10 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
       ExportSettings self, SseSerializer serializer);
 
   @protected
+  void sse_encode_box_autoadd_text_spec(
+      TextSpec self, SseSerializer serializer);
+
+  @protected
   void sse_encode_box_autoadd_timeline(Timeline self, SseSerializer serializer);
 
   @protected
@@ -440,11 +486,30 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   void sse_encode_opt_String(String? self, SseSerializer serializer);
 
   @protected
+  void sse_encode_opt_box_autoadd_text_spec(
+      TextSpec? self, SseSerializer serializer);
+
+  @protected
   void sse_encode_playback_state(PlaybackState self, SseSerializer serializer);
+
+  @protected
+  void sse_encode_record_u_32_u_32((int, int) self, SseSerializer serializer);
 
   @protected
   void sse_encode_suggested_adjustments(
       SuggestedAdjustments self, SseSerializer serializer);
+
+  @protected
+  void sse_encode_text_align(TextAlign self, SseSerializer serializer);
+
+  @protected
+  void sse_encode_text_animation(TextAnimation self, SseSerializer serializer);
+
+  @protected
+  void sse_encode_text_size(TextSize self, SseSerializer serializer);
+
+  @protected
+  void sse_encode_text_spec(TextSpec self, SseSerializer serializer);
 
   @protected
   void sse_encode_thumbnail(Thumbnail self, SseSerializer serializer);

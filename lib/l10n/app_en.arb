@@ -16,6 +16,14 @@
   "@layerKindVideo": {
     "description": "Name of a video layer."
   },
+  "layerKindText": "Text",
+  "@layerKindText": {
+    "description": "Name of a text layer."
+  },
+  "textTool": "Text",
+  "@textTool": {
+    "description": "Name of the tool that adds and styles text over the video."
+  },
   "layerKindImage": "Image",
   "@layerKindImage": {
     "description": "Name of an image layer."
@@ -91,6 +99,138 @@
   "filterVintage": "Vintage",
   "@filterVintage": {
     "description": "Name of the vintage filter."
+  },
+  "filterSepia": "Sepia",
+  "@filterSepia": {
+    "description": "Name of the sepia filter."
+  },
+  "filterNoir": "Noir",
+  "@filterNoir": {
+    "description": "Name of the high-contrast black and white filter."
+  },
+  "filterVivid": "Vivid",
+  "@filterVivid": {
+    "description": "Name of the saturated, punchy color filter."
+  },
+  "filterFade": "Fade",
+  "@filterFade": {
+    "description": "Name of the washed-out, lifted-blacks filter."
+  },
+  "filterCinema": "Cinema",
+  "@filterCinema": {
+    "description": "Name of the teal and orange cinematic filter."
+  },
+  "filterSunset": "Sunset",
+  "@filterSunset": {
+    "description": "Name of the golden-hour color filter."
+  },
+  "filterInvert": "Invert",
+  "@filterInvert": {
+    "description": "Name of the negative filter that inverts colors."
+  },
+  "effectsLabel": "Effects",
+  "@effectsLabel": {
+    "description": "Heading of the group of effect sliders (blur, vignette, grain...)."
+  },
+  "effectBlur": "Blur",
+  "@effectBlur": {
+    "description": "Name of the blur effect."
+  },
+  "effectVignette": "Vignette",
+  "@effectVignette": {
+    "description": "Name of the vignette effect that darkens the corners."
+  },
+  "effectGrain": "Grain",
+  "@effectGrain": {
+    "description": "Name of the film grain effect."
+  },
+  "effectPixelate": "Pixelate",
+  "@effectPixelate": {
+    "description": "Name of the pixelate effect."
+  },
+  "effectSharpen": "Sharpen",
+  "@effectSharpen": {
+    "description": "Name of the sharpen effect."
+  },
+  "effectValueLabel": "{name} {value}",
+  "@effectValueLabel": {
+    "description": "Label of an effect slider: its name and its strength in percent.",
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "example": "Blur"
+      },
+      "value": {
+        "type": "String",
+        "example": "40"
+      }
+    }
+  },
+  "animationsLabel": "Animations",
+  "@animationsLabel": {
+    "description": "Heading of the group that sets how a clip comes in and goes out."
+  },
+  "animationIn": "In",
+  "@animationIn": {
+    "description": "Label of the entrance animation row."
+  },
+  "animationOut": "Out",
+  "@animationOut": {
+    "description": "Label of the exit animation row."
+  },
+  "animationNone": "None",
+  "@animationNone": {
+    "description": "Chip that removes an animation."
+  },
+  "animationFade": "Fade",
+  "@animationFade": {
+    "description": "Name of the fade animation."
+  },
+  "animationSlideLeft": "Slide left",
+  "@animationSlideLeft": {
+    "description": "Name of the animation that slides the clip in from or out to the left."
+  },
+  "animationSlideRight": "Slide right",
+  "@animationSlideRight": {
+    "description": "Name of the animation that slides the clip in from or out to the right."
+  },
+  "animationSlideUp": "Slide up",
+  "@animationSlideUp": {
+    "description": "Name of the animation that slides the clip in from or out to the top."
+  },
+  "animationSlideDown": "Slide down",
+  "@animationSlideDown": {
+    "description": "Name of the animation that slides the clip in from or out to the bottom."
+  },
+  "animationZoomIn": "Zoom in",
+  "@animationZoomIn": {
+    "description": "Name of the animation that grows the clip into place."
+  },
+  "animationZoomOut": "Zoom out",
+  "@animationZoomOut": {
+    "description": "Name of the animation that shrinks the clip into place."
+  },
+  "animationSpin": "Spin",
+  "@animationSpin": {
+    "description": "Name of the animation that spins the clip into place."
+  },
+  "animationPop": "Pop",
+  "@animationPop": {
+    "description": "Name of the animation that pops the clip in with a little overshoot."
+  },
+  "animationDurationLabel": "{name} {seconds} s",
+  "@animationDurationLabel": {
+    "description": "Label of an animation length slider: the row name and the length in seconds.",
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "example": "In"
+      },
+      "seconds": {
+        "type": "String",
+        "example": "0.5"
+      }
+    }
   },
   "adjustmentsLabel": "Adjustments",
   "@adjustmentsLabel": {
@@ -2195,118 +2335,6 @@
       }
     }
   },
-  "musicPackPause": "Pause",
-  "@musicPackPause": {
-    "description": "Tooltip of the button that pauses a music pack download."
-  },
-  "musicPackResume": "Resume",
-  "@musicPackResume": {
-    "description": "Tooltip of the button that resumes a paused music pack download."
-  },
-  "musicPackCancel": "Cancel download",
-  "@musicPackCancel": {
-    "description": "Tooltip of the button that cancels a music pack download and discards what was fetched."
-  },
-  "musicPackPaused": "Paused {percent}%",
-  "@musicPackPaused": {
-    "description": "Status of a music pack download that was paused.",
-    "placeholders": {
-      "percent": {
-        "type": "int"
-      }
-    }
-  },
-  "musicPackPausedUnknown": "Paused",
-  "@musicPackPausedUnknown": {
-    "description": "Status of a paused music pack download whose progress is unknown."
-  },
-  "musicDownloadsContinue": "You can leave this screen: downloads keep going.",
-  "@musicDownloadsContinue": {
-    "description": "Reminder under the title of the music library while a pack downloads."
-  },
-  "settingsSectionMusic": "Music library",
-  "@settingsSectionMusic": {
-    "description": "Name of the settings section with the downloaded music packs."
-  },
-  "settingsSectionMusicHelp": "Downloaded packs and the space they take.",
-  "@settingsSectionMusicHelp": {
-    "description": "One line on what the music settings section holds."
-  },
-  "settingsMusicUsed": "Space used by music",
-  "@settingsMusicUsed": {
-    "description": "Title of the row that shows how much storage the music packs take."
-  },
-  "settingsMusicUsedValue": "{size} · {count, plural, =0{no packs} =1{1 pack} other{{count} packs}}",
-  "@settingsMusicUsedValue": {
-    "description": "Storage taken by music and the number of packs downloaded.",
-    "placeholders": {
-      "size": {
-        "type": "String"
-      },
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "settingsMusicBrowse": "Browse packs",
-  "@settingsMusicBrowse": {
-    "description": "Row that opens the music library to download more packs."
-  },
-  "settingsMusicBrowseHelp": "Download more genres for your videos.",
-  "@settingsMusicBrowseHelp": {
-    "description": "Help under the row that opens the music library."
-  },
-  "settingsMusicNone": "No packs downloaded yet.",
-  "@settingsMusicNone": {
-    "description": "Shown in settings when no music pack is on the device."
-  },
-  "settingsMusicPacksTitle": "Downloaded packs",
-  "@settingsMusicPacksTitle": {
-    "description": "Heading above the list of music packs on the device."
-  },
-  "settingsMusicPackSummary": "{count, plural, =1{1 track} other{{count} tracks}} · {size}",
-  "@settingsMusicPackSummary": {
-    "description": "Tracks and storage of one downloaded music pack.",
-    "placeholders": {
-      "count": {
-        "type": "int"
-      },
-      "size": {
-        "type": "String"
-      }
-    }
-  },
-  "settingsMusicRemoveAll": "Remove all packs",
-  "@settingsMusicRemoveAll": {
-    "description": "Row that deletes every downloaded music pack."
-  },
-  "settingsMusicRemoveAllHelp": "Frees {size}. You can download them again.",
-  "@settingsMusicRemoveAllHelp": {
-    "description": "Help under the row that deletes every music pack.",
-    "placeholders": {
-      "size": {
-        "type": "String"
-      }
-    }
-  },
-  "settingsMusicRemoveTitle": "Remove {name}?",
-  "@settingsMusicRemoveTitle": {
-    "description": "Title of the dialog that confirms deleting a music pack.",
-    "placeholders": {
-      "name": {
-        "type": "String"
-      }
-    }
-  },
-  "settingsMusicRemoveBody": "This frees {size}. You can download it again.",
-  "@settingsMusicRemoveBody": {
-    "description": "Body of the dialog that confirms deleting a music pack.",
-    "placeholders": {
-      "size": {
-        "type": "String"
-      }
-    }
-  },
   "importReportTitle": "Import report",
   "@importReportTitle": {
     "description": "Title of the dialog that lists files that were left out or need attention after an import."
@@ -2563,6 +2591,118 @@
       }
     }
   },
+  "musicPackPause": "Pause",
+  "@musicPackPause": {
+    "description": "Tooltip of the button that pauses a music pack download."
+  },
+  "musicPackResume": "Resume",
+  "@musicPackResume": {
+    "description": "Tooltip of the button that resumes a paused music pack download."
+  },
+  "musicPackCancel": "Cancel download",
+  "@musicPackCancel": {
+    "description": "Tooltip of the button that cancels a music pack download and discards what was fetched."
+  },
+  "musicPackPaused": "Paused {percent}%",
+  "@musicPackPaused": {
+    "description": "Status of a music pack download that was paused.",
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      }
+    }
+  },
+  "musicPackPausedUnknown": "Paused",
+  "@musicPackPausedUnknown": {
+    "description": "Status of a paused music pack download whose progress is unknown."
+  },
+  "musicDownloadsContinue": "You can leave this screen: downloads keep going.",
+  "@musicDownloadsContinue": {
+    "description": "Reminder under the title of the music library while a pack downloads."
+  },
+  "settingsSectionMusic": "Music library",
+  "@settingsSectionMusic": {
+    "description": "Name of the settings section with the downloaded music packs."
+  },
+  "settingsSectionMusicHelp": "Downloaded packs and the space they take.",
+  "@settingsSectionMusicHelp": {
+    "description": "One line on what the music settings section holds."
+  },
+  "settingsMusicUsed": "Space used by music",
+  "@settingsMusicUsed": {
+    "description": "Title of the row that shows how much storage the music packs take."
+  },
+  "settingsMusicUsedValue": "{size} · {count, plural, =0{no packs} =1{1 pack} other{{count} packs}}",
+  "@settingsMusicUsedValue": {
+    "description": "Storage taken by music and the number of packs downloaded.",
+    "placeholders": {
+      "size": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "settingsMusicBrowse": "Browse packs",
+  "@settingsMusicBrowse": {
+    "description": "Row that opens the music library to download more packs."
+  },
+  "settingsMusicBrowseHelp": "Download more genres for your videos.",
+  "@settingsMusicBrowseHelp": {
+    "description": "Help under the row that opens the music library."
+  },
+  "settingsMusicNone": "No packs downloaded yet.",
+  "@settingsMusicNone": {
+    "description": "Shown in settings when no music pack is on the device."
+  },
+  "settingsMusicPacksTitle": "Downloaded packs",
+  "@settingsMusicPacksTitle": {
+    "description": "Heading above the list of music packs on the device."
+  },
+  "settingsMusicPackSummary": "{count, plural, =1{1 track} other{{count} tracks}} · {size}",
+  "@settingsMusicPackSummary": {
+    "description": "Tracks and storage of one downloaded music pack.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsMusicRemoveAll": "Remove all packs",
+  "@settingsMusicRemoveAll": {
+    "description": "Row that deletes every downloaded music pack."
+  },
+  "settingsMusicRemoveAllHelp": "Frees {size}. You can download them again.",
+  "@settingsMusicRemoveAllHelp": {
+    "description": "Help under the row that deletes every music pack.",
+    "placeholders": {
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsMusicRemoveTitle": "Remove {name}?",
+  "@settingsMusicRemoveTitle": {
+    "description": "Title of the dialog that confirms deleting a music pack.",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsMusicRemoveBody": "This frees {size}. You can download it again.",
+  "@settingsMusicRemoveBody": {
+    "description": "Body of the dialog that confirms deleting a music pack.",
+    "placeholders": {
+      "size": {
+        "type": "String"
+      }
+    }
+  },
   "settingsSectionStorage": "Storage",
   "@settingsSectionStorage": {
     "description": "Name of the settings section about disk space."
@@ -2672,5 +2812,312 @@
   "storageRefresh": "Refresh",
   "@storageRefresh": {
     "description": "Button that measures the storage again."
+  },
+  "textAddAction": "Add text",
+  "@textAddAction": {
+    "description": "Button that adds a new text over the video at the playhead."
+  },
+  "textAddHint": "Type over the video, drag it to move it, pinch to resize.",
+  "@textAddHint": {
+    "description": "Hint under the add text button."
+  },
+  "textDefaultContent": "Your text",
+  "@textDefaultContent": {
+    "description": "Words a new text starts with."
+  },
+  "textFieldHint": "Type here",
+  "@textFieldHint": {
+    "description": "Placeholder of the field where the text is typed."
+  },
+  "textSectionFont": "Font",
+  "@textSectionFont": {
+    "description": "Name of the text style section that picks the font."
+  },
+  "textSectionColor": "Color",
+  "@textSectionColor": {
+    "description": "Name of the text style section that picks the letter color."
+  },
+  "textSectionOutline": "Outline",
+  "@textSectionOutline": {
+    "description": "Name of the text style section for the outline."
+  },
+  "textSectionShadow": "Shadow",
+  "@textSectionShadow": {
+    "description": "Name of the text style section for the shadow."
+  },
+  "textSectionBackground": "Background",
+  "@textSectionBackground": {
+    "description": "Name of the text style section for the fill behind the words."
+  },
+  "textSectionMotion": "Motion",
+  "@textSectionMotion": {
+    "description": "Name of the text style section for how the text enters and leaves."
+  },
+  "textSizeLabel": "Size",
+  "@textSizeLabel": {
+    "description": "Label of the text size slider."
+  },
+  "textSpacingLabel": "Letter spacing",
+  "@textSpacingLabel": {
+    "description": "Label of the letter spacing slider."
+  },
+  "textThicknessLabel": "Thickness",
+  "@textThicknessLabel": {
+    "description": "Label of the outline thickness slider."
+  },
+  "textStrengthLabel": "Strength",
+  "@textStrengthLabel": {
+    "description": "Label of the shadow strength slider."
+  },
+  "textBoldAction": "Bold",
+  "@textBoldAction": {
+    "description": "Tooltip of the bold toggle."
+  },
+  "textItalicAction": "Italic",
+  "@textItalicAction": {
+    "description": "Tooltip of the italic toggle."
+  },
+  "textAlignLeftAction": "Align left",
+  "@textAlignLeftAction": {
+    "description": "Tooltip of the left align button."
+  },
+  "textAlignCenterAction": "Align center",
+  "@textAlignCenterAction": {
+    "description": "Tooltip of the center align button."
+  },
+  "textAlignRightAction": "Align right",
+  "@textAlignRightAction": {
+    "description": "Tooltip of the right align button."
+  },
+  "textNoneOption": "None",
+  "@textNoneOption": {
+    "description": "Option that turns a text effect off (no outline, no background)."
+  },
+  "textAnimationFade": "Fade",
+  "@textAnimationFade": {
+    "description": "Text entrance: fades in and out."
+  },
+  "textAnimationPop": "Pop",
+  "@textAnimationPop": {
+    "description": "Text entrance: grows in with a bounce."
+  },
+  "textAnimationSlide": "Slide up",
+  "@textAnimationSlide": {
+    "description": "Text entrance: rises into place."
+  },
+  "textColorSemantics": "Color {value}",
+  "@textColorSemantics": {
+    "description": "Accessibility label of a color swatch; value is a hex code.",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "addLayerTitle": "What do you want to add?",
+  "@addLayerTitle": {
+    "description": "Title of the menu that asks which kind of layer to add."
+  },
+  "addLayerVideoHint": "Clips from your device",
+  "@addLayerVideoHint": {
+    "description": "Hint under Video in the add layer menu."
+  },
+  "addLayerImageHint": "Photos and pictures over the video",
+  "@addLayerImageHint": {
+    "description": "Hint under Image in the add layer menu."
+  },
+  "addLayerAudioHint": "Music, sounds or voice",
+  "@addLayerAudioHint": {
+    "description": "Hint under Audio in the add layer menu."
+  },
+  "addLayerTextHint": "Words over the video",
+  "@addLayerTextHint": {
+    "description": "Hint under Text in the add layer menu."
+  },
+  "textSectionStyle": "Style",
+  "@textSectionStyle": {
+    "description": "Name of the text section with bold, italic and alignment."
+  },
+  "textAlignLabel": "Alignment",
+  "@textAlignLabel": {
+    "description": "Label of the text alignment control."
+  },
+  "textAddAnotherAction": "Add another text",
+  "@textAddAnotherAction": {
+    "description": "Button that adds one more text over the video."
+  },
+  "transformSectionFit": "Fit to canvas",
+  "@transformSectionFit": {
+    "description": "Name of the section that fits a picture to the canvas."
+  },
+  "transformSectionSize": "Size and turn",
+  "@transformSectionSize": {
+    "description": "Name of the section with scale, rotation and opacity."
+  },
+  "transformSectionActions": "Quick actions",
+  "@transformSectionActions": {
+    "description": "Name of the section with rotate, mirror, center and reset."
+  },
+  "animationPresetsTitle": "Animation presets",
+  "@animationPresetsTitle": {
+    "description": "Heading of the section with ready-made entrance and exit animations."
+  },
+  "animationPresetsSummary": "One tap sets how the clip comes in and goes out.",
+  "@animationPresetsSummary": {
+    "description": "Help under the animation presets heading."
+  },
+  "animationPresetNone": "No animation",
+  "@animationPresetNone": {
+    "description": "Preset that removes the entrance and the exit of a clip."
+  },
+  "animationPresetGentle": "Gentle fade",
+  "@animationPresetGentle": {
+    "description": "Name of a built-in animation preset."
+  },
+  "animationPresetQuickFade": "Quick fade",
+  "@animationPresetQuickFade": {
+    "description": "Name of a built-in animation preset."
+  },
+  "animationPresetCinematic": "Cinematic",
+  "@animationPresetCinematic": {
+    "description": "Name of a built-in animation preset."
+  },
+  "animationPresetSlideThrough": "Slide through",
+  "@animationPresetSlideThrough": {
+    "description": "Name of a built-in animation preset."
+  },
+  "animationPresetSlideUpDown": "Slide up and down",
+  "@animationPresetSlideUpDown": {
+    "description": "Name of a built-in animation preset."
+  },
+  "animationPresetZoom": "Zoom",
+  "@animationPresetZoom": {
+    "description": "Name of a built-in animation preset."
+  },
+  "animationPresetPop": "Pop",
+  "@animationPresetPop": {
+    "description": "Name of a built-in animation preset."
+  },
+  "animationPresetSpin": "Spin",
+  "@animationPresetSpin": {
+    "description": "Name of a built-in animation preset."
+  },
+  "animationPresetSummaryLine": "In: {enter} · Out: {exit}",
+  "@animationPresetSummaryLine": {
+    "description": "Describes a preset by its entrance and its exit.",
+    "placeholders": {
+      "enter": {
+        "type": "String",
+        "example": "Fade 0.5 s"
+      },
+      "exit": {
+        "type": "String",
+        "example": "Fade 0.5 s"
+      }
+    }
+  },
+  "animationPresetStep": "{name} {seconds} s",
+  "@animationPresetStep": {
+    "description": "One side of an animation with its length.",
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "example": "Fade"
+      },
+      "seconds": {
+        "type": "String",
+        "example": "0.5"
+      }
+    }
+  },
+  "animationPresetWholeLayer": "Apply to every clip of this layer",
+  "@animationPresetWholeLayer": {
+    "description": "Switch: a preset goes to the whole layer, not only the selected clip."
+  },
+  "animationPresetSave": "Save this animation as a preset",
+  "@animationPresetSave": {
+    "description": "Button that saves the animation of the selected clip under a name."
+  },
+  "animationPresetNameLabel": "Preset name",
+  "@animationPresetNameLabel": {
+    "description": "Label of the field that names a new animation preset."
+  },
+  "animationPresetSaveConfirm": "Save",
+  "@animationPresetSaveConfirm": {
+    "description": "Button that confirms saving an animation preset."
+  },
+  "animationPresetDelete": "Delete preset",
+  "@animationPresetDelete": {
+    "description": "Tooltip of the button that deletes a saved animation preset."
+  },
+  "animationPresetYours": "Your presets",
+  "@animationPresetYours": {
+    "description": "Heading above the animation presets the user saved."
+  },
+  "animationPresetNeedsAnimation": "Give the clip an entrance or an exit first.",
+  "@animationPresetNeedsAnimation": {
+    "description": "Shown when saving a preset from a clip that has no animation."
+  },
+  "transitionTitle": "Transition",
+  "@transitionTitle": {
+    "description": "Heading of the section that joins a clip to the one before it."
+  },
+  "transitionSummary": "How this clip follows the one before it.",
+  "@transitionSummary": {
+    "description": "Help under the transition heading."
+  },
+  "transitionNeedsNeighbour": "Place this clip right after another one on its layer to add a transition.",
+  "@transitionNeedsNeighbour": {
+    "description": "Shown when the selected clip has no clip right before it."
+  },
+  "transitionNone": "No transition",
+  "@transitionNone": {
+    "description": "Option that removes the transition between two clips."
+  },
+  "transitionDip": "Fade",
+  "@transitionDip": {
+    "description": "Name of a transition."
+  },
+  "transitionPushLeft": "Push left",
+  "@transitionPushLeft": {
+    "description": "Name of a transition."
+  },
+  "transitionPushRight": "Push right",
+  "@transitionPushRight": {
+    "description": "Name of a transition."
+  },
+  "transitionPushUp": "Push up",
+  "@transitionPushUp": {
+    "description": "Name of a transition."
+  },
+  "transitionPushDown": "Push down",
+  "@transitionPushDown": {
+    "description": "Name of a transition."
+  },
+  "transitionZoomThrough": "Zoom through",
+  "@transitionZoomThrough": {
+    "description": "Name of a transition."
+  },
+  "transitionSpin": "Spin",
+  "@transitionSpin": {
+    "description": "Name of a transition."
+  },
+  "transitionPop": "Fade and pop",
+  "@transitionPop": {
+    "description": "Name of a transition."
+  },
+  "transitionDuration": "Length {seconds} s on each side",
+  "@transitionDuration": {
+    "description": "Label of the slider that sets how long a transition lasts.",
+    "placeholders": {
+      "seconds": {
+        "type": "String",
+        "example": "0.6"
+      }
+    }
+  },
+  "transitionFadeSound": "Fade the sound too",
+  "@transitionFadeSound": {
+    "description": "Switch: the sound of both clips fades with the transition."
   }
 }

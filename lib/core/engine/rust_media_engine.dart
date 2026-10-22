@@ -48,6 +48,10 @@ class RustMediaEngine implements MediaEngine {
   }
 
   @override
+  TextSize measureText(TextSpec spec, int canvasHeight) =>
+      rust.measureText(spec: spec, canvasHeight: canvasHeight);
+
+  @override
   EngineDiagnostics diagnostics() => rust.engineDiagnostics();
 
   @override
@@ -57,6 +61,18 @@ class RustMediaEngine implements MediaEngine {
     required int toMs,
   }) {
     return rust.suggestAdjustments(path: path, fromMs: fromMs, toMs: toMs);
+  }
+
+  @override
+  Future<({int width, int height})> removeBackground(
+    String inputPath,
+    String outputPath,
+  ) async {
+    final (width, height) = await rust.removeBackground(
+      inputPath: inputPath,
+      outputPath: outputPath,
+    );
+    return (width: width, height: height);
   }
 
   @override

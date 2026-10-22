@@ -20,6 +20,9 @@ enum EditorTool {
   /// clip.
   transform(Icons.crop_rotate, forClip: true),
 
+  /// Words over the video: add, type, style and time them.
+  text(Icons.text_fields),
+
   /// The project's media bank: import once, place again and again.
   media(Icons.perm_media_outlined),
 
@@ -59,6 +62,7 @@ enum EditorTool {
         EditorTool.filters => l10n.filtersLabel,
         EditorTool.adjust => l10n.adjustTool,
         EditorTool.transform => l10n.transformTool,
+        EditorTool.text => l10n.textTool,
         EditorTool.media => l10n.mediaTool,
         EditorTool.capture => l10n.captureTool,
         EditorTool.canvas => l10n.canvasTool,

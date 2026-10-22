@@ -45,3 +45,49 @@ flutter:
   generate: true
   assets:
     - CHANGELOG.md
+
+  # The fonts of the text tool: the same files the engine draws with.
+  fonts:
+    - family: sans
+      fonts:
+        - asset: rust/assets/fonts/LiberationSans-Regular.ttf
+        - asset: rust/assets/fonts/LiberationSans-Bold.ttf
+          weight: 700
+        - asset: rust/assets/fonts/LiberationSans-Italic.ttf
+          style: italic
+        - asset: rust/assets/fonts/LiberationSans-BoldItalic.ttf
+          weight: 700
+          style: italic
+    - family: serif
+      fonts:
+        - asset: rust/assets/fonts/LiberationSerif-Regular.ttf
+        - asset: rust/assets/fonts/LiberationSerif-Bold.ttf
+          weight: 700
+        - asset: rust/assets/fonts/LiberationSerif-Italic.ttf
+          style: italic
+        - asset: rust/assets/fonts/LiberationSerif-BoldItalic.ttf
+          weight: 700
+          style: italic
+    - family: mono
+      fonts:
+        - asset: rust/assets/fonts/LiberationMono-Regular.ttf
+        - asset: rust/assets/fonts/LiberationMono-Bold.ttf
+          weight: 700
+    - family: anton
+      fonts:
+        - asset: rust/assets/fonts/Anton-Regular.ttf
+    - family: bebas
+      fonts:
+        - asset: rust/assets/fonts/BebasNeue-Regular.ttf
+    - family: bangers
+      fonts:
+        - asset: rust/assets/fonts/Bangers-Regular.ttf
+    - family: lobster
+      fonts:
+        - asset: rust/assets/fonts/Lobster-Regular.ttf
+    - family: pacifico
+      fonts:
+        - asset: rust/assets/fonts/Pacifico-Regular.ttf
+    - family: marker
+      fonts:
+        - asset: rust/assets/fonts/PermanentMarker-Regular.ttf

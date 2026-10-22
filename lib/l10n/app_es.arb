@@ -16,6 +16,14 @@
   "@layerKindVideo": {
     "description": "Nombre de una capa de vídeo."
   },
+  "layerKindText": "Texto",
+  "@layerKindText": {
+    "description": "Nombre de una capa de texto."
+  },
+  "textTool": "Texto",
+  "@textTool": {
+    "description": "Nombre de la herramienta que añade y da estilo al texto sobre el video."
+  },
   "layerKindImage": "Imagen",
   "@layerKindImage": {
     "description": "Nombre de una capa de imagen."
@@ -91,6 +99,138 @@
   "filterVintage": "Vintage",
   "@filterVintage": {
     "description": "Nombre del filtro vintage."
+  },
+  "filterSepia": "Sepia",
+  "@filterSepia": {
+    "description": "Nombre del filtro sepia."
+  },
+  "filterNoir": "Noir",
+  "@filterNoir": {
+    "description": "Nombre del filtro blanco y negro de alto contraste."
+  },
+  "filterVivid": "Vívido",
+  "@filterVivid": {
+    "description": "Nombre del filtro de color saturado e intenso."
+  },
+  "filterFade": "Desvanecido",
+  "@filterFade": {
+    "description": "Nombre del filtro desvanecido de negros elevados."
+  },
+  "filterCinema": "Cine",
+  "@filterCinema": {
+    "description": "Nombre del filtro cinematográfico verde azulado y naranja."
+  },
+  "filterSunset": "Atardecer",
+  "@filterSunset": {
+    "description": "Nombre del filtro de luz dorada de atardecer."
+  },
+  "filterInvert": "Invertir",
+  "@filterInvert": {
+    "description": "Nombre del filtro negativo que invierte los colores."
+  },
+  "effectsLabel": "Efectos",
+  "@effectsLabel": {
+    "description": "Encabezado del grupo de efectos (desenfoque, viñeta, grano...)."
+  },
+  "effectBlur": "Desenfoque",
+  "@effectBlur": {
+    "description": "Nombre del efecto de desenfoque."
+  },
+  "effectVignette": "Viñeta",
+  "@effectVignette": {
+    "description": "Nombre del efecto de viñeta que oscurece las esquinas."
+  },
+  "effectGrain": "Grano",
+  "@effectGrain": {
+    "description": "Nombre del efecto de grano de película."
+  },
+  "effectPixelate": "Pixelado",
+  "@effectPixelate": {
+    "description": "Nombre del efecto de pixelado."
+  },
+  "effectSharpen": "Nitidez",
+  "@effectSharpen": {
+    "description": "Nombre del efecto de nitidez."
+  },
+  "effectValueLabel": "{name} {value}",
+  "@effectValueLabel": {
+    "description": "Etiqueta de un control de efecto: su nombre y su intensidad en porcentaje.",
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "example": "Blur"
+      },
+      "value": {
+        "type": "String",
+        "example": "40"
+      }
+    }
+  },
+  "animationsLabel": "Animaciones",
+  "@animationsLabel": {
+    "description": "Encabezado del grupo que define cómo entra y sale un clip."
+  },
+  "animationIn": "Entrada",
+  "@animationIn": {
+    "description": "Etiqueta de la fila de animación de entrada."
+  },
+  "animationOut": "Salida",
+  "@animationOut": {
+    "description": "Etiqueta de la fila de animación de salida."
+  },
+  "animationNone": "Ninguna",
+  "@animationNone": {
+    "description": "Chip que quita una animación."
+  },
+  "animationFade": "Fundido",
+  "@animationFade": {
+    "description": "Nombre de la animación de fundido."
+  },
+  "animationSlideLeft": "Deslizar izquierda",
+  "@animationSlideLeft": {
+    "description": "Nombre de la animación que desliza el clip desde o hacia la izquierda."
+  },
+  "animationSlideRight": "Deslizar derecha",
+  "@animationSlideRight": {
+    "description": "Nombre de la animación que desliza el clip desde o hacia la derecha."
+  },
+  "animationSlideUp": "Deslizar arriba",
+  "@animationSlideUp": {
+    "description": "Nombre de la animación que desliza el clip desde o hacia arriba."
+  },
+  "animationSlideDown": "Deslizar abajo",
+  "@animationSlideDown": {
+    "description": "Nombre de la animación que desliza el clip desde o hacia abajo."
+  },
+  "animationZoomIn": "Acercar",
+  "@animationZoomIn": {
+    "description": "Nombre de la animación que agranda el clip hasta su lugar."
+  },
+  "animationZoomOut": "Alejar",
+  "@animationZoomOut": {
+    "description": "Nombre de la animación que encoge el clip hasta su lugar."
+  },
+  "animationSpin": "Girar",
+  "@animationSpin": {
+    "description": "Nombre de la animación que gira el clip hasta su lugar."
+  },
+  "animationPop": "Rebote",
+  "@animationPop": {
+    "description": "Nombre de la animación que hace saltar el clip con un pequeño rebote."
+  },
+  "animationDurationLabel": "{name} {seconds} s",
+  "@animationDurationLabel": {
+    "description": "Etiqueta del control de duración de una animación: el nombre de la fila y la duración en segundos.",
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "example": "In"
+      },
+      "seconds": {
+        "type": "String",
+        "example": "0.5"
+      }
+    }
   },
   "adjustmentsLabel": "Ajustes",
   "@adjustmentsLabel": {
@@ -2099,25 +2239,6 @@
       }
     }
   },
-  "musicPackPause": "Pausar",
-  "musicPackResume": "Reanudar",
-  "musicPackCancel": "Cancelar descarga",
-  "musicPackPaused": "En pausa {percent} %",
-  "musicPackPausedUnknown": "En pausa",
-  "musicDownloadsContinue": "Puedes salir de esta pantalla: las descargas continúan.",
-  "settingsSectionMusic": "Biblioteca de música",
-  "settingsSectionMusicHelp": "Packs descargados y el espacio que ocupan.",
-  "settingsMusicUsed": "Espacio usado por la música",
-  "settingsMusicUsedValue": "{size} · {count, plural, =0{sin packs} =1{1 pack} other{{count} packs}}",
-  "settingsMusicBrowse": "Explorar packs",
-  "settingsMusicBrowseHelp": "Descarga más géneros para tus videos.",
-  "settingsMusicNone": "Aún no hay packs descargados.",
-  "settingsMusicPacksTitle": "Packs descargados",
-  "settingsMusicPackSummary": "{count, plural, =1{1 pista} other{{count} pistas}} · {size}",
-  "settingsMusicRemoveAll": "Quitar todos los packs",
-  "settingsMusicRemoveAllHelp": "Libera {size}. Puedes volver a descargarlos.",
-  "settingsMusicRemoveTitle": "¿Quitar {name}?",
-  "settingsMusicRemoveBody": "Esto libera {size}. Puedes volver a descargarlo.",
   "importReportTitle": "Informe de importación",
   "@importReportTitle": {
     "description": "Title of the dialog that lists files that were left out or need attention after an import."
@@ -2374,6 +2495,25 @@
       }
     }
   },
+  "musicPackPause": "Pausar",
+  "musicPackResume": "Reanudar",
+  "musicPackCancel": "Cancelar descarga",
+  "musicPackPaused": "En pausa {percent} %",
+  "musicPackPausedUnknown": "En pausa",
+  "musicDownloadsContinue": "Puedes salir de esta pantalla: las descargas continúan.",
+  "settingsSectionMusic": "Biblioteca de música",
+  "settingsSectionMusicHelp": "Packs descargados y el espacio que ocupan.",
+  "settingsMusicUsed": "Espacio usado por la música",
+  "settingsMusicUsedValue": "{size} · {count, plural, =0{sin packs} =1{1 pack} other{{count} packs}}",
+  "settingsMusicBrowse": "Explorar packs",
+  "settingsMusicBrowseHelp": "Descarga más géneros para tus videos.",
+  "settingsMusicNone": "Aún no hay packs descargados.",
+  "settingsMusicPacksTitle": "Packs descargados",
+  "settingsMusicPackSummary": "{count, plural, =1{1 pista} other{{count} pistas}} · {size}",
+  "settingsMusicRemoveAll": "Quitar todos los packs",
+  "settingsMusicRemoveAllHelp": "Libera {size}. Puedes volver a descargarlos.",
+  "settingsMusicRemoveTitle": "¿Quitar {name}?",
+  "settingsMusicRemoveBody": "Esto libera {size}. Puedes volver a descargarlo.",
   "settingsSectionStorage": "Almacenamiento",
   "@settingsSectionStorage": {
     "description": "Name of the settings section about disk space."
@@ -2483,5 +2623,312 @@
   "storageRefresh": "Actualizar",
   "@storageRefresh": {
     "description": "Button that measures the storage again."
+  },
+  "textAddAction": "Añadir texto",
+  "@textAddAction": {
+    "description": "Button that adds a new text over the video at the playhead."
+  },
+  "textAddHint": "Escribe sobre el video, arrástralo para moverlo y pellizca para cambiar su tamaño.",
+  "@textAddHint": {
+    "description": "Hint under the add text button."
+  },
+  "textDefaultContent": "Tu texto",
+  "@textDefaultContent": {
+    "description": "Words a new text starts with."
+  },
+  "textFieldHint": "Escribe aquí",
+  "@textFieldHint": {
+    "description": "Placeholder of the field where the text is typed."
+  },
+  "textSectionFont": "Fuente",
+  "@textSectionFont": {
+    "description": "Name of the text style section that picks the font."
+  },
+  "textSectionColor": "Color",
+  "@textSectionColor": {
+    "description": "Name of the text style section that picks the letter color."
+  },
+  "textSectionOutline": "Contorno",
+  "@textSectionOutline": {
+    "description": "Name of the text style section for the outline."
+  },
+  "textSectionShadow": "Sombra",
+  "@textSectionShadow": {
+    "description": "Name of the text style section for the shadow."
+  },
+  "textSectionBackground": "Fondo",
+  "@textSectionBackground": {
+    "description": "Name of the text style section for the fill behind the words."
+  },
+  "textSectionMotion": "Movimiento",
+  "@textSectionMotion": {
+    "description": "Name of the text style section for how the text enters and leaves."
+  },
+  "textSizeLabel": "Tamaño",
+  "@textSizeLabel": {
+    "description": "Label of the text size slider."
+  },
+  "textSpacingLabel": "Espaciado",
+  "@textSpacingLabel": {
+    "description": "Label of the letter spacing slider."
+  },
+  "textThicknessLabel": "Grosor",
+  "@textThicknessLabel": {
+    "description": "Label of the outline thickness slider."
+  },
+  "textStrengthLabel": "Intensidad",
+  "@textStrengthLabel": {
+    "description": "Label of the shadow strength slider."
+  },
+  "textBoldAction": "Negrita",
+  "@textBoldAction": {
+    "description": "Tooltip of the bold toggle."
+  },
+  "textItalicAction": "Cursiva",
+  "@textItalicAction": {
+    "description": "Tooltip of the italic toggle."
+  },
+  "textAlignLeftAction": "Alinear a la izquierda",
+  "@textAlignLeftAction": {
+    "description": "Tooltip of the left align button."
+  },
+  "textAlignCenterAction": "Centrar",
+  "@textAlignCenterAction": {
+    "description": "Tooltip of the center align button."
+  },
+  "textAlignRightAction": "Alinear a la derecha",
+  "@textAlignRightAction": {
+    "description": "Tooltip of the right align button."
+  },
+  "textNoneOption": "Ninguno",
+  "@textNoneOption": {
+    "description": "Option that turns a text effect off (no outline, no background)."
+  },
+  "textAnimationFade": "Desvanecer",
+  "@textAnimationFade": {
+    "description": "Text entrance: fades in and out."
+  },
+  "textAnimationPop": "Rebote",
+  "@textAnimationPop": {
+    "description": "Text entrance: grows in with a bounce."
+  },
+  "textAnimationSlide": "Subir",
+  "@textAnimationSlide": {
+    "description": "Text entrance: rises into place."
+  },
+  "textColorSemantics": "Color {value}",
+  "@textColorSemantics": {
+    "description": "Accessibility label of a color swatch; value is a hex code.",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "addLayerTitle": "¿Qué quieres agregar?",
+  "@addLayerTitle": {
+    "description": "Title of the menu that asks which kind of layer to add."
+  },
+  "addLayerVideoHint": "Clips de tu dispositivo",
+  "@addLayerVideoHint": {
+    "description": "Hint under Video in the add layer menu."
+  },
+  "addLayerImageHint": "Fotos e imágenes sobre el video",
+  "@addLayerImageHint": {
+    "description": "Hint under Image in the add layer menu."
+  },
+  "addLayerAudioHint": "Música, sonidos o voz",
+  "@addLayerAudioHint": {
+    "description": "Hint under Audio in the add layer menu."
+  },
+  "addLayerTextHint": "Palabras sobre el video",
+  "@addLayerTextHint": {
+    "description": "Hint under Text in the add layer menu."
+  },
+  "textSectionStyle": "Estilo",
+  "@textSectionStyle": {
+    "description": "Name of the text section with bold, italic and alignment."
+  },
+  "textAlignLabel": "Alineación",
+  "@textAlignLabel": {
+    "description": "Label of the text alignment control."
+  },
+  "textAddAnotherAction": "Agregar otro texto",
+  "@textAddAnotherAction": {
+    "description": "Button that adds one more text over the video."
+  },
+  "transformSectionFit": "Ajuste al lienzo",
+  "@transformSectionFit": {
+    "description": "Name of the section that fits a picture to the canvas."
+  },
+  "transformSectionSize": "Tamaño y giro",
+  "@transformSectionSize": {
+    "description": "Name of the section with scale, rotation and opacity."
+  },
+  "transformSectionActions": "Acciones rápidas",
+  "@transformSectionActions": {
+    "description": "Name of the section with rotate, mirror, center and reset."
+  },
+  "animationPresetsTitle": "Presets de animación",
+  "@animationPresetsTitle": {
+    "description": "Heading of the section with ready-made entrance and exit animations."
+  },
+  "animationPresetsSummary": "Un toque define cómo entra y sale el clip.",
+  "@animationPresetsSummary": {
+    "description": "Help under the animation presets heading."
+  },
+  "animationPresetNone": "Sin animación",
+  "@animationPresetNone": {
+    "description": "Preset that removes the entrance and the exit of a clip."
+  },
+  "animationPresetGentle": "Fundido suave",
+  "@animationPresetGentle": {
+    "description": "Name of a built-in animation preset."
+  },
+  "animationPresetQuickFade": "Fundido rápido",
+  "@animationPresetQuickFade": {
+    "description": "Name of a built-in animation preset."
+  },
+  "animationPresetCinematic": "Cinematográfico",
+  "@animationPresetCinematic": {
+    "description": "Name of a built-in animation preset."
+  },
+  "animationPresetSlideThrough": "Deslizar de lado a lado",
+  "@animationPresetSlideThrough": {
+    "description": "Name of a built-in animation preset."
+  },
+  "animationPresetSlideUpDown": "Deslizar arriba y abajo",
+  "@animationPresetSlideUpDown": {
+    "description": "Name of a built-in animation preset."
+  },
+  "animationPresetZoom": "Zoom",
+  "@animationPresetZoom": {
+    "description": "Name of a built-in animation preset."
+  },
+  "animationPresetPop": "Pop",
+  "@animationPresetPop": {
+    "description": "Name of a built-in animation preset."
+  },
+  "animationPresetSpin": "Giro",
+  "@animationPresetSpin": {
+    "description": "Name of a built-in animation preset."
+  },
+  "animationPresetSummaryLine": "Entrada: {enter} · Salida: {exit}",
+  "@animationPresetSummaryLine": {
+    "description": "Describes a preset by its entrance and its exit.",
+    "placeholders": {
+      "enter": {
+        "type": "String",
+        "example": "Fade 0.5 s"
+      },
+      "exit": {
+        "type": "String",
+        "example": "Fade 0.5 s"
+      }
+    }
+  },
+  "animationPresetStep": "{name} {seconds} s",
+  "@animationPresetStep": {
+    "description": "One side of an animation with its length.",
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "example": "Fade"
+      },
+      "seconds": {
+        "type": "String",
+        "example": "0.5"
+      }
+    }
+  },
+  "animationPresetWholeLayer": "Aplicar a todos los clips de esta capa",
+  "@animationPresetWholeLayer": {
+    "description": "Switch: a preset goes to the whole layer, not only the selected clip."
+  },
+  "animationPresetSave": "Guardar esta animación como preset",
+  "@animationPresetSave": {
+    "description": "Button that saves the animation of the selected clip under a name."
+  },
+  "animationPresetNameLabel": "Nombre del preset",
+  "@animationPresetNameLabel": {
+    "description": "Label of the field that names a new animation preset."
+  },
+  "animationPresetSaveConfirm": "Guardar",
+  "@animationPresetSaveConfirm": {
+    "description": "Button that confirms saving an animation preset."
+  },
+  "animationPresetDelete": "Eliminar preset",
+  "@animationPresetDelete": {
+    "description": "Tooltip of the button that deletes a saved animation preset."
+  },
+  "animationPresetYours": "Tus presets",
+  "@animationPresetYours": {
+    "description": "Heading above the animation presets the user saved."
+  },
+  "animationPresetNeedsAnimation": "Primero dale una entrada o una salida al clip.",
+  "@animationPresetNeedsAnimation": {
+    "description": "Shown when saving a preset from a clip that has no animation."
+  },
+  "transitionTitle": "Transición",
+  "@transitionTitle": {
+    "description": "Heading of the section that joins a clip to the one before it."
+  },
+  "transitionSummary": "Cómo sigue este clip al anterior.",
+  "@transitionSummary": {
+    "description": "Help under the transition heading."
+  },
+  "transitionNeedsNeighbour": "Coloca este clip justo después de otro en su capa para añadir una transición.",
+  "@transitionNeedsNeighbour": {
+    "description": "Shown when the selected clip has no clip right before it."
+  },
+  "transitionNone": "Sin transición",
+  "@transitionNone": {
+    "description": "Option that removes the transition between two clips."
+  },
+  "transitionDip": "Fundido",
+  "@transitionDip": {
+    "description": "Name of a transition."
+  },
+  "transitionPushLeft": "Empujar a la izquierda",
+  "@transitionPushLeft": {
+    "description": "Name of a transition."
+  },
+  "transitionPushRight": "Empujar a la derecha",
+  "@transitionPushRight": {
+    "description": "Name of a transition."
+  },
+  "transitionPushUp": "Empujar hacia arriba",
+  "@transitionPushUp": {
+    "description": "Name of a transition."
+  },
+  "transitionPushDown": "Empujar hacia abajo",
+  "@transitionPushDown": {
+    "description": "Name of a transition."
+  },
+  "transitionZoomThrough": "Zoom a través",
+  "@transitionZoomThrough": {
+    "description": "Name of a transition."
+  },
+  "transitionSpin": "Giro",
+  "@transitionSpin": {
+    "description": "Name of a transition."
+  },
+  "transitionPop": "Fundido y pop",
+  "@transitionPop": {
+    "description": "Name of a transition."
+  },
+  "transitionDuration": "Duración {seconds} s en cada lado",
+  "@transitionDuration": {
+    "description": "Label of the slider that sets how long a transition lasts.",
+    "placeholders": {
+      "seconds": {
+        "type": "String",
+        "example": "0.6"
+      }
+    }
+  },
+  "transitionFadeSound": "Fundir también el sonido",
+  "@transitionFadeSound": {
+    "description": "Switch: the sound of both clips fades with the transition."
   }
 }

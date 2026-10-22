@@ -29,6 +29,7 @@ List<String> _extensions(MediaKind? filter) => switch (filter) {
       MediaKind.video => videoExtensions.toList(),
       MediaKind.image => imageExtensions.toList(),
       MediaKind.audio => audioExtensions.toList(),
+      MediaKind.text => const [],
       null => mediaExtensions.toList(),
     };
 

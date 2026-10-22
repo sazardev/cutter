@@ -4,6 +4,7 @@ import 'dart:ui' as ui;
 import 'package:cutter/app/theme/app_theme.dart';
 import 'package:cutter/features/editor/data/engine_timeline.dart';
 import 'package:cutter/features/editor/domain/clip.dart';
+import 'package:cutter/features/editor/domain/clip_text.dart';
 import 'package:cutter/features/editor/domain/layer.dart';
 import 'package:cutter/features/editor/domain/media_asset.dart';
 import 'package:cutter/features/editor/domain/project.dart';
@@ -795,7 +796,39 @@ class TimelineViewState extends ConsumerState<TimelineView>
 }
 
 double _rowHeight(Layer layer) =>
-    layer.kind == MediaKind.audio ? _soundRowHeight : _pictureRowHeight;
+    layer.kind == MediaKind.audio || layer.kind == MediaKind.text
+        ? _soundRowHeight
+        : _pictureRowHeight;
+
+/// The words of a text clip, on its bar of the timeline.
+class _TextLabel extends StatelessWidget {
+  const _TextLabel({required this.text, required this.color});
+
+  final ClipText? text;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    final words = text?.content.replaceAll('\n', ' ').trim() ?? '';
+    return Padding(
+      padding: const EdgeInsets.symmetric(
+        horizontal: _handleWidth + AppSpacing.xs,
+      ),
+      child: Align(
+        alignment: Alignment.centerLeft,
+        child: Text(
+          words,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: Theme.of(context)
+              .textTheme
+              .labelLarge
+              ?.copyWith(color: color, fontWeight: FontWeight.w600),
+        ),
+      ),
+    );
+  }
+}
 
 class _Ruler extends StatelessWidget {
   const _Ruler({
@@ -911,7 +944,8 @@ class _LayerHeader extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
     final scheme = Theme.of(context).colorScheme;
-    final audible = layer.kind != MediaKind.image;
+    final audible =
+        layer.kind != MediaKind.image && layer.kind != MediaKind.text;
     return Padding(
       padding: const EdgeInsets.only(bottom: _rowGap),
       child: Semantics(
@@ -962,11 +996,17 @@ class _LayerHeader extends ConsumerWidget {
                             .setLayerMuted(layer.id, muted: !layer.muted),
                       ),
                     )
-                  : Icon(
-                      Icons.image_outlined,
-                      color: scheme.onSurfaceVariant,
-                      semanticLabel: l10n.layerKindImage,
-                    ),
+                  : layer.kind == MediaKind.text
+                      ? Icon(
+                          Icons.text_fields,
+                          color: scheme.onSurfaceVariant,
+                          semanticLabel: l10n.layerKindText,
+                        )
+                      : Icon(
+                          Icons.image_outlined,
+                          color: scheme.onSurfaceVariant,
+                          semanticLabel: l10n.layerKindImage,
+                        ),
             ),
           ),
         ),
@@ -1026,25 +1066,31 @@ class _ClipTile extends ConsumerWidget {
           scheme.secondaryContainer,
           scheme.onSecondaryContainer
         ),
+      MediaKind.text => (
+          scheme.primaryContainer,
+          scheme.onPrimaryContainer,
+        ),
     };
-    final content = clip.kind == MediaKind.audio
-        ? _Waveform(
-            clip: clip,
-            zoom: zoom,
-            color: foreground,
-            viewport: viewport,
-            contentLeft: contentLeft,
-          )
-        : CustomPaint(
-            painter: FilmstripPainter(
-              store: ref.watch(thumbnailStoreProvider),
-              clip: clip,
-              zoom: zoom,
-              placeholder: background,
-              viewport: viewport,
-              contentLeft: contentLeft,
-            ),
-          );
+    final content = clip.kind == MediaKind.text
+        ? _TextLabel(text: clip.text, color: foreground)
+        : clip.kind == MediaKind.audio
+            ? _Waveform(
+                clip: clip,
+                zoom: zoom,
+                color: foreground,
+                viewport: viewport,
+                contentLeft: contentLeft,
+              )
+            : CustomPaint(
+                painter: FilmstripPainter(
+                  store: ref.watch(thumbnailStoreProvider),
+                  clip: clip,
+                  zoom: zoom,
+                  placeholder: background,
+                  viewport: viewport,
+                  contentLeft: contentLeft,
+                ),
+              );
     final missing = ref.watch(
       missingSourcesProvider.select(
         (sources) => sources.valueOrNull?.contains(clip.sourceUri) ?? false,
@@ -1117,10 +1163,10 @@ class _ClipTile extends ConsumerWidget {
         selected: selected,
         label: (missing ? '${l10n.missingMediaClip}. ' : '') +
             l10n.clipSemanticsLabel(
-          _kindLabel(l10n, clip.kind),
-          formatTimelineTime(clip.startMs),
-          formatTimelineTime(clip.durationMs),
-        ),
+              _kindLabel(l10n, clip.kind),
+              formatTimelineTime(clip.startMs),
+              formatTimelineTime(clip.durationMs),
+            ),
         child: GestureDetector(
           onTap: onTap,
           onLongPressStart: (_) => onMoveStart(),
@@ -1143,6 +1189,7 @@ class _ClipTile extends ConsumerWidget {
         MediaKind.video => l10n.layerKindVideo,
         MediaKind.image => l10n.layerKindImage,
         MediaKind.audio => l10n.layerKindAudio,
+        MediaKind.text => l10n.layerKindText,
       };
 }
 

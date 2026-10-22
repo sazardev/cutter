@@ -3,6 +3,7 @@
 // ignore_for_file: avoid_equals_and_hash_code_on_mutable_classes
 
 import 'package:cutter/features/editor/domain/clip_crop.dart';
+import 'package:cutter/features/editor/domain/clip_text.dart';
 import 'package:cutter/features/editor/domain/clip_transform.dart';
 import 'package:cutter/features/editor/domain/media_asset.dart';
 import 'package:cutter/features/editor/domain/time_range.dart';
@@ -10,6 +11,23 @@ import 'package:cutter/features/editor/domain/time_range.dart';
 /// The shortest duration a clip may have, in milliseconds: one frame at 30
 /// fps, so short sound effects (a click, a whoosh) can be used whole.
 const minClipDurationMs = 33;
+
+/// The ids of the animations a clip comes in and goes out with, in the order
+/// the editor lists them. The engine renders the same ids.
+const clipAnimationIds = [
+  'fade',
+  'slide_left',
+  'slide_right',
+  'slide_up',
+  'slide_down',
+  'zoom_in',
+  'zoom_out',
+  'spin',
+  'pop',
+];
+
+/// Longest an entrance or an exit may last, in milliseconds.
+const maxClipAnimationMs = 3000;
 
 /// Slowest playback speed of a clip.
 const minClipSpeed = 0.25;
@@ -42,6 +60,11 @@ class Clip {
     this.speed = 1,
     this.fadeInMs = 0,
     this.fadeOutMs = 0,
+    this.text,
+    this.animIn,
+    this.animInMs = 0,
+    this.animOut,
+    this.animOutMs = 0,
   });
 
   /// Unique id of the clip.
@@ -104,6 +127,23 @@ class Clip {
   /// Length of the sound fade at the end, in timeline milliseconds.
   final int fadeOutMs;
 
+  /// The words and look of a text clip; null for any other clip.
+  final ClipText? text;
+
+  /// Id of the animation the clip comes in with (see [clipAnimationIds]), or
+  /// null when it just appears.
+  final String? animIn;
+
+  /// How long the entrance lasts, in timeline milliseconds.
+  final int animInMs;
+
+  /// Id of the animation the clip goes out with, or null when it just
+  /// disappears.
+  final String? animOut;
+
+  /// How long the exit lasts, in timeline milliseconds.
+  final int animOutMs;
+
   /// How long the clip lasts on the timeline: its source span at its
   /// speed.
   int get durationMs => ((outPointMs - inPointMs) / speed).round();
@@ -136,6 +176,13 @@ class Clip {
     String? id,
     String? sourceUri,
     String? assetId,
+    ClipText? text,
+    String? animIn,
+    bool clearAnimIn = false,
+    int? animInMs,
+    String? animOut,
+    bool clearAnimOut = false,
+    int? animOutMs,
   }) {
     return Clip(
       id: id ?? this.id,
@@ -158,6 +205,11 @@ class Clip {
       speed: speed ?? this.speed,
       fadeInMs: fadeInMs ?? this.fadeInMs,
       fadeOutMs: fadeOutMs ?? this.fadeOutMs,
+      text: text ?? this.text,
+      animIn: clearAnimIn ? null : (animIn ?? this.animIn),
+      animInMs: animInMs ?? this.animInMs,
+      animOut: clearAnimOut ? null : (animOut ?? this.animOut),
+      animOutMs: animOutMs ?? this.animOutMs,
     );
   }
 
@@ -184,6 +236,11 @@ class Clip {
           other.speed == speed &&
           other.fadeInMs == fadeInMs &&
           other.fadeOutMs == fadeOutMs &&
+          other.text == text &&
+          other.animIn == animIn &&
+          other.animInMs == animInMs &&
+          other.animOut == animOut &&
+          other.animOutMs == animOutMs &&
           _sameAdjustments(other.adjustments);
 
   bool _sameAdjustments(Map<String, double> other) {
@@ -211,7 +268,8 @@ class Clip {
         transform,
         sourceWidth,
         sourceHeight,
-        Object.hash(crop, speed, fadeInMs, fadeOutMs),
+        Object.hash(crop, speed, fadeInMs, fadeOutMs, text),
+        Object.hash(animIn, animInMs, animOut, animOutMs),
         Object.hashAllUnordered(
           adjustments.entries.map((e) => Object.hash(e.key, e.value)),
         ),

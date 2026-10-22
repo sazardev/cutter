@@ -224,6 +224,29 @@ void main() {
       );
     });
 
+    test('stores the effect strengths next to the color adjustments', () async {
+      final result = await SetClipAdjustments(repository)(
+        projectId: 'p1',
+        clipId: 'c1',
+        adjustments: {'brightness': 0.5, 'blur': 0.4, 'vignette': 1},
+      );
+
+      expect(
+        _valueOf(result).clipById('c1')!.adjustments,
+        {'brightness': 0.5, 'blur': 0.4, 'vignette': 1.0},
+      );
+    });
+
+    test('every effect key is accepted', () async {
+      final result = await SetClipAdjustments(repository)(
+        projectId: 'p1',
+        clipId: 'c1',
+        adjustments: {for (final key in effectKeys) key: 0.5},
+      );
+
+      expect(_valueOf(result).clipById('c1')!.adjustments.keys, effectKeys);
+    });
+
     test('replaces the previous adjustments', () async {
       final setAdjustments = SetClipAdjustments(repository);
       await setAdjustments(

@@ -172,6 +172,13 @@ final class IncompatibleClip extends EditorFailure {
   const IncompatibleClip();
 }
 
+/// The animation id is not one the engine renders, or its length is out of
+/// range.
+final class InvalidAnimation extends EditorFailure {
+  /// Creates the failure.
+  const InvalidAnimation();
+}
+
 /// The adjustment key is not part of the confirmed set.
 final class UnknownAdjustment extends EditorFailure {
   /// Creates the failure for [key].
@@ -290,4 +297,10 @@ final class InvalidFade extends EditorFailure {
 final class InvalidCrop extends EditorFailure {
   /// Creates the failure.
   const InvalidCrop();
+}
+
+/// A text has a value outside its allowed range, or the clip is not a text.
+final class InvalidText extends EditorFailure {
+  /// Creates the failure.
+  const InvalidText();
 }
