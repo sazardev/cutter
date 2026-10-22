@@ -142,7 +142,10 @@ impl ExportJob {
             Err(e) if e.is::<crate::export::Cancelled>() => {
                 ExportEvent::finished(ExportStage::Cancelled, None)
             }
-            Err(e) => ExportEvent::finished(ExportStage::Failed, Some(format!("{e:#}"))),
+            Err(e) => {
+                crate::diagnostics::error(format!("export failed: {e:#}"));
+                ExportEvent::finished(ExportStage::Failed, Some(format!("{e:#}")))
+            }
         });
     }
 }

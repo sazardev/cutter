@@ -1,6 +1,7 @@
 //! Reading media files through FFmpeg: probing, video frames and audio samples.
 
 pub mod audio;
+pub mod ff_log;
 pub mod probe;
 pub mod video;
 
@@ -13,11 +14,14 @@ pub fn init() {
     static INIT: Once = Once::new();
     INIT.call_once(|| {
         ff::init().expect("FFmpeg failed to initialise");
+        #[cfg(target_os = "android")]
+        ff_log::install();
         // The decoders log every damaged or unreferenced frame at the error
         // level (`mmco: unref short failure` on a seek into the middle of a
         // GOP, thousands of times while scrubbing). They are harmless: a
         // corrupt packet loses one frame and real failures come back as
         // errors, so only fatal messages are printed.
+        #[cfg(not(target_os = "android"))]
         ff::util::log::set_level(ff::util::log::Level::Fatal);
     });
 }

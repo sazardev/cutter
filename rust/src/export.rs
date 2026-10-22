@@ -29,6 +29,8 @@ impl std::error::Error for Cancelled {}
 struct Output {
     octx: ff::format::context::Output,
     video: ff::encoder::Video,
+    /// The pixel format the H.264 encoder takes; the scaler must produce it.
+    video_format: ff::format::Pixel,
     video_index: usize,
     video_tb: ff::Rational,
     audio: ff::encoder::Audio,
@@ -74,6 +76,130 @@ impl Output {
             }
         }
     }
+
+    /// Sends a picture to the encoder.
+    ///
+    /// A hardware encoder answers `EAGAIN` while its input queue is full: the
+    /// packets made so far have to be taken before it accepts more, so drain
+    /// them and try again. Without this an export on Android fails with
+    /// "Try again" as soon as the encoder falls behind.
+    fn send_video(&mut self, frame: &ff::frame::Video) -> Result<()> {
+        let mut tries = 0;
+        loop {
+            match self.video.send_frame(frame) {
+                Ok(()) => return Ok(()),
+                Err(ff::Error::Other { errno }) if errno == EAGAIN => {
+                    self.drain_video()?;
+                    tries += 1;
+                    if tries > 5000 {
+                        bail!("the H.264 encoder stopped taking frames");
+                    }
+                    std::thread::sleep(std::time::Duration::from_millis(1));
+                }
+                Err(e) => return Err(e.into()),
+            }
+        }
+    }
+
+    /// Sends sound to the encoder, draining packets while it is full.
+    fn send_audio(&mut self, frame: &ff::frame::Audio) -> Result<()> {
+        let mut tries = 0;
+        loop {
+            match self.audio.send_frame(frame) {
+                Ok(()) => return Ok(()),
+                Err(ff::Error::Other { errno }) if errno == EAGAIN => {
+                    self.drain_audio()?;
+                    tries += 1;
+                    if tries > 5000 {
+                        bail!("the AAC encoder stopped taking frames");
+                    }
+                    std::thread::sleep(std::time::Duration::from_millis(1));
+                }
+                Err(e) => return Err(e.into()),
+            }
+        }
+    }
+
+    fn finish_video(&mut self) -> Result<()> {
+        let mut tries = 0;
+        loop {
+            match self.video.send_eof() {
+                Ok(()) => return Ok(()),
+                Err(ff::Error::Other { errno }) if errno == EAGAIN => {
+                    self.drain_video()?;
+                    tries += 1;
+                    if tries > 5000 {
+                        bail!("the H.264 encoder would not finish");
+                    }
+                    std::thread::sleep(std::time::Duration::from_millis(1));
+                }
+                Err(e) => return Err(e.into()),
+            }
+        }
+    }
+
+    fn finish_audio(&mut self) -> Result<()> {
+        let mut tries = 0;
+        loop {
+            match self.audio.send_eof() {
+                Ok(()) => return Ok(()),
+                Err(ff::Error::Other { errno }) if errno == EAGAIN => {
+                    self.drain_audio()?;
+                    tries += 1;
+                    if tries > 5000 {
+                        bail!("the AAC encoder would not finish");
+                    }
+                    std::thread::sleep(std::time::Duration::from_millis(1));
+                }
+                Err(e) => return Err(e.into()),
+            }
+        }
+    }
+}
+
+/// The H.264 codec an export uses, with the pixel format it accepts.
+struct VideoCodec {
+    codec: ff::Codec,
+    format: ff::format::Pixel,
+}
+
+/// The first encoder and pixel format that open at [s]'s size.
+///
+/// `h264_mediacodec` is tried with NV12 first: some devices (and the emulator)
+/// accept a planar YUV420P configuration and then never hand out an input
+/// buffer, which fails the export with EAGAIN. NV12 is the layout those
+/// encoders are made for; planar stays as the fallback.
+fn choose_video_codec(s: &ExportSettings) -> Result<VideoCodec> {
+    for name in H264_ENCODERS {
+        let Some(codec) = ff::encoder::find_by_name(name) else {
+            continue;
+        };
+        let formats: &[ff::format::Pixel] = if name == "h264_mediacodec" {
+            &[ff::format::Pixel::NV12, ff::format::Pixel::YUV420P]
+        } else {
+            &[ff::format::Pixel::YUV420P]
+        };
+        for &format in formats {
+            let opened = ff::codec::context::Context::new_with_codec(codec)
+                .encoder()
+                .video()
+                .map(|mut ctx| {
+                    ctx.set_width(s.width);
+                    ctx.set_height(s.height);
+                    ctx.set_format(format);
+                    ctx.set_time_base(ff::Rational(1, s.fps as i32));
+                    ctx.open().is_ok()
+                })
+                .unwrap_or(false);
+            if opened {
+                return Ok(VideoCodec { codec, format });
+            }
+        }
+    }
+    Ok(VideoCodec {
+        codec: ff::encoder::find(ff::codec::Id::MPEG4).context("no H.264 encoder available")?,
+        format: ff::format::Pixel::YUV420P,
+    })
 }
 
 fn open_output(path: &str, s: &ExportSettings) -> Result<Output> {
@@ -84,36 +210,25 @@ fn open_output(path: &str, s: &ExportSettings) -> Result<Output> {
         .flags()
         .contains(ff::format::Flags::GLOBAL_HEADER);
 
-    let codec = H264_ENCODERS
-        .iter()
-        .find_map(|name| {
-            let codec = ff::encoder::find_by_name(name)?;
-            // A listed encoder can still fail to open without its hardware.
-            let mut ctx = ff::codec::context::Context::new_with_codec(codec)
-                .encoder()
-                .video()
-                .ok()?;
-            ctx.set_width(s.width);
-            ctx.set_height(s.height);
-            ctx.set_format(ff::format::Pixel::YUV420P);
-            ctx.set_time_base(ff::Rational(1, s.fps as i32));
-            ctx.open().ok().map(|_| codec)
-        })
-        .or_else(|| ff::encoder::find(ff::codec::Id::MPEG4))
-        .context("no H.264 encoder available")?;
+    let VideoCodec { codec, format } = choose_video_codec(s)?;
     let video_index = octx.add_stream(codec)?.index();
     let mut enc = ff::codec::context::Context::new_with_codec(codec)
         .encoder()
         .video()?;
     enc.set_width(s.width);
     enc.set_height(s.height);
-    enc.set_format(ff::format::Pixel::YUV420P);
+    enc.set_format(format);
     let video_tb = ff::Rational(1, s.fps as i32);
     enc.set_time_base(video_tb);
     enc.set_frame_rate(Some(ff::Rational(s.fps as i32, 1)));
     enc.set_bit_rate(s.video_bitrate as usize);
     enc.set_gop(s.fps * 2);
-    if global_header {
+    // MediaCodec must not get the global-header flag: FFmpeg then builds the
+    // extradata at open by sending a dummy frame, signalling end of stream and
+    // flushing the codec, and after that flush the Android encoder (the
+    // emulator's C2 one, at least) never hands out an input buffer again. The
+    // MP4 muxer takes the SPS/PPS from the first packet instead.
+    if global_header && codec.name() != "h264_mediacodec" {
         enc.set_flags(ff::codec::Flags::GLOBAL_HEADER);
     }
     let mut opts = ff::Dictionary::new();
@@ -151,6 +266,7 @@ fn open_output(path: &str, s: &ExportSettings) -> Result<Output> {
     Ok(Output {
         octx,
         video,
+        video_format: format,
         video_index,
         video_tb,
         audio,
@@ -197,7 +313,7 @@ pub fn export(
         ff::format::Pixel::RGBA,
         s.width,
         s.height,
-        ff::format::Pixel::YUV420P,
+        out.video_format,
         s.width,
         s.height,
         ff::software::scaling::Flags::BICUBIC,
@@ -222,7 +338,7 @@ pub fn export(
         let mut yuv = ff::frame::Video::empty();
         scaler.run(&src, &mut yuv)?;
         yuv.set_pts(Some(i));
-        out.video.send_frame(&yuv)?;
+        out.send_video(&yuv)?;
         out.drain_video()?;
 
         // Keep the sound up to the end of this picture.
@@ -242,7 +358,7 @@ pub fn export(
                 }
             }
             frame.set_pts(Some(samples_done));
-            out.audio.send_frame(&frame)?;
+            out.send_audio(&frame)?;
             out.drain_audio()?;
             samples_done += frame_size as i64;
         }
@@ -254,9 +370,9 @@ pub fn export(
         }
     }
 
-    out.video.send_eof()?;
+    out.finish_video()?;
     out.drain_video()?;
-    out.audio.send_eof()?;
+    out.finish_audio()?;
     out.drain_audio()?;
     out.octx.write_trailer()?;
     let took = begun.elapsed().as_secs_f64();
