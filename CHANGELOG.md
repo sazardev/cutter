@@ -2,6 +2,28 @@
 
 All notable changes to Cutter. Newest first.
 
+## [0.5.2] - 2026-10-22
+
+### Added
+- Crashlytics, Analytics and Performance: crashes carry the install ID, the
+  stage, breadcrumbs and the engine's frame numbers; export failures are
+  reported with the resolution, frame rate and layer count; exports and engine
+  startup appear as performance traces (ADR 0021).
+- A Firebase App Distribution beta for testers.
+
+### Fixed
+- Release builds died at launch: R8 renamed `io.flutter.view.TextureRegistry`
+  and irondash's JNI lookup failed with `NoSuchMethodError`.
+- Export on Android failed with `EAGAIN`: MediaCodec no longer gets the
+  global-header flag, which left the encoder without input buffers after
+  FFmpeg's dummy-frame flush; NV12 is tried first and `EAGAIN` is retried.
+- A single-ABI APK could install on the wrong device and close at launch; the
+  shipped APK carries arm64 and x86_64 and drops the 32-bit libraries.
+
+### Changed
+- R8 keeps names in the beta so crash reports are readable without a mapping
+  upload; turn `-dontobfuscate` off once the mapping is uploaded from CI.
+
 ## [0.5.1] - 2026-10-21
 
 ### Added

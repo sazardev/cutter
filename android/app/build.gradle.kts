@@ -2,6 +2,9 @@ plugins {
     id("com.android.application")
     // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
     id("dev.flutter.flutter-gradle-plugin")
+    // Reads google-services.json: Firebase Analytics, Crashlytics and
+    // Performance get their project and app IDs from it.
+    id("com.google.gms.google-services")
 }
 
 android {
@@ -53,4 +56,10 @@ kotlin {
 
 flutter {
     source = "../.."
+}
+
+dependencies {
+    // Native crashes (the Rust engine, MediaCodec) go to Crashlytics too.
+    implementation(platform("com.google.firebase:firebase-bom:35.0.0"))
+    implementation("com.google.firebase:firebase-crashlytics-ndk")
 }

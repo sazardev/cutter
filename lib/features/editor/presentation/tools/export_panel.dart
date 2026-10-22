@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:cutter/app/theme/app_theme.dart';
 import 'package:cutter/core/engine/media_engine.dart';
+import 'package:cutter/core/telemetry/telemetry.dart';
 import 'package:cutter/features/editor/data/engine_timeline.dart';
 import 'package:cutter/features/editor/domain/export_preset.dart';
 import 'package:cutter/features/editor/domain/export_record.dart';
@@ -109,12 +110,14 @@ class ExportUi {
 class ExportController extends AutoDisposeNotifier<ExportUi> {
   ExportTask? _task;
   StreamSubscription<ExportEvent>? _events;
+  TelemetryTrace? _trace;
 
   @override
   ExportUi build() {
     ref.onDispose(() {
       _task?.cancel();
       unawaited(_events?.cancel());
+      unawaited(_trace?.stop());
     });
     return const ExportUi();
   }
@@ -141,6 +144,37 @@ class ExportController extends AutoDisposeNotifier<ExportUi> {
     final timeline = engineTimelineOf(
       project,
       missingSources: ref.read(missingSourcesProvider).valueOrNull ?? const {},
+    );
+    final telemetry = ref.read(telemetryProvider);
+    final began = DateTime.now();
+    _trace = telemetry.startTrace(
+      'export',
+      attributes: {
+        'platform': platform.name,
+        'quality': quality.name,
+        'width': '${plan.width}',
+        'height': '${plan.height}',
+        'fps': '${plan.fps}',
+        'layers': '${timeline.layers.length}',
+      },
+    );
+    telemetry.log(
+      'export start ${plan.width}x${plan.height}@${plan.fps} '
+      '${platform.name}/${quality.name} layers=${timeline.layers.length}',
+    );
+    unawaited(
+      telemetry.event(
+        'export_started',
+        parameters: {
+          'width': plan.width,
+          'height': plan.height,
+          'fps': plan.fps,
+          'platform': platform.name,
+          'quality': quality.name,
+          'layers': timeline.layers.length,
+          'duration_ms': project.durationMs,
+        },
+      ),
     );
     final task = ref.read(mediaEngineProvider).export(
           Timeline(
@@ -212,9 +246,72 @@ class ExportController extends AutoDisposeNotifier<ExportUi> {
               // No share target: the buttons in the panel remain.
             }
           }
+          final tookMs = DateTime.now().difference(began).inMilliseconds;
+          _trace?.setAttribute('result', 'done');
+          _trace?.setMetric('duration_ms', tookMs);
+          _trace?.setMetric('video_duration_ms', project.durationMs);
+          await _trace?.stop();
+          _trace = null;
+          telemetry.log('export done in $tookMs ms');
+          unawaited(
+            telemetry.event(
+              'export_finished',
+              parameters: {
+                'duration_ms': tookMs,
+                'video_duration_ms': project.durationMs,
+                'width': plan.width,
+                'height': plan.height,
+                'fps': plan.fps,
+                'layers': timeline.layers.length,
+              },
+            ),
+          );
         case ExportStage.failed:
+          final message = event.message ?? 'the engine reported a failure';
+          final stats = ref.read(mediaEngineProvider).diagnostics();
+          telemetry.log('export failed: $message');
+          unawaited(
+            telemetry.recordError(
+              StateError(message),
+              StackTrace.current,
+              reason: 'the export failed',
+              keys: {
+                'stage': 'export',
+                'export_width': plan.width,
+                'export_height': plan.height,
+                'export_fps': plan.fps,
+                'export_platform': platform.name,
+                'export_quality': quality.name,
+                'export_layers': timeline.layers.length,
+                'export_duration_ms': project.durationMs,
+                'engine_avg_ms': stats.avgRenderMs,
+                'engine_worst_ms': stats.maxRenderMs,
+                'engine_late_frames': stats.lateFrames.toInt(),
+                'engine_preview_scale': stats.previewScale,
+              },
+            ),
+          );
+          unawaited(
+            telemetry.event(
+              'export_failed',
+              parameters: {
+                'width': plan.width,
+                'height': plan.height,
+                'fps': plan.fps,
+                'layers': timeline.layers.length,
+                'reason': message,
+              },
+            ),
+          );
+          _trace?.setAttribute('result', 'failed');
+          await _trace?.stop();
+          _trace = null;
           state = ExportUi(phase: ExportPhase.failed, message: event.message);
         case ExportStage.cancelled:
+          telemetry.log('export cancelled');
+          _trace?.setAttribute('result', 'cancelled');
+          await _trace?.stop();
+          _trace = null;
           state = const ExportUi();
       }
     });

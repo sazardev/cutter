@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "954848099692",
+    "project_id": "cutter-video-editor",
+    "storage_bucket": "cutter-video-editor.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:954848099692:android:37c4795142fbc69d53c749",
+        "android_client_info": {
+          "package_name": "com.cutterapp.cutter"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAVBSI7TjzsUJ7PKdAcA9moE2PHrmGj9Dk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

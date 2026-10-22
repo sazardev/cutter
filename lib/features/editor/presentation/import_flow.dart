@@ -1,5 +1,7 @@
+import 'dart:async';
 import 'dart:io';
 
+import 'package:cutter/core/telemetry/telemetry.dart';
 import 'package:cutter/features/editor/domain/import_media.dart';
 import 'package:cutter/features/editor/domain/media_asset.dart';
 import 'package:cutter/features/editor/domain/media_bank.dart';
@@ -96,12 +98,49 @@ Future<ImportOutcome> importPaths(
   int? atMs,
 }) async {
   final playhead = atMs ?? ref.read(playbackControllerProvider).positionMs;
-  final outcome = await ref.read(editorControllerProvider.notifier).importFiles(
-        paths,
-        atMs: playhead,
-        placement: placement,
-        toTimeline: toTimeline,
-      );
+  final telemetry = ref.read(telemetryProvider);
+  final watch = Stopwatch()..start();
+  telemetry.log('import start files=${paths.length}');
+  unawaited(
+    telemetry.event('import_started', parameters: {'files': paths.length}),
+  );
+  final ImportOutcome outcome;
+  try {
+    outcome = await ref.read(editorControllerProvider.notifier).importFiles(
+          paths,
+          atMs: playhead,
+          placement: placement,
+          toTimeline: toTimeline,
+        );
+  } on Object catch (error, stackTrace) {
+    unawaited(
+      telemetry.recordError(
+        error,
+        stackTrace,
+        reason: 'importing media',
+        keys: {'stage': 'import', 'files': paths.length},
+      ),
+    );
+    rethrow;
+  }
+  telemetry.log(
+    'import done in ${watch.elapsedMilliseconds} ms: '
+    '${outcome.imported} of ${paths.length}',
+  );
+  unawaited(
+    telemetry.event(
+      'media_imported',
+      parameters: {
+        'files': paths.length,
+        'imported': outcome.imported,
+        'rejected': outcome.rejected.length,
+        'issues': outcome.issues.length,
+        'notices': outcome.notices.length,
+        'duration_ms': watch.elapsedMilliseconds,
+        'to_timeline': toTimeline ? 1 : 0,
+      },
+    ),
+  );
   if (context.mounted) await showImportReport(context, outcome);
   return outcome;
 }
