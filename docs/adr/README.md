@@ -23,3 +23,4 @@ Why the code is the way it is: one record per decision, never edited after it is
 | [0017](0017-text-layers.md) | Text layers: the engine draws text from bundled fonts, text clips live on `text` layers, schema v7 | 2026-10-21 | accepted |
 | [0018](0018-animation-presets-and-transitions.md) | Animation presets (built-in and saved) and transitions between neighbouring clips built from the clip animations and sound fades | 2026-10-21 | accepted |
 | [0019](0019-image-effects-clip-animations-and-background-removal.md) | Eleven filters, five spatial effects, per-clip animations (schema v8), drawings (schema v9) and background removal for images with a bundled model run by `tract` | 2026-10-21 | accepted |
+| [0020](0020-android-build.md) | Android build: FFmpeg cross-compiled for arm64 and linked statically, `minSdk` 26, `compileSdk` 37, arm64 only, debug-signed APK | 2026-10-21 | accepted |

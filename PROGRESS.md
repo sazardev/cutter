@@ -29,7 +29,7 @@ Where the work stands, for whoever goes on with it. Rewritten after every build;
 
 ## Open
 
-- Android: install the SDK and NDK, cross-compile FFmpeg for arm64 (LGPL, with `h264_mediacodec`), then `flutter build apk`.
+- Android: the APK builds (ADR 0020) but was never run on a phone or an emulator: start it, import, play and export on a device (the JavaVM hand-off to FFmpeg and MediaCodec encoding are the likeliest to need fixes). Release signing key and Play Store signing are not set.
 - GPU composition, and pitch-correct speed for sound (sound at another speed is muted).
 - Memory stays near its peak after the editor closes (allocator does not return freed pages); measure on a device before acting.
 - GPU composition for 1080p multi-layer at 60 fps (NFR-1), measured on a device.

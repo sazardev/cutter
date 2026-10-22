@@ -2,6 +2,15 @@
 
 All notable changes to Cutter. Newest first.
 
+## [0.5.1] - 2026-10-21
+
+### Added
+- Android build: the first APK (arm64), with FFmpeg cross-compiled and linked into the engine (ADR 0020).
+- `tool/android/build_ffmpeg.sh` to build FFmpeg for Android.
+
+### Changed
+- Android needs version 8 (API 26) or newer, for the engine's sound output.
+
 ## [0.5.0] - 2026-10-21
 
 ### Added
