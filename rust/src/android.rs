@@ -10,8 +10,7 @@ extern "C" {
 }
 
 /// Gives FFmpeg the `JavaVM`, which `irondash_engine_context` already holds
-/// (it owns the library's `JNI_OnLoad`). Without it the MediaCodec encoder
-/// cannot start, and exports fail.
+/// (it owns the library's `JNI_OnLoad`).
 pub fn init() {
     match irondash_engine_context::EngineContext::get_java_vm() {
         Ok(vm) => {

@@ -40,6 +40,15 @@ class BuildGradle {
     );
     final artifacts = await provider.getArtifacts(targets);
 
+    // The output directory is shared by every ABI: a build for one ABI would
+    // otherwise leave the previous build's library in the APK, which then
+    // claims an ABI it cannot run (an arm64 APK installing on x86_64 and
+    // closing at launch).
+    final output = Directory(Environment.outputDir);
+    if (output.existsSync()) {
+      output.deleteSync(recursive: true);
+    }
+
     for (final target in targets) {
       final libs = artifacts[target]!;
       final outputDir = path.join(Environment.outputDir, target.android!);

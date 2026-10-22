@@ -144,10 +144,14 @@ class CargoKitPlugin implements Plugin<Project> {
                 platforms = plugin.getTargetPlatforms().collect()
             }
 
-            // Same thing addFlutterDependencies does in flutter.gradle
+            // Same thing addFlutterDependencies does in flutter.gradle, but
+            // this engine only has arm64 and x86_64 FFmpeg: the 32-bit Rust
+            // targets do not build (the i686 bindings fail) and a build for
+            // them could not run anyway.
             if (buildType == "debug") {
                 platforms.add("android-x86")
                 platforms.add("android-x64")
+                platforms = platforms.findAll { it != "android-arm" && it != "android-x86" }
             }
 
             // The task name depends on plugin properties, which are not available

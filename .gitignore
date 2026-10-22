@@ -47,6 +47,7 @@ Thumbs.db
 
 # Android
 android/.gradle/
+android/.kotlin/
 android/captures/
 android/local.properties
 android/app/debug/
