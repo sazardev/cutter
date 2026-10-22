@@ -2930,5 +2930,65 @@
   "transitionFadeSound": "Fundir también el sonido",
   "@transitionFadeSound": {
     "description": "Switch: the sound of both clips fades with the transition."
+  },
+  "removeBackgroundTitle": "Fondo",
+  "@removeBackgroundTitle": {
+    "description": "Título de la sección que recorta el sujeto de una imagen quitando el fondo."
+  },
+  "removeBackgroundAction": "Quitar fondo",
+  "@removeBackgroundAction": {
+    "description": "Botón que quita el fondo de la imagen seleccionada."
+  },
+  "removeBackgroundWorking": "Recortando…",
+  "@removeBackgroundWorking": {
+    "description": "Se muestra mientras se quita el fondo de una imagen."
+  },
+  "removeBackgroundHint": "Conserva el sujeto y deja lo demás transparente. Deshacer recupera el original.",
+  "@removeBackgroundHint": {
+    "description": "Explica qué hace quitar el fondo."
+  },
+  "removeBackgroundFailed": "No se pudo quitar el fondo de esta imagen.",
+  "@removeBackgroundFailed": {
+    "description": "Se muestra cuando falló quitar el fondo."
+  },
+  "layerKindDrawing": "Dibujo",
+  "@layerKindDrawing": {
+    "description": "Nombre del tipo de capa que contiene un dibujo."
+  },
+  "addLayerDrawingHint": "Dibuja sobre el video",
+  "@addLayerDrawingHint": {
+    "description": "Explica el tipo de capa Dibujo en el menú de añadir capa."
+  },
+  "drawingTitle": "Dibujar",
+  "@drawingTitle": {
+    "description": "Título de la pantalla de dibujo."
+  },
+  "drawingUndo": "Deshacer trazo",
+  "@drawingUndo": {
+    "description": "Botón que quita el último trazo."
+  },
+  "drawingClear": "Borrar todo",
+  "@drawingClear": {
+    "description": "Botón que quita todos los trazos."
+  },
+  "drawingDone": "Listo",
+  "@drawingDone": {
+    "description": "Botón que guarda el dibujo y cierra la pantalla de dibujo."
+  },
+  "drawingBrush": "Pincel",
+  "@drawingBrush": {
+    "description": "Herramienta que pinta trazos."
+  },
+  "drawingEraser": "Goma",
+  "@drawingEraser": {
+    "description": "Herramienta que borra trazos."
+  },
+  "drawingThickness": "Grosor",
+  "@drawingThickness": {
+    "description": "Etiqueta del control de grosor del trazo."
+  },
+  "drawingColor": "Color",
+  "@drawingColor": {
+    "description": "Etiqueta de una muestra de color de la paleta de dibujo."
   }
 }

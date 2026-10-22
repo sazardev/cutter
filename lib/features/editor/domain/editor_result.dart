@@ -299,6 +299,12 @@ final class InvalidCrop extends EditorFailure {
   const InvalidCrop();
 }
 
+/// A drawing has nothing drawn, or the clip is not a drawing.
+final class InvalidDrawing extends EditorFailure {
+  /// Creates the failure.
+  const InvalidDrawing();
+}
+
 /// A text has a value outside its allowed range, or the clip is not a text.
 final class InvalidText extends EditorFailure {
   /// Creates the failure.

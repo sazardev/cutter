@@ -7,12 +7,13 @@ import 'package:cutter/features/editor/domain/clip.dart';
 import 'package:cutter/features/editor/domain/clip_settings_use_cases.dart';
 import 'package:cutter/features/editor/domain/media_asset.dart';
 import 'package:cutter/features/editor/presentation/clip_quick_bar.dart';
+import 'package:cutter/features/editor/presentation/drawing/drawing_page.dart';
 import 'package:cutter/features/editor/presentation/editor_providers.dart';
 import 'package:cutter/features/editor/presentation/layout/editor_layout.dart';
 import 'package:cutter/features/editor/presentation/playback_controller.dart';
 import 'package:cutter/features/editor/presentation/studio/clip_studio_page.dart';
 import 'package:cutter/features/editor/presentation/tools/animation_presets.dart';
-import 'package:cutter/features/editor/presentation/tools/transition_section.dart';
+import 'package:cutter/features/editor/presentation/tools/background_section.dart';
 import 'package:cutter/features/editor/presentation/tools/canvas_panel.dart';
 import 'package:cutter/features/editor/presentation/tools/diagnostics_panel.dart';
 import 'package:cutter/features/editor/presentation/tools/editor_tool.dart';
@@ -23,6 +24,7 @@ import 'package:cutter/features/editor/presentation/tools/panel_kit.dart';
 import 'package:cutter/features/editor/presentation/tools/project_settings_panel.dart';
 import 'package:cutter/features/editor/presentation/tools/text_panel.dart';
 import 'package:cutter/features/editor/presentation/tools/transform_panel.dart';
+import 'package:cutter/features/editor/presentation/tools/transition_section.dart';
 import 'package:cutter/features/editor/presentation/tools/versions_panel.dart';
 import 'package:cutter/l10n/app_localizations.dart';
 import 'package:flutter/gestures.dart';
@@ -112,6 +114,8 @@ const List<EditorTool> projectTools = [
 void editClip(BuildContext context, WidgetRef ref, Clip clip) {
   if (clip.kind == MediaKind.text) {
     ref.read(activeToolProvider.notifier).state = EditorTool.text;
+  } else if (clip.drawing != null) {
+    unawaited(openDrawing(context, clipId: clip.id));
   } else {
     unawaited(openClipStudio(context, clip.id));
   }
@@ -488,6 +492,7 @@ class FilterPicker extends ConsumerWidget {
         const TransitionSection(),
         const AnimationPresets(),
         const AnimationPanel(),
+        const BackgroundSection(),
       ],
     );
   }

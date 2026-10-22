@@ -3119,5 +3119,65 @@
   "transitionFadeSound": "Fade the sound too",
   "@transitionFadeSound": {
     "description": "Switch: the sound of both clips fades with the transition."
+  },
+  "removeBackgroundTitle": "Background",
+  "@removeBackgroundTitle": {
+    "description": "Title of the section that cuts a picture's subject out of its background."
+  },
+  "removeBackgroundAction": "Remove background",
+  "@removeBackgroundAction": {
+    "description": "Button that removes the background of the selected image."
+  },
+  "removeBackgroundWorking": "Cutting out…",
+  "@removeBackgroundWorking": {
+    "description": "Shown while the background of an image is being removed."
+  },
+  "removeBackgroundHint": "Keeps the subject and makes the rest transparent. Undo brings the original back.",
+  "@removeBackgroundHint": {
+    "description": "Explains what removing the background does."
+  },
+  "removeBackgroundFailed": "The background could not be removed from this picture.",
+  "@removeBackgroundFailed": {
+    "description": "Shown when removing the background failed."
+  },
+  "layerKindDrawing": "Drawing",
+  "@layerKindDrawing": {
+    "description": "Name of the kind of layer that holds a drawing."
+  },
+  "addLayerDrawingHint": "Draw over the video",
+  "@addLayerDrawingHint": {
+    "description": "Explains the Drawing layer kind in the add layer menu."
+  },
+  "drawingTitle": "Draw",
+  "@drawingTitle": {
+    "description": "Title of the drawing screen."
+  },
+  "drawingUndo": "Undo stroke",
+  "@drawingUndo": {
+    "description": "Button that takes off the last stroke."
+  },
+  "drawingClear": "Clear",
+  "@drawingClear": {
+    "description": "Button that removes every stroke."
+  },
+  "drawingDone": "Done",
+  "@drawingDone": {
+    "description": "Button that saves the drawing and closes the drawing screen."
+  },
+  "drawingBrush": "Brush",
+  "@drawingBrush": {
+    "description": "Tool that paints strokes."
+  },
+  "drawingEraser": "Eraser",
+  "@drawingEraser": {
+    "description": "Tool that rubs out strokes."
+  },
+  "drawingThickness": "Thickness",
+  "@drawingThickness": {
+    "description": "Label of the stroke thickness slider."
+  },
+  "drawingColor": "Color",
+  "@drawingColor": {
+    "description": "Label of one color swatch of the drawing palette."
   }
 }

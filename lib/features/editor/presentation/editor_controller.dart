@@ -7,6 +7,7 @@ import 'package:cutter/features/editor/domain/animation_preset.dart';
 import 'package:cutter/features/editor/domain/canvas.dart';
 import 'package:cutter/features/editor/domain/clip.dart';
 import 'package:cutter/features/editor/domain/clip_crop.dart';
+import 'package:cutter/features/editor/domain/clip_drawing.dart';
 import 'package:cutter/features/editor/domain/clip_text.dart';
 import 'package:cutter/features/editor/domain/clip_transform.dart';
 import 'package:cutter/features/editor/domain/clip_transition.dart';
@@ -22,6 +23,7 @@ import 'package:cutter/features/editor/domain/project_version.dart';
 import 'package:cutter/features/editor/domain/relink_media.dart';
 import 'package:cutter/features/editor/presentation/animation_preset_providers.dart';
 import 'package:cutter/features/editor/presentation/checkpoint_labels.dart';
+import 'package:cutter/features/editor/presentation/drawing/drawing_painter.dart';
 import 'package:cutter/features/editor/presentation/edit_log.dart';
 import 'package:cutter/features/editor/presentation/editor_providers.dart';
 import 'package:cutter/features/editor/presentation/layout/editor_layout.dart';
@@ -123,6 +125,9 @@ class ImportOutcome {
   /// Whether there is anything to tell the user about.
   bool get hasReport => issues.isNotEmpty || notices.isNotEmpty;
 }
+
+/// The longest side, in pixels, of the picture a drawing is rendered to.
+const _drawingMaxSide = 1920;
 
 /// Runs the domain use cases for the editor screen. Every accepted edit is
 /// saved at once (autosave) and can be undone for as long as the editor is
@@ -783,6 +788,82 @@ class EditorController extends Notifier<AsyncValue<EditorUiState>> {
             sourceUri: out,
             width: size.width,
             height: size.height,
+          ),
+    );
+  }
+
+  /// Renders [drawing] to a PNG in the media library, sized to the project's
+  /// canvas (at most [_drawingMaxSide] px on its long side).
+  Future<({String path, int width, int height})> _renderDrawing(
+    Project project,
+    ClipDrawing drawing,
+  ) async {
+    final canvas = project.canvas;
+    final shrink = (_drawingMaxSide /
+            (canvas.width > canvas.height ? canvas.width : canvas.height))
+        .clamp(0.0, 1.0);
+    final width = (canvas.width * shrink).round();
+    final height = (canvas.height * shrink).round();
+    final png = await renderDrawingPng(drawing, width, height);
+    final library = await ref.read(mediaLibraryProvider.future);
+    final dir =
+        Directory('${library.root.path}${Platform.pathSeparator}drawings');
+    await dir.create(recursive: true);
+    final path = '${dir.path}${Platform.pathSeparator}'
+        '${DateTime.now().microsecondsSinceEpoch}.png';
+    await File(path).writeAsBytes(png, flush: true);
+    return (path: path, width: width, height: height);
+  }
+
+  /// Adds [drawing] over the video at [startMs], selects it and returns its
+  /// id; null when it was blank or the picture could not be made.
+  Future<String?> addDrawing(ClipDrawing drawing, int startMs) async {
+    final before = state.valueOrNull?.project;
+    if (before == null || drawing.isBlank) return null;
+    final ({String path, int width, int height}) picture;
+    try {
+      picture = await _renderDrawing(before, drawing);
+    } on Object {
+      return null;
+    }
+    final ok = await _run(
+      'drawing',
+      (project) => ref.read(addDrawingClipProvider).call(
+            projectId: project.id,
+            drawing: drawing,
+            sourceUri: picture.path,
+            width: picture.width,
+            height: picture.height,
+            startMs: startMs,
+          ),
+    );
+    if (!ok) return null;
+    final added = _newClipIds(before, state.requireValue.project);
+    if (added.isEmpty) return null;
+    selectClip(added.first);
+    return added.first;
+  }
+
+  /// Saves new strokes for drawing clip [clipId]; false when it is not a
+  /// drawing, the drawing is blank or the picture could not be made.
+  Future<bool> setDrawing(String clipId, ClipDrawing drawing) async {
+    final project = state.valueOrNull?.project;
+    if (project == null || drawing.isBlank) return false;
+    final ({String path, int width, int height}) picture;
+    try {
+      picture = await _renderDrawing(project, drawing);
+    } on Object {
+      return false;
+    }
+    return _run(
+      'drawing',
+      (project) => ref.read(setClipDrawingProvider).call(
+            projectId: project.id,
+            clipId: clipId,
+            drawing: drawing,
+            sourceUri: picture.path,
+            width: picture.width,
+            height: picture.height,
           ),
     );
   }

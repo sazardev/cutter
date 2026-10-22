@@ -3,6 +3,7 @@
 // ignore_for_file: avoid_equals_and_hash_code_on_mutable_classes
 
 import 'package:cutter/features/editor/domain/clip_crop.dart';
+import 'package:cutter/features/editor/domain/clip_drawing.dart';
 import 'package:cutter/features/editor/domain/clip_text.dart';
 import 'package:cutter/features/editor/domain/clip_transform.dart';
 import 'package:cutter/features/editor/domain/media_asset.dart';
@@ -65,6 +66,7 @@ class Clip {
     this.animInMs = 0,
     this.animOut,
     this.animOutMs = 0,
+    this.drawing,
   });
 
   /// Unique id of the clip.
@@ -144,6 +146,10 @@ class Clip {
   /// How long the exit lasts, in timeline milliseconds.
   final int animOutMs;
 
+  /// The strokes of a drawing clip, kept so it can be edited again; null for
+  /// any other clip. The clip's picture is the rendered PNG at [sourceUri].
+  final ClipDrawing? drawing;
+
   /// How long the clip lasts on the timeline: its source span at its
   /// speed.
   int get durationMs => ((outPointMs - inPointMs) / speed).round();
@@ -183,6 +189,7 @@ class Clip {
     String? animOut,
     bool clearAnimOut = false,
     int? animOutMs,
+    ClipDrawing? drawing,
   }) {
     return Clip(
       id: id ?? this.id,
@@ -210,6 +217,7 @@ class Clip {
       animInMs: animInMs ?? this.animInMs,
       animOut: clearAnimOut ? null : (animOut ?? this.animOut),
       animOutMs: animOutMs ?? this.animOutMs,
+      drawing: drawing ?? this.drawing,
     );
   }
 
@@ -241,6 +249,7 @@ class Clip {
           other.animInMs == animInMs &&
           other.animOut == animOut &&
           other.animOutMs == animOutMs &&
+          other.drawing == drawing &&
           _sameAdjustments(other.adjustments);
 
   bool _sameAdjustments(Map<String, double> other) {
@@ -269,7 +278,7 @@ class Clip {
         sourceWidth,
         sourceHeight,
         Object.hash(crop, speed, fadeInMs, fadeOutMs, text),
-        Object.hash(animIn, animInMs, animOut, animOutMs),
+        Object.hash(animIn, animInMs, animOut, animOutMs, drawing),
         Object.hashAllUnordered(
           adjustments.entries.map((e) => Object.hash(e.key, e.value)),
         ),

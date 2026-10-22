@@ -10,7 +10,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'in_memory_editor_ports.dart';
 
 Project _withImage() {
-  final image = Clip(
+  const image = Clip(
     id: 'i1',
     layerId: 'img',
     assetId: 'file:///photo.jpg',
@@ -21,7 +21,7 @@ Project _withImage() {
     outPointMs: 3000,
     sourceDurationMs: 3000,
     filterId: 'sepia',
-    transform: const ClipTransform(x: 0.2, scale: 1.5),
+    transform: ClipTransform(x: 0.2, scale: 1.5),
     sourceWidth: 4000,
     sourceHeight: 3000,
   );

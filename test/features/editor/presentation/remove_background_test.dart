@@ -5,7 +5,10 @@ import 'package:cutter/core/engine/media_engine.dart';
 import 'package:cutter/features/editor/data/media_library.dart';
 import 'package:cutter/features/editor/presentation/editor_controller.dart';
 import 'package:cutter/features/editor/presentation/editor_providers.dart';
+import 'package:cutter/features/editor/presentation/tools/background_section.dart';
+import 'package:cutter/l10n/app_localizations.dart';
 import 'package:drift/drift.dart' show Value;
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -96,7 +99,7 @@ void main() {
     expect((clip.sourceWidth, clip.sourceHeight), (640, 480));
     expect(clip.filterId, 'sepia');
 
-    controller().undo();
+    await controller().undo();
     await Future<void>.delayed(Duration.zero);
     expect(
       container
@@ -131,5 +134,63 @@ void main() {
 
     expect(ok, isFalse);
     expect(engine.cutouts, isEmpty);
+  });
+
+  // The cutout touches real files, which the test clock does not move: let
+  // real time pass between frames until the work is done.
+  Future<void> settle(WidgetTester tester) async {
+    for (var i = 0; i < 10; i++) {
+      await tester.runAsync(
+        () => Future<void>.delayed(const Duration(milliseconds: 50)),
+      );
+      await tester.pump(const Duration(milliseconds: 50));
+    }
+  }
+
+  Future<void> pumpSection(WidgetTester tester) => tester.pumpWidget(
+        UncontrolledProviderScope(
+          container: container,
+          child: const MaterialApp(
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            home: Scaffold(
+              body: SingleChildScrollView(child: BackgroundSection()),
+            ),
+          ),
+        ),
+      );
+
+  testWidgets('the button cuts the selected picture out', (tester) async {
+    controller().selectClip('i1');
+    await pumpSection(tester);
+
+    await tester.tap(find.text('Background'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Remove background'));
+    await settle(tester);
+
+    expect(engine.cutouts, hasLength(1));
+  });
+
+  testWidgets('says so when the engine fails', (tester) async {
+    engine.failCutout = true;
+    controller().selectClip('i1');
+    await pumpSection(tester);
+
+    await tester.tap(find.text('Background'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Remove background'));
+    await settle(tester);
+
+    expect(
+      find.text('The background could not be removed from this picture.'),
+      findsOneWidget,
+    );
+  });
+
+  testWidgets('nothing shows when no picture is selected', (tester) async {
+    await pumpSection(tester);
+
+    expect(find.text('Remove background'), findsNothing);
   });
 }

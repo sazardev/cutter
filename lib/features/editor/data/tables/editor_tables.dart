@@ -152,6 +152,12 @@ class EditorClips extends Table {
 
   IntColumn get animOutMs => integer().withDefault(const Constant(0))();
 
+  // Version 9: the strokes of a drawing clip.
+
+  /// JSON of the drawing (see ClipDrawing); null for clips that are not
+  /// drawings.
+  TextColumn get drawingJson => text().nullable()();
+
   @override
   Set<Column<Object>> get primaryKey => {id};
 }

@@ -14,16 +14,17 @@ import 'package:cutter/features/editor/domain/clip_settings_use_cases.dart';
 import 'package:cutter/features/editor/domain/clip_studio_use_cases.dart';
 import 'package:cutter/features/editor/domain/clip_timing_use_cases.dart';
 import 'package:cutter/features/editor/domain/create_project.dart';
+import 'package:cutter/features/editor/domain/drawing_use_cases.dart';
 import 'package:cutter/features/editor/domain/editor_ports.dart';
 import 'package:cutter/features/editor/domain/export_record.dart';
 import 'package:cutter/features/editor/domain/import_media.dart';
 import 'package:cutter/features/editor/domain/layer_use_cases.dart';
-import 'package:cutter/features/editor/domain/text_use_cases.dart';
 import 'package:cutter/features/editor/domain/media_bank.dart';
 import 'package:cutter/features/editor/domain/project_summary.dart';
 import 'package:cutter/features/editor/domain/project_version.dart';
 import 'package:cutter/features/editor/domain/relink_media.dart';
 import 'package:cutter/features/editor/domain/rename_project.dart';
+import 'package:cutter/features/editor/domain/text_use_cases.dart';
 import 'package:cutter/features/editor/presentation/editor_controller.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:uuid/uuid.dart';
@@ -192,6 +193,19 @@ final restoreProjectProvider = Provider<RestoreProject>(
 /// The use case that changes the canvas of a project.
 final setCanvasProvider = Provider<SetCanvas>(
   (ref) => SetCanvas(ref.watch(projectRepositoryProvider)),
+);
+
+/// The use case that adds a drawing over the video.
+final addDrawingClipProvider = Provider<AddDrawingClip>(
+  (ref) => AddDrawingClip(
+    ref.watch(projectRepositoryProvider),
+    ref.watch(idGeneratorProvider),
+  ),
+);
+
+/// The use case that gives a drawing clip new strokes.
+final setClipDrawingProvider = Provider<SetClipDrawing>(
+  (ref) => SetClipDrawing(ref.watch(projectRepositoryProvider)),
 );
 
 /// The use case that adds a text over the video.

@@ -1671,6 +1671,269 @@ i1.GeneratedColumn<int> _column_64(String aliasedName) =>
         type: i1.DriftSqlType.int,
         $customConstraints: 'NOT NULL DEFAULT 0',
         defaultValue: const i1.CustomExpression('0'));
+
+final class Schema9 extends i0.VersionedSchema {
+  Schema9({required super.database}) : super(version: 9);
+  @override
+  late final List<i1.DatabaseSchemaEntity> entities = [
+    editorProjects,
+    editorLayers,
+    editorClips,
+    editorVersions,
+    editorExports,
+    editorMedia,
+    appSettings,
+  ];
+  late final Shape4 editorProjects = Shape4(
+      source: i0.VersionedTable(
+        entityName: 'editor_projects',
+        withoutRowId: false,
+        isStrict: false,
+        tableConstraints: [
+          'PRIMARY KEY(id)',
+        ],
+        columns: [
+          _column_0,
+          _column_1,
+          _column_2,
+          _column_3,
+          _column_4,
+          _column_5,
+          _column_6,
+          _column_25,
+        ],
+        attachedDatabase: database,
+      ),
+      alias: null);
+  late final Shape1 editorLayers = Shape1(
+      source: i0.VersionedTable(
+        entityName: 'editor_layers',
+        withoutRowId: false,
+        isStrict: false,
+        tableConstraints: [
+          'PRIMARY KEY(id)',
+        ],
+        columns: [
+          _column_0,
+          _column_7,
+          _column_8,
+          _column_59,
+          _column_10,
+          _column_11,
+        ],
+        attachedDatabase: database,
+      ),
+      alias: null);
+  late final Shape12 editorClips = Shape12(
+      source: i0.VersionedTable(
+        entityName: 'editor_clips',
+        withoutRowId: false,
+        isStrict: false,
+        tableConstraints: [
+          'PRIMARY KEY(id)',
+        ],
+        columns: [
+          _column_0,
+          _column_12,
+          _column_13,
+          _column_14,
+          _column_15,
+          _column_16,
+          _column_17,
+          _column_18,
+          _column_19,
+          _column_10,
+          _column_20,
+          _column_21,
+          _column_22,
+          _column_26,
+          _column_27,
+          _column_28,
+          _column_29,
+          _column_30,
+          _column_31,
+          _column_32,
+          _column_33,
+          _column_34,
+          _column_37,
+          _column_38,
+          _column_39,
+          _column_40,
+          _column_41,
+          _column_42,
+          _column_43,
+          _column_60,
+          _column_61,
+          _column_62,
+          _column_63,
+          _column_64,
+          _column_65,
+        ],
+        attachedDatabase: database,
+      ),
+      alias: null);
+  late final Shape6 editorVersions = Shape6(
+      source: i0.VersionedTable(
+        entityName: 'editor_versions',
+        withoutRowId: false,
+        isStrict: false,
+        tableConstraints: [
+          'PRIMARY KEY(id)',
+        ],
+        columns: [
+          _column_0,
+          _column_7,
+          _column_1,
+          _column_2,
+          _column_35,
+          _column_36,
+        ],
+        attachedDatabase: database,
+      ),
+      alias: null);
+  late final Shape8 editorExports = Shape8(
+      source: i0.VersionedTable(
+        entityName: 'editor_exports',
+        withoutRowId: false,
+        isStrict: false,
+        tableConstraints: [
+          'PRIMARY KEY(id)',
+        ],
+        columns: [
+          _column_0,
+          _column_44,
+          _column_45,
+          _column_46,
+          _column_47,
+          _column_48,
+          _column_49,
+          _column_50,
+          _column_51,
+          _column_2,
+          _column_52,
+          _column_53,
+        ],
+        attachedDatabase: database,
+      ),
+      alias: null);
+  late final Shape9 editorMedia = Shape9(
+      source: i0.VersionedTable(
+        entityName: 'editor_media',
+        withoutRowId: false,
+        isStrict: false,
+        tableConstraints: [
+          'PRIMARY KEY(id)',
+          'UNIQUE(project_id, path)',
+        ],
+        columns: [
+          _column_0,
+          _column_44,
+          _column_46,
+          _column_9,
+          _column_50,
+          _column_54,
+          _column_55,
+          _column_56,
+          _column_57,
+          _column_58,
+        ],
+        attachedDatabase: database,
+      ),
+      alias: null);
+  late final Shape3 appSettings = Shape3(
+      source: i0.VersionedTable(
+        entityName: 'app_settings',
+        withoutRowId: false,
+        isStrict: false,
+        tableConstraints: [
+          'PRIMARY KEY("key")',
+        ],
+        columns: [
+          _column_23,
+          _column_24,
+        ],
+        attachedDatabase: database,
+      ),
+      alias: null);
+}
+
+class Shape12 extends i0.VersionedTable {
+  Shape12({required super.source, required super.alias}) : super.aliased();
+  i1.GeneratedColumn<String> get id =>
+      columnsByName['id']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get layerId =>
+      columnsByName['layer_id']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<int> get sortKey =>
+      columnsByName['sort_key']! as i1.GeneratedColumn<int>;
+  i1.GeneratedColumn<String> get sourceUri =>
+      columnsByName['source_uri']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<int> get startMs =>
+      columnsByName['start_ms']! as i1.GeneratedColumn<int>;
+  i1.GeneratedColumn<int> get durationMs =>
+      columnsByName['duration_ms']! as i1.GeneratedColumn<int>;
+  i1.GeneratedColumn<int> get inPointMs =>
+      columnsByName['in_point_ms']! as i1.GeneratedColumn<int>;
+  i1.GeneratedColumn<int> get outPointMs =>
+      columnsByName['out_point_ms']! as i1.GeneratedColumn<int>;
+  i1.GeneratedColumn<int> get reversed =>
+      columnsByName['reversed']! as i1.GeneratedColumn<int>;
+  i1.GeneratedColumn<double> get volume =>
+      columnsByName['volume']! as i1.GeneratedColumn<double>;
+  i1.GeneratedColumn<String> get filterId =>
+      columnsByName['filter_id']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get adjustmentsJson =>
+      columnsByName['adjustments_json']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<int> get sourceDurationMs =>
+      columnsByName['source_duration_ms']! as i1.GeneratedColumn<int>;
+  i1.GeneratedColumn<double> get posX =>
+      columnsByName['pos_x']! as i1.GeneratedColumn<double>;
+  i1.GeneratedColumn<double> get posY =>
+      columnsByName['pos_y']! as i1.GeneratedColumn<double>;
+  i1.GeneratedColumn<double> get scale =>
+      columnsByName['scale']! as i1.GeneratedColumn<double>;
+  i1.GeneratedColumn<double> get rotation =>
+      columnsByName['rotation']! as i1.GeneratedColumn<double>;
+  i1.GeneratedColumn<double> get opacity =>
+      columnsByName['opacity']! as i1.GeneratedColumn<double>;
+  i1.GeneratedColumn<int> get flipX =>
+      columnsByName['flip_x']! as i1.GeneratedColumn<int>;
+  i1.GeneratedColumn<String> get fit =>
+      columnsByName['fit']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<int> get sourceWidth =>
+      columnsByName['source_width']! as i1.GeneratedColumn<int>;
+  i1.GeneratedColumn<int> get sourceHeight =>
+      columnsByName['source_height']! as i1.GeneratedColumn<int>;
+  i1.GeneratedColumn<double> get cropLeft =>
+      columnsByName['crop_left']! as i1.GeneratedColumn<double>;
+  i1.GeneratedColumn<double> get cropTop =>
+      columnsByName['crop_top']! as i1.GeneratedColumn<double>;
+  i1.GeneratedColumn<double> get cropRight =>
+      columnsByName['crop_right']! as i1.GeneratedColumn<double>;
+  i1.GeneratedColumn<double> get cropBottom =>
+      columnsByName['crop_bottom']! as i1.GeneratedColumn<double>;
+  i1.GeneratedColumn<double> get speed =>
+      columnsByName['speed']! as i1.GeneratedColumn<double>;
+  i1.GeneratedColumn<int> get fadeInMs =>
+      columnsByName['fade_in_ms']! as i1.GeneratedColumn<int>;
+  i1.GeneratedColumn<int> get fadeOutMs =>
+      columnsByName['fade_out_ms']! as i1.GeneratedColumn<int>;
+  i1.GeneratedColumn<String> get textJson =>
+      columnsByName['text_json']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get animIn =>
+      columnsByName['anim_in']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<int> get animInMs =>
+      columnsByName['anim_in_ms']! as i1.GeneratedColumn<int>;
+  i1.GeneratedColumn<String> get animOut =>
+      columnsByName['anim_out']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<int> get animOutMs =>
+      columnsByName['anim_out_ms']! as i1.GeneratedColumn<int>;
+  i1.GeneratedColumn<String> get drawingJson =>
+      columnsByName['drawing_json']! as i1.GeneratedColumn<String>;
+}
+
+i1.GeneratedColumn<String> _column_65(String aliasedName) =>
+    i1.GeneratedColumn<String>('drawing_json', aliasedName, true,
+        type: i1.DriftSqlType.string, $customConstraints: 'NULL');
 i0.MigrationStepWithVersion migrationSteps({
   required Future<void> Function(i1.Migrator m, Schema2 schema) from1To2,
   required Future<void> Function(i1.Migrator m, Schema3 schema) from2To3,
@@ -1679,6 +1942,7 @@ i0.MigrationStepWithVersion migrationSteps({
   required Future<void> Function(i1.Migrator m, Schema6 schema) from5To6,
   required Future<void> Function(i1.Migrator m, Schema7 schema) from6To7,
   required Future<void> Function(i1.Migrator m, Schema8 schema) from7To8,
+  required Future<void> Function(i1.Migrator m, Schema9 schema) from8To9,
 }) {
   return (currentVersion, database) async {
     switch (currentVersion) {
@@ -1717,6 +1981,11 @@ i0.MigrationStepWithVersion migrationSteps({
         final migrator = i1.Migrator(database, schema);
         await from7To8(migrator, schema);
         return 8;
+      case 8:
+        final schema = Schema9(database: database);
+        final migrator = i1.Migrator(database, schema);
+        await from8To9(migrator, schema);
+        return 9;
       default:
         throw ArgumentError.value('Unknown migration from $currentVersion');
     }
@@ -1731,6 +2000,7 @@ i1.OnUpgrade stepByStep({
   required Future<void> Function(i1.Migrator m, Schema6 schema) from5To6,
   required Future<void> Function(i1.Migrator m, Schema7 schema) from6To7,
   required Future<void> Function(i1.Migrator m, Schema8 schema) from7To8,
+  required Future<void> Function(i1.Migrator m, Schema9 schema) from8To9,
 }) =>
     i0.VersionedSchema.stepByStepHelper(
         step: migrationSteps(
@@ -1741,4 +2011,5 @@ i1.OnUpgrade stepByStep({
       from5To6: from5To6,
       from6To7: from6To7,
       from7To8: from7To8,
+      from8To9: from8To9,
     ));

@@ -74,7 +74,11 @@ void main() {
       );
       expect(
         await set(
-            projectId: 'p1', clipId: 'c1', animOut: 'fade', animOutMs: -1),
+          projectId: 'p1',
+          clipId: 'c1',
+          animOut: 'fade',
+          animOutMs: -1,
+        ),
         _failsWith(const InvalidAnimation()),
       );
       expect(

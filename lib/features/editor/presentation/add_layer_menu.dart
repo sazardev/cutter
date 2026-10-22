@@ -1,7 +1,9 @@
 import 'package:cutter/app/theme/app_theme.dart';
 import 'package:cutter/features/editor/domain/import_media.dart';
 import 'package:cutter/features/editor/domain/media_asset.dart';
+import 'package:cutter/features/editor/presentation/drawing/drawing_page.dart';
 import 'package:cutter/features/editor/presentation/import_flow.dart';
+import 'package:cutter/features/editor/presentation/playback_controller.dart';
 import 'package:cutter/features/editor/presentation/tools/editor_tool.dart';
 import 'package:cutter/features/editor/presentation/tools/text_panel.dart';
 import 'package:cutter/l10n/app_localizations.dart';
@@ -12,13 +14,20 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 /// picker for that kind and put the files on a new layer in front; Text adds
 /// a text at the playhead and opens the text tool to type over it.
 Future<void> showAddLayerMenu(BuildContext context, WidgetRef ref) async {
-  final choice = await showModalBottomSheet<MediaKind>(
+  final choice = await showModalBottomSheet<Object>(
     context: context,
     showDragHandle: true,
     isScrollControlled: true,
     builder: (context) => const _AddLayerSheet(),
   );
   if (choice == null || !context.mounted) return;
+  if (choice == _drawChoice) {
+    await openDrawing(
+      context,
+      startMs: ref.read(playbackControllerProvider).positionMs,
+    );
+    return;
+  }
   if (choice == MediaKind.text) {
     final id = await addTextAtPlayhead(context, ref);
     if (id != null) {
@@ -26,6 +35,7 @@ Future<void> showAddLayerMenu(BuildContext context, WidgetRef ref) async {
     }
     return;
   }
+  if (choice is! MediaKind) return;
   await pickAndImport(
     context,
     ref,
@@ -33,6 +43,9 @@ Future<void> showAddLayerMenu(BuildContext context, WidgetRef ref) async {
     filter: choice,
   );
 }
+
+/// What the sheet returns for Drawing, which is not a kind of media.
+const _drawChoice = 'draw';
 
 class _AddLayerSheet extends StatelessWidget {
   const _AddLayerSheet();
@@ -65,6 +78,12 @@ class _AddLayerSheet extends StatelessWidget {
         Icons.text_fields,
         l10n.layerKindText,
         l10n.addLayerTextHint
+      ),
+      (
+        _drawChoice,
+        Icons.brush_outlined,
+        l10n.layerKindDrawing,
+        l10n.addLayerDrawingHint
       ),
     ];
     return SafeArea(

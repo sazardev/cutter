@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:cutter/features/editor/domain/canvas.dart';
 import 'package:cutter/features/editor/domain/clip.dart';
 import 'package:cutter/features/editor/domain/clip_crop.dart';
+import 'package:cutter/features/editor/domain/clip_drawing.dart';
 import 'package:cutter/features/editor/domain/clip_text.dart';
 import 'package:cutter/features/editor/domain/clip_transform.dart';
 import 'package:cutter/features/editor/domain/layer.dart';
@@ -11,8 +12,9 @@ import 'package:cutter/features/editor/domain/project.dart';
 
 /// Version of the snapshot format, stored in every snapshot so a later
 /// format can still read older versions. Format 2 adds crop, speed and
-/// fades; format 3 adds text clips; format 4 adds animations. Older snapshots read with defaults.
-const snapshotFormat = 4;
+/// fades; format 3 adds text clips; format 4 adds animations; format 5 adds
+/// drawings. Older snapshots read with defaults.
+const snapshotFormat = 5;
 
 /// A whole project as JSON, for saved versions.
 String encodeProjectSnapshot(Project project) => jsonEncode({
@@ -67,6 +69,7 @@ Map<String, Object?> _clip(Clip clip) => {
       'animInMs': clip.animInMs,
       'animOut': clip.animOut,
       'animOutMs': clip.animOutMs,
+      'drawing': clip.drawing?.toJson(),
       'transform': {
         'x': clip.transform.x,
         'y': clip.transform.y,
@@ -156,6 +159,9 @@ Clip _clipFrom(Map<String, dynamic> map, String layerId) {
     animInMs: map['animInMs'] as int? ?? 0,
     animOut: map['animOut'] as String?,
     animOutMs: map['animOutMs'] as int? ?? 0,
+    drawing: map['drawing'] == null
+        ? null
+        : ClipDrawing.fromJson(map['drawing'] as Map<String, dynamic>),
     transform: ClipTransform(
       x: (t['x'] as num).toDouble(),
       y: (t['y'] as num).toDouble(),
