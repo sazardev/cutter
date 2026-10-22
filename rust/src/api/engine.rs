@@ -22,6 +22,8 @@ use crate::playback::Session;
 pub fn init_app() {
     flutter_rust_bridge::setup_default_user_utils();
     crate::media::init();
+    #[cfg(target_os = "android")]
+    crate::android::init();
 }
 
 /// Counters and recent log lines of the engine.
