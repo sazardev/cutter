@@ -109,6 +109,11 @@ final moveClipProvider = Provider<MoveClip>(
   (ref) => MoveClip(ref.watch(projectRepositoryProvider)),
 );
 
+/// The use case that sends a clip to the start or end of its layer.
+final arrangeClipProvider = Provider<ArrangeClip>(
+  (ref) => ArrangeClip(ref.watch(projectRepositoryProvider)),
+);
+
 /// The use case that reverses a clip's playback direction.
 final setClipReverseProvider = Provider<SetClipReverse>(
   (ref) => SetClipReverse(ref.watch(projectRepositoryProvider)),

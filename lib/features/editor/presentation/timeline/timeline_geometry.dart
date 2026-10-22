@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 
 import 'package:cutter/features/editor/domain/clip.dart';
+import 'package:cutter/features/editor/domain/layer.dart';
 import 'package:cutter/features/editor/domain/project.dart';
 
 /// Widest view, in logical pixels per millisecond (1 px per second, an hour
@@ -166,4 +167,46 @@ int sourceTimeAt(Clip clip, int timelineMs) {
   final longest = clip.sourceDurationMs - clip.outPointMs;
   final delta = clip.sourceSpanOf(deltaMs).clamp(shortest, longest);
   return (inMs: clip.inPointMs, outMs: clip.outPointMs + delta);
+}
+
+/// Width, in logical pixels, of the band at each edge of the timeline where a
+/// dragged clip or handle makes the view scroll.
+const double edgeScrollZonePx = 56;
+
+/// Fastest the view scrolls while dragging at the very edge, in pixels per
+/// second.
+const double edgeScrollMaxSpeed = 640;
+
+/// How fast, in pixels per second, the view scrolls while a drag is at
+/// [pointerX] of a view [viewWidth] wide: negative towards the start, zero
+/// away from the edges, faster the closer to (or past) the edge.
+double edgeScrollSpeed(double pointerX, double viewWidth) {
+  if (viewWidth <= edgeScrollZonePx * 2) return 0;
+  final double depth;
+  if (pointerX < edgeScrollZonePx) {
+    depth = (edgeScrollZonePx - pointerX) / edgeScrollZonePx;
+  } else if (pointerX > viewWidth - edgeScrollZonePx) {
+    depth = -(pointerX - (viewWidth - edgeScrollZonePx)) / edgeScrollZonePx;
+  } else {
+    return 0;
+  }
+  // Eased, so it creeps at first and runs near the edge.
+  final eased = depth.abs().clamp(0.0, 1.0);
+  return -depth.sign * eased * eased * edgeScrollMaxSpeed;
+}
+
+/// The room around [clip] on its [layer]: it may not start before
+/// `minStartMs` nor end after `maxEndMs` (null when nothing follows it).
+({int minStartMs, int? maxEndMs}) neighbourLimits(Layer layer, Clip clip) {
+  var minStart = 0;
+  int? maxEnd;
+  for (final other in layer.clips) {
+    if (other.id == clip.id) continue;
+    if (other.range.endMs <= clip.startMs) {
+      if (other.range.endMs > minStart) minStart = other.range.endMs;
+    } else if (other.startMs >= clip.range.endMs) {
+      if (maxEnd == null || other.startMs < maxEnd) maxEnd = other.startMs;
+    }
+  }
+  return (minStartMs: minStart, maxEndMs: maxEnd);
 }

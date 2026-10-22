@@ -1,10 +1,10 @@
 import 'package:cutter/features/editor/domain/clip.dart';
+import 'package:cutter/features/editor/domain/clip_placement.dart';
 import 'package:cutter/features/editor/domain/editor_ports.dart';
 import 'package:cutter/features/editor/domain/editor_result.dart';
 import 'package:cutter/features/editor/domain/layer.dart';
 import 'package:cutter/features/editor/domain/media_asset.dart';
 import 'package:cutter/features/editor/domain/project.dart';
-import 'package:cutter/features/editor/domain/time_range.dart';
 
 /// How long a still image plays when it is first placed.
 const defaultImageDurationMs = 3000;
@@ -28,7 +28,7 @@ abstract interface class MediaInspector {
 /// Where imported media lands on the timeline.
 enum ImportPlacement {
   /// Pictures go to the end of the main sequence, one after another; sound
-  /// goes to the playhead.
+  /// goes to the playhead on the project's one sound layer.
   append,
 
   /// Everything goes to the playhead on a new layer in front of the others.
@@ -64,6 +64,7 @@ class ImportMedia {
     var visualCursor = _sequenceEnd(layers);
     final overlayLayers = <MediaKind, String>{};
     var overlayCursor = atMs;
+    var soundCursor = atMs;
 
     for (final asset in assets) {
       final duration = asset.durationMs;
@@ -84,20 +85,24 @@ class ImportMedia {
           layerId = layer.id;
         }
       } else if (asset.kind == MediaKind.audio) {
-        start = atMs;
-        final range = TimeRange(start, duration);
-        final free = layers.where(
-          (l) =>
-              l.kind == MediaKind.audio &&
-              !l.clips.any((c) => c.range.overlaps(range)),
-        );
-        if (free.isNotEmpty) {
-          layerId = free.first.id;
+        // Sound shares one layer: it goes where the playhead is, or just
+        // after what is already there, and a layer is made only when the
+        // project has none.
+        final existing = layers.where((l) => l.kind == MediaKind.audio);
+        final Layer target;
+        if (existing.isNotEmpty) {
+          target = existing.first;
         } else {
-          final layer = Layer(id: _ids.next(), name: '', kind: asset.kind);
-          layers = [...layers, layer];
-          layerId = layer.id;
+          target = Layer(id: _ids.next(), name: '', kind: asset.kind);
+          layers = [...layers, target];
         }
+        start = nearestFreeStart(
+          [for (final clip in target.clips) clip.range],
+          duration,
+          soundCursor,
+        );
+        soundCursor = start + duration;
+        layerId = target.id;
       } else {
         start = visualCursor;
         visualCursor += duration;

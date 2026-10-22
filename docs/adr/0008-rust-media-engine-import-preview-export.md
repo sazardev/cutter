@@ -27,7 +27,7 @@ Nothing in the editor touched a real file. There was no Rust code: the preview w
 **Import.** The system picker is used: the photo and video picker on Android, the desktop portal on Linux. Without a portal (WSL, for example) the app asks for a path. Every file is probed. Files that cannot be played are named back to the user and not imported. Placement rules (`ImportMedia`):
 
 - Pictures go to the end of the main sequence.
-- Sound goes to the playhead, on the first audio layer with room.
+- Sound goes to the playhead on the project's one sound layer, after any clip already there; a sound layer is made only when the project has none (several sounds in one import follow each other).
 - An overlay goes on a new front layer at the playhead.
 
 Images start at 3 s and may be stretched up to 10 min. Files the picker left in a cache directory are moved into the app's `media/` folder.

@@ -1,4 +1,5 @@
 import 'package:cutter/features/editor/domain/clip.dart';
+import 'package:cutter/features/editor/domain/clip_placement.dart';
 import 'package:cutter/features/editor/domain/editor_ports.dart';
 import 'package:cutter/features/editor/domain/editor_result.dart';
 import 'package:cutter/features/editor/domain/layer.dart';
@@ -176,5 +177,45 @@ class MoveClip {
         else
           layer,
     ]);
+  }
+}
+
+/// Sends a clip to the start or the end of its layer, or closes the gap
+/// next to it, without leaving its layer or overlapping another clip.
+class ArrangeClip {
+  /// Creates the use case over [_projects].
+  ArrangeClip(this._projects);
+
+  final ProjectRepository _projects;
+
+  /// Arranges clip [clipId] by [arrangement]; a clip that is already there
+  /// is left alone and nothing is saved.
+  Future<EditorResult<Project>> call({
+    required String projectId,
+    required String clipId,
+    required ClipArrangement arrangement,
+  }) async {
+    final project = await _projects.find(projectId);
+    if (project == null) return Err(ProjectNotFound(projectId));
+    final clip = project.clipById(clipId);
+    final layer = project.layerOfClip(clipId);
+    if (clip == null || layer == null) return Err(ClipNotFound(clipId));
+
+    final start = arrangedStart(
+      [
+        for (final other in layer.clips)
+          if (other.id != clipId) other.range,
+      ],
+      clip.range,
+      arrangement,
+      project.durationMs,
+    );
+    if (start == clip.startMs) return Ok(project);
+
+    final updated = project.replaceLayer(
+      _withReplacedClip(layer, clip.copyWith(startMs: start)),
+    );
+    await _projects.save(updated);
+    return Ok(updated);
   }
 }

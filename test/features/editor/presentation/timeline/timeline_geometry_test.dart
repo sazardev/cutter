@@ -1,4 +1,5 @@
 import 'package:cutter/features/editor/domain/clip.dart';
+import 'package:cutter/features/editor/domain/layer.dart';
 import 'package:cutter/features/editor/domain/media_asset.dart';
 import 'package:cutter/features/editor/presentation/timeline/timeline_geometry.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -78,5 +79,59 @@ void main() {
     expect(fitZoom(0, 524), TimeScale.seconds.zoom);
     expect(fitZoom(100 * 3600 * 1000, 524), minZoom);
     expect(fitZoom(10, 524), maxZoom);
+  });
+
+  group('edgeScrollSpeed', () {
+    test('is still away from the edges', () {
+      expect(edgeScrollSpeed(200, 400), 0);
+    });
+
+    test('scrolls towards the start near the left edge', () {
+      expect(edgeScrollSpeed(10, 400), lessThan(0));
+    });
+
+    test('scrolls towards the end near the right edge', () {
+      expect(edgeScrollSpeed(390, 400), greaterThan(0));
+    });
+
+    test('runs faster the closer the finger is to the edge', () {
+      expect(
+        edgeScrollSpeed(5, 400).abs(),
+        greaterThan(edgeScrollSpeed(40, 400).abs()),
+      );
+    });
+
+    test('is capped past the edge and ignores a view too narrow for zones', () {
+      expect(edgeScrollSpeed(-500, 400), -edgeScrollMaxSpeed);
+      expect(edgeScrollSpeed(5, 100), 0);
+    });
+  });
+
+  test('neighbourLimits finds the clips on each side', () {
+    Clip at(String id, int start, int length) => _clip.copyWith(
+          id: id,
+          startMs: start,
+          inPointMs: 0,
+          outPointMs: length,
+        );
+    final layer = Layer(
+      id: 'l',
+      name: 'L',
+      kind: MediaKind.video,
+      clips: [at('a', 0, 1000), at('b', 2000, 1000), at('c', 5000, 1000)],
+    );
+
+    expect(
+      neighbourLimits(layer, layer.clips[1]),
+      (minStartMs: 1000, maxEndMs: 5000),
+    );
+    expect(
+      neighbourLimits(layer, layer.clips[0]),
+      (minStartMs: 0, maxEndMs: 2000),
+    );
+    expect(
+      neighbourLimits(layer, layer.clips[2]),
+      (minStartMs: 3000, maxEndMs: null),
+    );
   });
 }

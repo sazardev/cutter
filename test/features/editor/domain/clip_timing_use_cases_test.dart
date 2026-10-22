@@ -1,3 +1,4 @@
+import 'package:cutter/features/editor/domain/clip_placement.dart';
 import 'package:cutter/features/editor/domain/clip_timing_use_cases.dart';
 import 'package:cutter/features/editor/domain/editor_result.dart';
 import 'package:cutter/features/editor/domain/layer.dart';
@@ -320,6 +321,70 @@ void main() {
       expect(_failureOf(noClip), const ClipNotFound('nope'));
       expect(_failureOf(noLayer), const LayerNotFound('nope'));
       expectUntouched();
+    });
+  });
+
+  group('ArrangeClip', () {
+    late ArrangeClip arrange;
+
+    setUp(() => arrange = ArrangeClip(repository));
+
+    test('close gap before moves the clip against the one before', () async {
+      final project = _unwrap(
+        await arrange(
+          projectId: 'p1',
+          clipId: 'c2',
+          arrangement: ClipArrangement.closeGapBefore,
+        ),
+      );
+
+      expect(project.clipById('c2')!.startMs, 4000);
+      expect(repository.saveCount, 1);
+    });
+
+    test('close gap after moves the clip against the one after', () async {
+      final project = _unwrap(
+        await arrange(
+          projectId: 'p1',
+          clipId: 'c1',
+          arrangement: ClipArrangement.closeGapAfter,
+        ),
+      );
+
+      expect(project.clipById('c1')!.startMs, 2000);
+    });
+
+    test('to end puts the clip after the last one on its layer', () async {
+      final project = _unwrap(
+        await arrange(
+          projectId: 'p1',
+          clipId: 'c1',
+          arrangement: ClipArrangement.toEnd,
+        ),
+      );
+
+      expect(project.clipById('c1')!.startMs, 8000);
+    });
+
+    test('does not save when the clip is already there', () async {
+      final result = await arrange(
+        projectId: 'p1',
+        clipId: 'c1',
+        arrangement: ClipArrangement.toStart,
+      );
+
+      expect(_unwrap(result), original);
+      expectUntouched();
+    });
+
+    test('reports a clip that does not exist', () async {
+      final result = await arrange(
+        projectId: 'p1',
+        clipId: 'nope',
+        arrangement: ClipArrangement.toStart,
+      );
+
+      expect(_failureOf(result), isA<ClipNotFound>());
     });
   });
 }

@@ -112,7 +112,7 @@ void main() {
     );
   });
 
-  test('sound that would overlap gets a new audio layer behind the others',
+  test('sound that would overlap stays on the same layer, after the clip',
       () async {
     final project = _ok(
       await importMedia(
@@ -124,9 +124,33 @@ void main() {
 
     final audio =
         project.layers.where((l) => l.kind == MediaKind.audio).toList();
-    expect(audio, hasLength(2));
-    expect(project.layers.last, audio.last);
-    expect(audio.last.clips.single.startMs, 0);
+    expect(audio, hasLength(1));
+    // The fixture's music fills 0..8000 ms; the song waits for it to end.
+    expect(
+      audio.single.clips.map((c) => c.startMs),
+      containsAll([0, 8000]),
+    );
+  });
+
+  test('several sounds in one import share a layer, one after another',
+      () async {
+    final project = _ok(
+      await importMedia(
+        projectId: 'empty',
+        assets: [
+          _asset('a', MediaKind.audio, durationMs: 2000),
+          _asset('b', MediaKind.audio),
+          _asset('c', MediaKind.audio, durationMs: 1000),
+        ],
+        atMs: 500,
+      ),
+    );
+
+    expect(project.layers, hasLength(1));
+    expect(
+      project.layers.single.clips.map((c) => c.startMs),
+      [500, 2500, 5500],
+    );
   });
 
   test('an overlay goes on a new front layer at the playhead', () async {
