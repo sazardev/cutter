@@ -1,7 +1,7 @@
-use std::sync::atomic::{AtomicU64, Ordering};
+use std::sync::atomic::{AtomicBool, AtomicU64, Ordering};
 use std::sync::Arc;
 use std::thread::JoinHandle;
-use std::time::Duration;
+use std::time::{Duration, Instant};
 
 use cpal::traits::{DeviceTrait, HostTrait, StreamTrait};
 use crossbeam_channel::{bounded, Receiver, SendTimeoutError};
@@ -13,6 +13,9 @@ use crate::render::mixer::Mixer;
 const BLOCK_FRAMES: usize = 1024;
 /// About 128 ms of sound mixed ahead of the device.
 const QUEUED_BLOCKS: usize = 6;
+/// How long to wait before trying the audio device again after it failed
+/// or vanished (headphones unplugged, Bluetooth switched, app resumed).
+const RETRY_EVERY: Duration = Duration::from_secs(1);
 
 struct Block {
     generation: u64,
@@ -31,11 +34,14 @@ pub fn spawn(shared: Arc<Shared>) -> JoinHandle<()> {
 fn run(shared: Arc<Shared>) {
     let (tx, rx) = bounded::<Block>(QUEUED_BLOCKS);
     // The stream must live on this thread: it is not Send on every platform.
-    let _stream = open_stream(rx, shared.generation.clone());
-    if _stream.is_some() {
+    let failed = Arc::new(AtomicBool::new(false));
+    let mut stream = open_stream(rx.clone(), shared.generation.clone(), failed.clone());
+    let mut last_try = Instant::now();
+    let mut reported = stream.is_some();
+    if reported {
         crate::diagnostics::info("audio output open");
     } else {
-        crate::diagnostics::warn("no audio output device: the preview plays silently");
+        crate::diagnostics::warn("no audio output device: trying again while playing");
     }
     let mut mixer = Mixer::default();
     let mut generation = u64::MAX;
@@ -57,6 +63,24 @@ fn run(shared: Arc<Shared>) {
                 shared.generation.load(Ordering::Acquire),
             )
         };
+        // A device that was missing, or whose stream died, is tried again
+        // while playing, so sound comes back without restarting the app.
+        if (stream.is_none() || failed.load(Ordering::Relaxed))
+            && last_try.elapsed() >= RETRY_EVERY
+        {
+            last_try = Instant::now();
+            failed.store(false, Ordering::Relaxed);
+            drop(stream.take());
+            stream = open_stream(rx.clone(), shared.generation.clone(), failed.clone());
+            if stream.is_some() != reported {
+                reported = stream.is_some();
+                if reported {
+                    crate::diagnostics::info("audio output open again");
+                } else {
+                    crate::diagnostics::warn("audio output lost: trying again while playing");
+                }
+            }
+        }
         if current != generation {
             generation = current;
             position = clock.now_frames();
@@ -125,11 +149,24 @@ impl Feed {
     }
 }
 
-fn open_stream(rx: Receiver<Block>, generation: Arc<AtomicU64>) -> Option<cpal::Stream> {
+fn open_stream(
+    rx: Receiver<Block>,
+    generation: Arc<AtomicU64>,
+    failed: Arc<AtomicBool>,
+) -> Option<cpal::Stream> {
     let host = cpal::default_host();
     let device = host.default_output_device()?;
     let supported = device.default_output_config().ok()?;
     let format = supported.sample_format();
+    crate::diagnostics::info(format!(
+        "audio device {} at {} Hz, {} channels, {:?}",
+        device
+            .description()
+            .map_or_else(|_| "unknown".to_string(), |d| d.to_string()),
+        supported.sample_rate(),
+        supported.channels(),
+        format,
+    ));
     let config: cpal::StreamConfig = supported.config();
     let channels = config.channels as usize;
     let mut feed = Feed {
@@ -139,7 +176,10 @@ fn open_stream(rx: Receiver<Block>, generation: Arc<AtomicU64>) -> Option<cpal::
         pos: 0.0,
         step: f64::from(SAMPLE_RATE) / f64::from(config.sample_rate),
     };
-    let err = |e| eprintln!("cutter audio: {e}");
+    let err = move |e| {
+        crate::diagnostics::warn(format!("audio stream error: {e}"));
+        failed.store(true, Ordering::Relaxed);
+    };
     let stream = match format {
         cpal::SampleFormat::F32 => device.build_output_stream::<f32, _, _>(
             config,
