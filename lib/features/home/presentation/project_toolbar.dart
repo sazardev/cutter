@@ -60,9 +60,8 @@ class _ProjectToolbarState extends ConsumerState<ProjectToolbar> {
   /// chosen in Settings (a pill, or the radius picked there).
   OutlinedBorder _fieldShape(BuildContext context) {
     final theme = Theme.of(context);
-    return theme.filledButtonTheme.style?.shape?.resolve({}) is OutlinedBorder
-        ? theme.filledButtonTheme.style!.shape!.resolve({})! as OutlinedBorder
-        : const StadiumBorder();
+    final shape = theme.filledButtonTheme.style?.shape?.resolve({});
+    return shape is OutlinedBorder ? shape : const StadiumBorder();
   }
 
   @override

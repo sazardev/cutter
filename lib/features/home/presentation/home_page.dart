@@ -5,7 +5,6 @@ import 'package:cutter/features/editor/domain/project_summary.dart';
 import 'package:cutter/features/editor/domain/template.dart';
 import 'package:cutter/features/editor/presentation/editor_page.dart';
 import 'package:cutter/features/editor/presentation/editor_providers.dart';
-import 'package:cutter/features/home/domain/home_preferences.dart';
 import 'package:cutter/features/home/domain/project_list_query.dart';
 import 'package:cutter/features/home/presentation/home_providers.dart';
 import 'package:cutter/features/home/presentation/new_project/new_project_page.dart';

@@ -28,8 +28,9 @@ class _StorageSectionState extends ConsumerState<StorageSection> {
 
   Future<void> _clearCache(AppLocalizations l10n) async {
     final freed = await clearAppCache(ref);
-    if (mounted)
+    if (mounted) {
       setState(() => _cacheFreed = l10n.storageFreed(formatBytes(freed)));
+    }
   }
 
   Future<void> _cleanUnused(
@@ -65,8 +66,9 @@ class _StorageSectionState extends ConsumerState<StorageSection> {
     );
     if (confirmed != true) return;
     final freed = await deleteUnusedMedia(ref, report);
-    if (mounted)
+    if (mounted) {
       setState(() => _unusedFreed = l10n.storageFreed(formatBytes(freed)));
+    }
   }
 
   @override

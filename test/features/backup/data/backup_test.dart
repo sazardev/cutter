@@ -127,7 +127,7 @@ void main() {
             .having((e) => e.failure, 'failure', BackupFailure.damaged),
       ),
     );
-    expect(root.existsSync() ? root.listSync() : [], isEmpty);
+    expect(root.existsSync() ? root.listSync() : <FileSystemEntity>[], isEmpty);
   });
 
   test('a backup from a newer Cutter is refused with its own reason', () async {

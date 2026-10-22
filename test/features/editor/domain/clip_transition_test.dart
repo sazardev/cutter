@@ -168,7 +168,7 @@ void main() {
           kind: TransitionKind.dip,
           durationMs: 500,
         ),
-        isA<Err>(),
+        isA<Err<Project>>(),
       );
       expect(
         await apply(
@@ -177,7 +177,7 @@ void main() {
           kind: TransitionKind.dip,
           durationMs: 500,
         ),
-        isA<Err>(),
+        isA<Err<Project>>(),
       );
       expect(
         await apply(
@@ -186,7 +186,7 @@ void main() {
           kind: TransitionKind.dip,
           durationMs: 50,
         ),
-        isA<Err>(),
+        isA<Err<Project>>(),
       );
       expect(repository.saveCount, 0);
     });

@@ -1281,8 +1281,12 @@ void main() {
       addTearDown(() => tester.runAsync(db.close));
       await tester.runAsync(() => _seed(db, layerKind: 'video'));
       final l10n = await _strings(const Locale('en'));
-      await _pumpPage(tester, db, const Locale('en'),
-          size: const Size(1200, 1800));
+      await _pumpPage(
+        tester,
+        db,
+        const Locale('en'),
+        size: const Size(1200, 1800),
+      );
       await openPresets(tester, l10n);
 
       await tapText(tester, l10n.animationPresetZoom);
@@ -1311,8 +1315,12 @@ void main() {
       addTearDown(() => tester.runAsync(db.close));
       await tester.runAsync(() => seedTwoClips(db));
       final l10n = await _strings(const Locale('en'));
-      await _pumpPage(tester, db, const Locale('en'),
-          size: const Size(1200, 1800));
+      await _pumpPage(
+        tester,
+        db,
+        const Locale('en'),
+        size: const Size(1200, 1800),
+      );
       await openPresets(tester, l10n);
 
       await tapText(tester, l10n.animationPresetWholeLayer);
@@ -1332,8 +1340,12 @@ void main() {
       addTearDown(() => tester.runAsync(db.close));
       await tester.runAsync(() => _seed(db, layerKind: 'video'));
       final l10n = await _strings(const Locale('en'));
-      await _pumpPage(tester, db, const Locale('en'),
-          size: const Size(1200, 1800));
+      await _pumpPage(
+        tester,
+        db,
+        const Locale('en'),
+        size: const Size(1200, 1800),
+      );
       await openPresets(tester, l10n);
 
       // Nothing to save before the clip animates.

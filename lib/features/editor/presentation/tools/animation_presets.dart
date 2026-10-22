@@ -94,8 +94,9 @@ class AnimationPresets extends ConsumerWidget {
     final result = await ref
         .read(saveAnimationPresetProvider)
         .call(clip: clip, name: name);
-    if (result is Ok<AnimationPreset>)
+    if (result is Ok<AnimationPreset>) {
       ref.invalidate(userAnimationPresetsProvider);
+    }
   }
 
   Future<void> _delete(WidgetRef ref, AnimationPreset preset) async {

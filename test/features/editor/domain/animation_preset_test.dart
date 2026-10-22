@@ -63,7 +63,9 @@ class _Ids implements IdGenerator {
 void main() {
   test('every built-in preset is valid and has a distinct id', () {
     expect(
-        builtInAnimationPresets.every((p) => p.isValid && !p.isEmpty), isTrue);
+      builtInAnimationPresets.every((p) => p.isValid && !p.isEmpty),
+      isTrue,
+    );
     expect(
       builtInAnimationPresets.map((p) => p.id).toSet(),
       hasLength(builtInAnimationPresets.length),
@@ -119,10 +121,13 @@ void main() {
       final animated =
           _clip('c', MediaKind.video, animIn: 'fade', animInMs: 500);
 
-      expect(await save(clip: animated, name: '  '), isA<Err>());
+      expect(
+        await save(clip: animated, name: '  '),
+        isA<Err<AnimationPreset>>(),
+      );
       expect(
         await save(clip: _clip('d', MediaKind.video), name: 'Plain'),
-        isA<Err>(),
+        isA<Err<AnimationPreset>>(),
       );
       expect(presets.items, isEmpty);
     });
@@ -180,7 +185,7 @@ void main() {
 
       expect(
         await apply(projectId: 'p', clipIds: ['s'], preset: preset),
-        isA<Err>(),
+        isA<Err<Project>>(),
       );
       expect(
         await apply(
@@ -194,7 +199,7 @@ void main() {
             animOutMs: 0,
           ),
         ),
-        isA<Err>(),
+        isA<Err<Project>>(),
       );
       expect(repository.saveCount, 0);
     });
