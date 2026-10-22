@@ -1158,6 +1158,26 @@
   "@railExpand": {
     "description": "Unfolds the side tool bar."
   },
+  "arrangeAction": "Acomodar",
+  "@arrangeAction": {
+    "description": "Button of the clip bar that opens the menu to place the clip against its neighbours or at the start or end of its layer."
+  },
+  "arrangeCloseGapBefore": "Pegar al anterior",
+  "@arrangeCloseGapBefore": {
+    "description": "Menu item: moves the selected clip left until it touches the clip before it, or the start of the timeline."
+  },
+  "arrangeCloseGapAfter": "Pegar al siguiente",
+  "@arrangeCloseGapAfter": {
+    "description": "Menu item: moves the selected clip right until it touches the clip after it."
+  },
+  "arrangeToStart": "Mandar al inicio",
+  "@arrangeToStart": {
+    "description": "Menu item: moves the selected clip to the first free place from the start of its layer."
+  },
+  "arrangeToEnd": "Mandar al final",
+  "@arrangeToEnd": {
+    "description": "Menu item: moves the selected clip after the last clip of its layer, or to the end of the project."
+  },
   "moreActions": "Más",
   "@moreActions": {
     "description": "Menu with more actions."
@@ -2869,18 +2889,6 @@
   "@animationPresetNeedsAnimation": {
     "description": "Shown when saving a preset from a clip that has no animation."
   },
-  "transitionTitle": "Transición",
-  "@transitionTitle": {
-    "description": "Heading of the section that joins a clip to the one before it."
-  },
-  "transitionSummary": "Cómo sigue este clip al anterior.",
-  "@transitionSummary": {
-    "description": "Help under the transition heading."
-  },
-  "transitionNeedsNeighbour": "Coloca este clip justo después de otro en su capa para añadir una transición.",
-  "@transitionNeedsNeighbour": {
-    "description": "Shown when the selected clip has no clip right before it."
-  },
   "transitionNone": "Sin transición",
   "@transitionNone": {
     "description": "Option that removes the transition between two clips."
@@ -2990,5 +2998,20 @@
   "drawingColor": "Color",
   "@drawingColor": {
     "description": "Etiqueta de una muestra de color de la paleta de dibujo."
-  }
+  },
+  "galleryTool": "Efectos",
+  "galleryTabTransitions": "Transiciones",
+  "galleryTabAnimations": "Animaciones",
+  "@galleryTabAnimations": {
+    "description": "Tab of the effects gallery with entrance and exit animation presets."
+  },
+  "galleryTabEffects": "Efectos",
+  "galleryHint": "Mantén una tarjeta y arrástrala sobre un clip, o selecciona un clip y toca una tarjeta.",
+  "galleryNeedsClip": "Primero selecciona un clip, o arrastra la tarjeta sobre uno.",
+  "galleryClipUnsupported": "Este clip no admite eso: el sonido y los títulos no tienen imagen que cambiar.",
+  "galleryEdgeTitle": "¿Dónde la ponemos?",
+  "galleryEdgeRemoveTitle": "Quitarla de…",
+  "galleryEdgeStart": "Al inicio",
+  "galleryEdgeEnd": "Al final",
+  "galleryEdgeBoth": "En ambos extremos"
 }

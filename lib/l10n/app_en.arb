@@ -1158,6 +1158,26 @@
   "@railExpand": {
     "description": "Unfolds the side tool bar."
   },
+  "arrangeAction": "Arrange",
+  "@arrangeAction": {
+    "description": "Button of the clip bar that opens the menu to place the clip against its neighbours or at the start or end of its layer."
+  },
+  "arrangeCloseGapBefore": "Snap to previous",
+  "@arrangeCloseGapBefore": {
+    "description": "Menu item: moves the selected clip left until it touches the clip before it, or the start of the timeline."
+  },
+  "arrangeCloseGapAfter": "Snap to next",
+  "@arrangeCloseGapAfter": {
+    "description": "Menu item: moves the selected clip right until it touches the clip after it."
+  },
+  "arrangeToStart": "Send to start",
+  "@arrangeToStart": {
+    "description": "Menu item: moves the selected clip to the first free place from the start of its layer."
+  },
+  "arrangeToEnd": "Send to end",
+  "@arrangeToEnd": {
+    "description": "Menu item: moves the selected clip after the last clip of its layer, or to the end of the project."
+  },
   "moreActions": "More",
   "@moreActions": {
     "description": "Menu with more actions."
@@ -3058,18 +3078,6 @@
   "@animationPresetNeedsAnimation": {
     "description": "Shown when saving a preset from a clip that has no animation."
   },
-  "transitionTitle": "Transition",
-  "@transitionTitle": {
-    "description": "Heading of the section that joins a clip to the one before it."
-  },
-  "transitionSummary": "How this clip follows the one before it.",
-  "@transitionSummary": {
-    "description": "Help under the transition heading."
-  },
-  "transitionNeedsNeighbour": "Place this clip right after another one on its layer to add a transition.",
-  "@transitionNeedsNeighbour": {
-    "description": "Shown when the selected clip has no clip right before it."
-  },
   "transitionNone": "No transition",
   "@transitionNone": {
     "description": "Option that removes the transition between two clips."
@@ -3179,5 +3187,53 @@
   "drawingColor": "Color",
   "@drawingColor": {
     "description": "Label of one color swatch of the drawing palette."
+  },
+  "galleryTool": "Effects",
+  "@galleryTool": {
+    "description": "Name of the tool that holds the transitions and effects gallery."
+  },
+  "galleryTabTransitions": "Transitions",
+  "@galleryTabTransitions": {
+    "description": "Tab of the gallery that lists transitions."
+  },
+  "galleryTabAnimations": "Animations",
+  "@galleryTabAnimations": {
+    "description": "Tab of the effects gallery with entrance and exit animation presets."
+  },
+  "galleryTabEffects": "Effects",
+  "@galleryTabEffects": {
+    "description": "Tab of the gallery that lists filters and effects."
+  },
+  "galleryHint": "Hold a card and drag it onto a clip, or select a clip and tap a card.",
+  "@galleryHint": {
+    "description": "Help line at the top of the effects gallery."
+  },
+  "galleryNeedsClip": "Select a clip first, or drag the card onto one.",
+  "@galleryNeedsClip": {
+    "description": "Message shown when a gallery card is tapped with no clip selected."
+  },
+  "galleryClipUnsupported": "This clip can't take that: sound and titles have no picture to change.",
+  "@galleryClipUnsupported": {
+    "description": "Message shown when a card is given to a sound or title clip."
+  },
+  "galleryEdgeTitle": "Where should it go?",
+  "@galleryEdgeTitle": {
+    "description": "Title of the sheet asking where on a clip a transition goes."
+  },
+  "galleryEdgeRemoveTitle": "Remove it from…",
+  "@galleryEdgeRemoveTitle": {
+    "description": "Title of the sheet asking where to remove a transition."
+  },
+  "galleryEdgeStart": "At the start",
+  "@galleryEdgeStart": {
+    "description": "Option: the transition goes at the start of the clip."
+  },
+  "galleryEdgeEnd": "At the end",
+  "@galleryEdgeEnd": {
+    "description": "Option: the transition goes at the end of the clip."
+  },
+  "galleryEdgeBoth": "At both ends",
+  "@galleryEdgeBoth": {
+    "description": "Option: the transition goes at both ends of the clip."
   }
 }

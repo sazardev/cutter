@@ -26,6 +26,9 @@ enum EditorTool {
   /// The project's media bank: import once, place again and again.
   media(Icons.perm_media_outlined),
 
+  /// Transitions and effects as cards to drag onto clips of the timeline.
+  gallery(Icons.auto_awesome_motion_outlined),
+
   /// Photos, video and voice recorded with the device and added at once.
   capture(Icons.videocam_outlined),
 
@@ -64,6 +67,7 @@ enum EditorTool {
         EditorTool.transform => l10n.transformTool,
         EditorTool.text => l10n.textTool,
         EditorTool.media => l10n.mediaTool,
+        EditorTool.gallery => l10n.galleryTool,
         EditorTool.capture => l10n.captureTool,
         EditorTool.canvas => l10n.canvasTool,
         EditorTool.versions => l10n.versionsTool,

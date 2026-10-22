@@ -44,6 +44,18 @@ enum TransitionKind {
   final String animIn;
 }
 
+/// Where on a clip a transition goes.
+enum TransitionEdge {
+  /// Where the clip begins: it joins the clip before it, or fades in alone.
+  start,
+
+  /// Where the clip ends: it joins the clip after it, or leaves alone.
+  end,
+
+  /// Both ends.
+  both,
+}
+
 /// Shortest and longest a transition may last, per side, in milliseconds.
 const int minTransitionMs = 200;
 
@@ -66,6 +78,18 @@ Clip? previousNeighbour(Layer layer, Clip clip) {
   return clip.startMs - best.range.endMs <= maxTransitionGapMs ? best : null;
 }
 
+/// The clip right after [clip] on its layer, or null when it ends the layer
+/// or there is a gap longer than [maxTransitionGapMs] after it.
+Clip? nextNeighbour(Layer layer, Clip clip) {
+  Clip? best;
+  for (final other in layer.clips) {
+    if (other.id == clip.id || other.startMs < clip.range.endMs) continue;
+    if (best == null || other.startMs < best.startMs) best = other;
+  }
+  if (best == null) return null;
+  return best.startMs - clip.range.endMs <= maxTransitionGapMs ? best : null;
+}
+
 /// The transition that joins [first] to [second], or null when they are not
 /// joined by one of the [TransitionKind]s.
 TransitionKind? transitionBetween(Clip first, Clip second) {
@@ -77,43 +101,56 @@ TransitionKind? transitionBetween(Clip first, Clip second) {
   return null;
 }
 
-/// Joins a clip to the one before it with a transition: the first clip's
-/// exit and this clip's entrance are set to the pair, and the sound of both
-/// is faded the same length when asked.
+/// Puts a transition on a clip: at its start, at its end or at both. Where a
+/// neighbour touches that end, the join is made of both clips (the first
+/// leaves, the second comes in) and the sound of both is faded the same
+/// length when asked; with no neighbour the clip fades or moves alone.
 class ApplyTransition {
   /// Creates the use case over [_projects].
   const ApplyTransition(this._projects);
 
   final ProjectRepository _projects;
 
-  /// Puts [kind], [durationMs] long on each side, between [clipId] and the
-  /// clip before it. The length is cut to what each clip can hold.
+  /// Puts [kind], [durationMs] long on each side, at [edge] of [clipId]. The
+  /// length is cut to what each clip can hold.
   Future<EditorResult<Project>> call({
     required String projectId,
     required String clipId,
     required TransitionKind kind,
     required int durationMs,
     bool fadeSound = true,
+    TransitionEdge edge = TransitionEdge.start,
   }) async {
     if (durationMs < minTransitionMs || durationMs > maxTransitionMs) {
       return const Err(InvalidAnimation());
     }
     final project = await _projects.find(projectId);
     if (project == null) return Err(ProjectNotFound(projectId));
-    final second = project.clipById(clipId);
+    final target = project.clipById(clipId);
     final layer = project.layerOfClip(clipId);
-    if (second == null || layer == null) return Err(ClipNotFound(clipId));
-    final first = previousNeighbour(layer, second);
-    if (first == null || !_canJoin(first) || !_canJoin(second)) {
-      return const Err(IncompatibleClip());
-    }
+    if (target == null || layer == null) return Err(ClipNotFound(clipId));
+    if (!_canJoin(target)) return const Err(IncompatibleClip());
+
+    final entering = edge != TransitionEdge.end;
+    final leaving = edge != TransitionEdge.start;
+    final before = entering ? previousNeighbour(layer, target) : null;
+    final after = leaving ? nextNeighbour(layer, target) : null;
 
     final updated = project.replaceLayer(
       layer.withClips([
         for (final clip in layer.clips)
-          if (clip.id == first.id)
+          if (clip.id == target.id)
+            _both(
+              clip,
+              kind,
+              durationMs,
+              fadeSound,
+              entering: entering,
+              leaving: leaving,
+            )
+          else if (clip.id == before?.id && _canJoin(clip))
             _leaving(clip, kind, durationMs, fadeSound)
-          else if (clip.id == second.id)
+          else if (clip.id == after?.id && _canJoin(clip))
             _arriving(clip, kind, durationMs, fadeSound)
           else
             clip,
@@ -121,6 +158,20 @@ class ApplyTransition {
     );
     await _projects.save(updated);
     return Ok(updated);
+  }
+
+  Clip _both(
+    Clip clip,
+    TransitionKind kind,
+    int ms,
+    bool fadeSound, {
+    required bool entering,
+    required bool leaving,
+  }) {
+    var result = clip;
+    if (entering) result = _arriving(result, kind, ms, fadeSound);
+    if (leaving) result = _leaving(result, kind, ms, fadeSound);
+    return result;
   }
 
   // A title has its own animation.
@@ -151,33 +202,48 @@ class ApplyTransition {
   }
 }
 
-/// Takes the transition off the join between a clip and the one before it:
-/// the exit, the entrance and the sound fades of the join are cleared.
+/// Takes the transition off a clip: the exit, the entrance and the sound
+/// fades of the chosen edge are cleared, and so are those of the neighbour
+/// that shared the join.
 class RemoveTransition {
   /// Creates the use case over [_projects].
   const RemoveTransition(this._projects);
 
   final ProjectRepository _projects;
 
-  /// Clears the join of [clipId] with its previous neighbour.
+  /// Clears [edge] of [clipId] and the neighbour across it.
   Future<EditorResult<Project>> call({
     required String projectId,
     required String clipId,
+    TransitionEdge edge = TransitionEdge.start,
   }) async {
     final project = await _projects.find(projectId);
     if (project == null) return Err(ProjectNotFound(projectId));
-    final second = project.clipById(clipId);
+    final target = project.clipById(clipId);
     final layer = project.layerOfClip(clipId);
-    if (second == null || layer == null) return Err(ClipNotFound(clipId));
-    final first = previousNeighbour(layer, second);
-    if (first == null) return const Err(IncompatibleClip());
+    if (target == null || layer == null) return Err(ClipNotFound(clipId));
+    final clearIn = edge != TransitionEdge.end;
+    final clearOut = edge != TransitionEdge.start;
+    final before = clearIn ? previousNeighbour(layer, target) : null;
+    final after = clearOut ? nextNeighbour(layer, target) : null;
+    Clip cleared(Clip clip, {required bool inSide, required bool outSide}) =>
+        clip.copyWith(
+          clearAnimIn: inSide,
+          animInMs: inSide ? 0 : null,
+          fadeInMs: inSide ? 0 : null,
+          clearAnimOut: outSide,
+          animOutMs: outSide ? 0 : null,
+          fadeOutMs: outSide ? 0 : null,
+        );
     final updated = project.replaceLayer(
       layer.withClips([
         for (final clip in layer.clips)
-          if (clip.id == first.id)
-            clip.copyWith(clearAnimOut: true, animOutMs: 0, fadeOutMs: 0)
-          else if (clip.id == second.id)
-            clip.copyWith(clearAnimIn: true, animInMs: 0, fadeInMs: 0)
+          if (clip.id == target.id)
+            cleared(clip, inSide: clearIn, outSide: clearOut)
+          else if (clip.id == before?.id)
+            cleared(clip, inSide: false, outSide: true)
+          else if (clip.id == after?.id)
+            cleared(clip, inSide: true, outSide: false)
           else
             clip,
       ]),

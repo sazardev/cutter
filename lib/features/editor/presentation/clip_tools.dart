@@ -17,14 +17,15 @@ import 'package:cutter/features/editor/presentation/tools/background_section.dar
 import 'package:cutter/features/editor/presentation/tools/canvas_panel.dart';
 import 'package:cutter/features/editor/presentation/tools/diagnostics_panel.dart';
 import 'package:cutter/features/editor/presentation/tools/editor_tool.dart';
+import 'package:cutter/features/editor/presentation/tools/effects_gallery_panel.dart';
 import 'package:cutter/features/editor/presentation/tools/export_panel.dart';
+import 'package:cutter/features/editor/presentation/tools/gallery_item.dart';
 import 'package:cutter/features/editor/presentation/tools/layout_panel.dart';
 import 'package:cutter/features/editor/presentation/tools/media_bank_panel.dart';
 import 'package:cutter/features/editor/presentation/tools/panel_kit.dart';
 import 'package:cutter/features/editor/presentation/tools/project_settings_panel.dart';
 import 'package:cutter/features/editor/presentation/tools/text_panel.dart';
 import 'package:cutter/features/editor/presentation/tools/transform_panel.dart';
-import 'package:cutter/features/editor/presentation/tools/transition_section.dart';
 import 'package:cutter/features/editor/presentation/tools/versions_panel.dart';
 import 'package:cutter/l10n/app_localizations.dart';
 import 'package:flutter/gestures.dart';
@@ -100,6 +101,7 @@ class EditorActions {
 /// The project tools, in the order the tool bars show them.
 const List<EditorTool> projectTools = [
   EditorTool.media,
+  EditorTool.gallery,
   EditorTool.capture,
   EditorTool.canvas,
   EditorTool.layout,
@@ -297,6 +299,13 @@ class EditorToolbar extends ConsumerWidget {
           ),
         if (colourable)
           _ToolButton(
+            icon: EditorTool.gallery.icon,
+            label: EditorTool.gallery.label(l10n),
+            selected: clip.animIn != null || clip.animOut != null,
+            onPressed: () => open(EditorTool.gallery),
+          ),
+        if (colourable)
+          _ToolButton(
             icon: EditorTool.adjust.icon,
             label: EditorTool.adjust.label(l10n),
             selected: clip.adjustments.values.any((v) => v != 0),
@@ -342,6 +351,7 @@ Widget toolContent(EditorTool tool) => switch (tool) {
       EditorTool.transform => const TransformPanel(),
       EditorTool.text => const TextPanel(),
       EditorTool.media => const MediaBankPanel(),
+      EditorTool.gallery => const EffectsGalleryPanel(),
       EditorTool.capture => const CapturePanel(),
       EditorTool.canvas => const CanvasPanel(),
       EditorTool.versions => const VersionsPanel(),
@@ -460,7 +470,6 @@ class FilterPicker extends ConsumerWidget {
     final l10n = AppLocalizations.of(context)!;
     final clip = ref.watch(editorControllerProvider).valueOrNull?.selectedClip;
     if (clip == null) return const SizedBox.shrink();
-    final controller = ref.read(editorControllerProvider.notifier);
     final options = <(String?, String, IconData)>[
       (null, l10n.filterNone, Icons.block),
       for (final id in filterIds) (id, filterLabel(l10n, id), _filterIcon(id)),
@@ -479,17 +488,24 @@ class FilterPicker extends ConsumerWidget {
           summary: current.$2,
           initiallyExpanded: true,
           children: [
-            for (final (id, label, icon) in options)
-              OptionTile(
-                icon: icon,
-                title: label,
-                selected: clip.filterId == id,
-                onTap: () => controller.setFilter(id),
+            // Cards with a picture, as in the gallery: a tap gives the filter
+            // to this clip and a card can also be held and dropped on any
+            // clip of the timeline.
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
+              child: GalleryCards(
+                children: [
+                  for (final (id, label, _) in options)
+                    GalleryCard(
+                      item: FilterItem(id),
+                      label: label,
+                      selected: clip.filterId == id,
+                    ),
+                ],
               ),
+            ),
           ],
         ),
-        const EffectsPanel(),
-        const TransitionSection(),
         const AnimationPresets(),
         const AnimationPanel(),
         const BackgroundSection(),
@@ -628,14 +644,6 @@ class _EffectsPanelState extends ConsumerState<EffectsPanel> {
   Map<String, double>? _draft;
   String? _clipId;
 
-  String _name(AppLocalizations l10n, String key) => switch (key) {
-        'blur' => l10n.effectBlur,
-        'vignette' => l10n.effectVignette,
-        'grain' => l10n.effectGrain,
-        'pixelate' => l10n.effectPixelate,
-        _ => l10n.effectSharpen,
-      };
-
   Future<void> _commit() async {
     final draft = _draft;
     if (draft == null) return;
@@ -659,10 +667,11 @@ class _EffectsPanelState extends ConsumerState<EffectsPanel> {
       icon: Icons.blur_on,
       title: l10n.effectsLabel,
       summary: active == 0 ? null : '$active',
+      initiallyExpanded: true,
       children: [
         for (final key in effectKeys)
           SliderTile(
-            title: _name(l10n, key),
+            title: effectLabel(l10n, key),
             valueLabel: '${((values[key] ?? 0) * 100).round()}%',
             value: values[key] ?? 0,
             divisions: 20,

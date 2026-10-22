@@ -2,6 +2,7 @@ import 'package:cutter/core/db/app_database.dart';
 import 'package:cutter/core/engine/media_engine.dart';
 import 'package:cutter/features/editor/data/engine_media_inspector.dart';
 import 'package:cutter/features/editor/domain/clip.dart';
+import 'package:cutter/features/editor/domain/clip_placement.dart';
 import 'package:cutter/features/editor/domain/clip_text.dart';
 import 'package:cutter/features/editor/domain/media_asset.dart';
 import 'package:cutter/features/editor/presentation/checkpoint_labels.dart';
@@ -215,6 +216,30 @@ void main() {
     expect(clipById('c2').startMs, _clipDurationMs + 2000 + 500);
   });
 
+  test('arranging the selected clip closes the gap before it', () async {
+    controller().selectClip('c2');
+    expect(
+      controller().arrangedStartOfSelected(ClipArrangement.closeGapBefore),
+      _clipDurationMs,
+    );
+
+    await controller().arrangeSelected(ClipArrangement.closeGapBefore);
+
+    expect(uiState().failure, isNull);
+    expect(clipById('c2').startMs, _clipDurationMs);
+    expect(uiState().canUndo, isTrue);
+  });
+
+  test('arranging without a selected clip does nothing', () async {
+    expect(
+      controller().arrangedStartOfSelected(ClipArrangement.toStart),
+      isNull,
+    );
+    await controller().arrangeSelected(ClipArrangement.toStart);
+
+    expect(uiState().failure, isNull);
+  });
+
   test('move onto an occupied range fails and keeps both clips', () async {
     await controller().moveClip('c2', _videoLayerId, _clipDurationMs - 1000);
 
@@ -390,13 +415,17 @@ void main() {
     final video = layerClips(_videoLayerId);
     expect(video.last.sourceUri, '/media/clip.mp4');
     expect(video.last.startMs, _clipDurationMs * 2 + 2000);
-    final sounds = [
+    final soundLayers = [
       for (final layer in uiState().project.layers)
-        if (layer.kind == MediaKind.audio)
-          for (final clip in layer.clips)
-            if (clip.sourceUri == '/media/song.m4a') clip,
+        if (layer.kind == MediaKind.audio) layer,
     ];
-    expect(sounds.single.startMs, 1000);
+    // The song joins the music's layer, after the music that is there.
+    expect(soundLayers, hasLength(1));
+    final sounds = [
+      for (final clip in soundLayers.single.clips)
+        if (clip.sourceUri == '/media/song.m4a') clip,
+    ];
+    expect(sounds.single.startMs, clipById('a1').range.endMs);
     expect(uiState().selectedClipId, sounds.single.id);
     expect(uiState().importing, isFalse);
   });

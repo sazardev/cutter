@@ -14,10 +14,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /// Whether a preset goes to every clip of the layer instead of the selected
 /// clip only.
-final _wholeLayerProvider = StateProvider.autoDispose<bool>((ref) => false);
+final animationWholeLayerProvider =
+    StateProvider.autoDispose<bool>((ref) => false);
 
 /// The preset that removes both animations of a clip.
-const _noAnimation = AnimationPreset(
+const noAnimationPreset = AnimationPreset(
   id: 'none',
   animIn: null,
   animInMs: 0,
@@ -26,11 +27,18 @@ const _noAnimation = AnimationPreset(
 );
 
 /// Whether [clip] has exactly the animation of [preset].
-bool _matches(Clip clip, AnimationPreset preset) =>
+bool animationMatches(Clip clip, AnimationPreset preset) =>
     clip.animIn == preset.animIn &&
     clip.animOut == preset.animOut &&
     (preset.animIn == null || clip.animInMs == preset.animInMs) &&
     (preset.animOut == null || clip.animOutMs == preset.animOutMs);
+
+/// The name of [preset] to show: the one the user gave it, or the built-in
+/// name of its id.
+String animationPresetName(AppLocalizations l10n, AnimationPreset preset) {
+  if (preset.id == 'none') return l10n.animationPresetNone;
+  return preset.name ?? _builtInName(l10n, preset.id);
+}
 
 String _builtInName(AppLocalizations l10n, String id) => switch (id) {
       'gentle' => l10n.animationPresetGentle,
@@ -52,6 +60,51 @@ String _step(AppLocalizations l10n, String? id, int ms) => id == null
         (ms / 1000).toStringAsFixed(1),
       );
 
+/// Asks for a name and saves the animation of [clip] as a preset of the
+/// user's; explains what is needed when the clip has no animation.
+Future<void> saveAnimationPresetAs(
+  BuildContext context,
+  WidgetRef ref,
+  Clip clip,
+) async {
+  final l10n = AppLocalizations.of(context)!;
+  if (clip.animIn == null && clip.animOut == null) {
+    await showDialog<void>(
+      context: context,
+      builder: (context) => AlertDialog(
+        content: Text(l10n.animationPresetNeedsAnimation),
+        actions: [
+          FilledButton(
+            autofocus: true,
+            onPressed: () => Navigator.of(context).pop(),
+            child: Text(l10n.importReportClose),
+          ),
+        ],
+      ),
+    );
+    return;
+  }
+  final name = await showDialog<String>(
+    context: context,
+    builder: (context) => const _NameDialog(),
+  );
+  if (name == null) return;
+  final result =
+      await ref.read(saveAnimationPresetProvider).call(clip: clip, name: name);
+  if (result is Ok<AnimationPreset>) {
+    ref.invalidate(userAnimationPresetsProvider);
+  }
+}
+
+/// Deletes the user's preset [preset].
+Future<void> deleteAnimationPreset(
+  WidgetRef ref,
+  AnimationPreset preset,
+) async {
+  await ref.read(animationPresetRepositoryProvider).delete(preset.id);
+  ref.invalidate(userAnimationPresetsProvider);
+}
+
 /// Ready-made entrance and exit animations, and the ones the user saved.
 /// One tap sets both sides of the selected clip (or of its whole layer);
 /// the sliders of the animation panel then adjust the result.
@@ -65,44 +118,8 @@ class AnimationPresets extends ConsumerWidget {
   ) =>
       ref.read(editorControllerProvider.notifier).applyAnimationPreset(
             preset,
-            wholeLayer: ref.read(_wholeLayerProvider),
+            wholeLayer: ref.read(animationWholeLayerProvider),
           );
-
-  Future<void> _save(BuildContext context, WidgetRef ref, Clip clip) async {
-    final l10n = AppLocalizations.of(context)!;
-    if (clip.animIn == null && clip.animOut == null) {
-      await showDialog<void>(
-        context: context,
-        builder: (context) => AlertDialog(
-          content: Text(l10n.animationPresetNeedsAnimation),
-          actions: [
-            FilledButton(
-              autofocus: true,
-              onPressed: () => Navigator.of(context).pop(),
-              child: Text(l10n.importReportClose),
-            ),
-          ],
-        ),
-      );
-      return;
-    }
-    final name = await showDialog<String>(
-      context: context,
-      builder: (context) => const _NameDialog(),
-    );
-    if (name == null) return;
-    final result = await ref
-        .read(saveAnimationPresetProvider)
-        .call(clip: clip, name: name);
-    if (result is Ok<AnimationPreset>) {
-      ref.invalidate(userAnimationPresetsProvider);
-    }
-  }
-
-  Future<void> _delete(WidgetRef ref, AnimationPreset preset) async {
-    await ref.read(animationPresetRepositoryProvider).delete(preset.id);
-    ref.invalidate(userAnimationPresetsProvider);
-  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -114,7 +131,7 @@ class AnimationPresets extends ConsumerWidget {
     }
     final mine = ref.watch(userAnimationPresetsProvider).valueOrNull ??
         const <AnimationPreset>[];
-    final whole = ref.watch(_wholeLayerProvider);
+    final whole = ref.watch(animationWholeLayerProvider);
 
     Widget option(AnimationPreset preset, {Widget? action}) {
       final name = preset.name ?? _builtInName(l10n, preset.id);
@@ -127,7 +144,7 @@ class AnimationPresets extends ConsumerWidget {
                 _step(l10n, preset.animIn, preset.animInMs),
                 _step(l10n, preset.animOut, preset.animOutMs),
               ),
-        selected: _matches(clip, preset),
+        selected: animationMatches(clip, preset),
         onTap: () => _apply(ref, preset),
       );
       if (action == null) return tile;
@@ -144,7 +161,7 @@ class AnimationPresets extends ConsumerWidget {
       title: l10n.animationPresetsTitle,
       summary: l10n.animationPresetsSummary,
       children: [
-        option(_noAnimation),
+        option(noAnimationPreset),
         for (final preset in builtInAnimationPresets) option(preset),
         if (mine.isNotEmpty) ...[
           Padding(
@@ -165,7 +182,7 @@ class AnimationPresets extends ConsumerWidget {
               action: IconButton(
                 tooltip: l10n.animationPresetDelete,
                 icon: const Icon(Icons.delete_outline),
-                onPressed: () => _delete(ref, preset),
+                onPressed: () => deleteAnimationPreset(ref, preset),
               ),
             ),
         ],
@@ -174,12 +191,12 @@ class AnimationPresets extends ConsumerWidget {
           title: Text(l10n.animationPresetWholeLayer),
           value: whole,
           onChanged: (value) =>
-              ref.read(_wholeLayerProvider.notifier).state = value,
+              ref.read(animationWholeLayerProvider.notifier).state = value,
         ),
         Align(
           alignment: AlignmentDirectional.centerStart,
           child: TextButton.icon(
-            onPressed: () => _save(context, ref, clip),
+            onPressed: () => saveAnimationPresetAs(context, ref, clip),
             icon: const Icon(Icons.bookmark_add_outlined),
             label: Text(l10n.animationPresetSave),
           ),

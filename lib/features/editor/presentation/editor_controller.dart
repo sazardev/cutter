@@ -9,6 +9,7 @@ import 'package:cutter/features/editor/domain/canvas.dart';
 import 'package:cutter/features/editor/domain/clip.dart';
 import 'package:cutter/features/editor/domain/clip_crop.dart';
 import 'package:cutter/features/editor/domain/clip_drawing.dart';
+import 'package:cutter/features/editor/domain/clip_placement.dart';
 import 'package:cutter/features/editor/domain/clip_text.dart';
 import 'package:cutter/features/editor/domain/clip_transform.dart';
 import 'package:cutter/features/editor/domain/clip_transition.dart';
@@ -161,9 +162,9 @@ class EditorController extends Notifier<AsyncValue<EditorUiState>> {
     });
     final loaded = state.valueOrNull?.project;
     if (loaded != null) {
-      await _repairSourceSizes(loaded);
       _describeProject(loaded);
       ref.read(telemetryProvider).log('editor opened');
+      await _repairSourceSizes(loaded);
       await _openCheckpoints(loaded.id);
     }
   }
@@ -519,6 +520,39 @@ class EditorController extends Notifier<AsyncValue<EditorUiState>> {
     );
   }
 
+  /// Sends the selected clip to the start or end of its layer, or closes the
+  /// gap beside it.
+  Future<void> arrangeSelected(ClipArrangement arrangement) async {
+    final clip = state.valueOrNull?.selectedClip;
+    if (clip == null) return;
+    await _run(
+      'arrange',
+      (project) => ref.read(arrangeClipProvider).call(
+            projectId: project.id,
+            clipId: clip.id,
+            arrangement: arrangement,
+          ),
+    );
+  }
+
+  /// The start [arrangement] would give the selected clip, or null when
+  /// nothing is selected.
+  int? arrangedStartOfSelected(ClipArrangement arrangement) {
+    final current = state.valueOrNull;
+    final clip = current?.selectedClip;
+    final layer = current?.selectedLayer;
+    if (current == null || clip == null || layer == null) return null;
+    return arrangedStart(
+      [
+        for (final other in layer.clips)
+          if (other.id != clip.id) other.range,
+      ],
+      clip.range,
+      arrangement,
+      current.project.durationMs,
+    );
+  }
+
   /// Trims clip [clipId] to [inPointMs]..[outPointMs] of its source.
   Future<void> trimClip(
     String clipId, {
@@ -636,37 +670,44 @@ class EditorController extends Notifier<AsyncValue<EditorUiState>> {
     );
   }
 
-  /// Joins the selected clip to the one before it with [kind], [durationMs]
-  /// long on each side. One edit, one undo.
+  /// Puts [kind], [durationMs] long on each side, at [edge] of [clipId] (the
+  /// selected clip by default). One edit, one undo.
   Future<void> applyTransition(
     TransitionKind kind,
     int durationMs, {
     bool fadeSound = true,
+    TransitionEdge edge = TransitionEdge.start,
+    String? clipId,
   }) async {
-    final clip = state.valueOrNull?.selectedClip;
-    if (clip == null) return;
+    final id = clipId ?? state.valueOrNull?.selectedClip?.id;
+    if (id == null) return;
     await _run(
       'transition',
       (project) => ref.read(applyTransitionProvider).call(
             projectId: project.id,
-            clipId: clip.id,
+            clipId: id,
             kind: kind,
             durationMs: durationMs,
             fadeSound: fadeSound,
+            edge: edge,
           ),
     );
   }
 
-  /// Takes the transition off the join of the selected clip with the one
-  /// before it.
-  Future<void> removeTransition() async {
-    final clip = state.valueOrNull?.selectedClip;
-    if (clip == null) return;
+  /// Takes the transition off [edge] of [clipId] (the selected clip by
+  /// default) and the neighbour across it.
+  Future<void> removeTransition({
+    TransitionEdge edge = TransitionEdge.start,
+    String? clipId,
+  }) async {
+    final id = clipId ?? state.valueOrNull?.selectedClip?.id;
+    if (id == null) return;
     await _run(
       'remove transition',
       (project) => ref.read(removeTransitionProvider).call(
             projectId: project.id,
-            clipId: clip.id,
+            clipId: id,
+            edge: edge,
           ),
     );
   }
@@ -1121,6 +1162,18 @@ class EditorController extends Notifier<AsyncValue<EditorUiState>> {
   /// Applies one use case: Ok replaces the project and records the previous
   /// one for undo, Err records the failure and leaves the project unchanged.
   /// Returns whether the edit was accepted.
+  /// Gives the crash reports the size of the project (counts only, no
+  /// names), to tell a crash on a big project from one on a small one.
+  void _describeProject(Project project) {
+    final clips = project.layers.fold<int>(0, (n, l) => n + l.clips.length);
+    ref.read(telemetryProvider).setKey(
+          'project',
+          'layers=${project.layers.length} clips=$clips '
+              'canvas=${project.canvas.width}x${project.canvas.height} '
+              'ms=${project.durationMs}',
+        );
+  }
+
   Future<bool> _run(
     String label,
     Future<EditorResult<Project>> Function(Project project) action, {
@@ -1145,6 +1198,7 @@ class EditorController extends Notifier<AsyncValue<EditorUiState>> {
           ),
         );
         _checkpointIfDue();
+        _describeProject(tidy);
         return true;
       case Err<Project>(:final failure):
         state = AsyncValue.data(latest.copyWith(failure: () => failure));
@@ -1152,16 +1206,3 @@ class EditorController extends Notifier<AsyncValue<EditorUiState>> {
     }
   }
 }
-  /// Gives the crash reports the size of the project (counts only, no
-  /// names), to tell a crash on a big project from one on a small one.
-  void _describeProject(Project project) {
-    final clips = project.layers.fold<int>(0, (n, l) => n + l.clips.length);
-    ref.read(telemetryProvider).setKey(
-          'project',
-          'layers=${project.layers.length} clips=$clips '
-              'canvas=${project.canvas.width}x${project.canvas.height} '
-              'ms=${project.durationMs}',
-        );
-  }
-
-        _describeProject(tidy);

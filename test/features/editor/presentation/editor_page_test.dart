@@ -287,6 +287,7 @@ void main() {
       l10n.duplicateAction,
       l10n.splitAction,
       l10n.deleteAction,
+      l10n.arrangeAction,
       l10n.moreActions,
     ]) {
       expect(find.byTooltip(label), findsWidgets, reason: label);
@@ -1395,73 +1396,41 @@ void main() {
           );
     }
 
-    Future<void> openTransition(
+    Future<List<EditorClip>> clipRows(
       WidgetTester tester,
-      AppLocalizations l10n, {
-      required bool second,
-    }) async {
-      final clips = find.bySemanticsLabel(RegExp('${l10n.layerKindVideo}, '));
-      final clip = second ? clips.last : clips.first;
-      await tester.ensureVisible(clip);
-      await tester.pumpAndSettle();
-      await tester.tapAt(tester.getTopLeft(clip) + const Offset(24, 24));
-      await _settle(tester);
-      await tester.tap(find.byTooltip(l10n.moreActions));
-      await _settle(tester);
-      final section = find.widgetWithText(
-        ExpansionTile,
-        l10n.transitionTitle,
-      );
-      await tester.ensureVisible(section);
-      await tester.pumpAndSettle();
-      await tester.tap(section);
-      await tester.pumpAndSettle();
-    }
-
-    testWidgets('joins the selected clip to the one before it', (tester) async {
-      final db = AppDatabase.inMemory();
-      addTearDown(() => tester.runAsync(db.close));
-      await tester.runAsync(() => seedJoined(db));
-      final l10n = await _strings(const Locale('en'));
-      await _pumpPage(
-        tester,
-        db,
-        const Locale('en'),
-        size: const Size(1800, 1800),
-      );
-      await openTransition(tester, l10n, second: true);
-
-      final push = find.text(l10n.transitionPushLeft);
-      await tester.ensureVisible(push);
-      await tester.pumpAndSettle();
-      await tester.tap(push);
-      await _settle(tester);
-
+      AppDatabase db,
+    ) async {
       final rows = await tester.runAsync(
         () => (db.select(db.editorClips)
               ..orderBy([(c) => OrderingTerm.asc(c.startMs)]))
             .get(),
       );
-      expect(rows![0].animOut, 'slide_left');
-      expect(rows[0].animOutMs, 600);
-      expect(rows[1].animIn, 'slide_right');
-      expect(rows[1].animInMs, 600);
+      return rows!;
+    }
 
-      final none = find.text(l10n.transitionNone);
-      await tester.ensureVisible(none);
-      await tester.pumpAndSettle();
-      await tester.tap(none);
+    Finder videoClip(AppLocalizations l10n, {required bool second}) {
+      final clips = find.bySemanticsLabel(RegExp('${l10n.layerKindVideo}, '));
+      return second ? clips.last : clips.first;
+    }
+
+    Future<void> openGallery(WidgetTester tester, AppLocalizations l10n) async {
+      await tester.tap(find.text(l10n.galleryTool).first);
       await _settle(tester);
-      final cleared = await tester.runAsync(
-        () => (db.select(db.editorClips)
-              ..orderBy([(c) => OrderingTerm.asc(c.startMs)]))
-            .get(),
-      );
-      expect(cleared![0].animOut, isNull);
-      expect(cleared[1].animIn, isNull);
-    });
+    }
 
-    testWidgets('the first clip of a layer explains what is needed',
+    Future<void> selectClip(
+      WidgetTester tester,
+      AppLocalizations l10n, {
+      required bool second,
+    }) async {
+      final clip = videoClip(l10n, second: second);
+      await tester.ensureVisible(clip);
+      await tester.pumpAndSettle();
+      await tester.tapAt(tester.getTopLeft(clip) + const Offset(24, 24));
+      await _settle(tester);
+    }
+
+    testWidgets('a tap on a card asks where, then joins the clips',
         (tester) async {
       final db = AppDatabase.inMemory();
       addTearDown(() => tester.runAsync(db.close));
@@ -1473,10 +1442,121 @@ void main() {
         const Locale('en'),
         size: const Size(1800, 1800),
       );
-      await openTransition(tester, l10n, second: false);
+      await selectClip(tester, l10n, second: true);
+      await openGallery(tester, l10n);
 
-      expect(find.text(l10n.transitionNeedsNeighbour), findsWidgets);
-      expect(find.text(l10n.transitionPushLeft), findsNothing);
+      await tester.tap(find.text(l10n.transitionPushLeft));
+      await _settle(tester);
+      expect(find.text(l10n.galleryEdgeTitle), findsOneWidget);
+      await tester.tap(find.text(l10n.galleryEdgeStart));
+      await _settle(tester);
+
+      final rows = await clipRows(tester, db);
+      expect(rows[0].animOut, 'slide_left');
+      expect(rows[0].animOutMs, 600);
+      expect(rows[1].animIn, 'slide_right');
+      expect(rows[1].animInMs, 600);
+
+      await tester.tap(find.text(l10n.transitionNone));
+      await _settle(tester);
+      expect(find.text(l10n.galleryEdgeRemoveTitle), findsOneWidget);
+      await tester.tap(find.text(l10n.galleryEdgeStart));
+      await _settle(tester);
+      final cleared = await clipRows(tester, db);
+      expect(cleared[0].animOut, isNull);
+      expect(cleared[1].animIn, isNull);
+    });
+
+    testWidgets('an animation card dropped on a clip gives it both sides',
+        (tester) async {
+      final db = AppDatabase.inMemory();
+      addTearDown(() => tester.runAsync(db.close));
+      await tester.runAsync(() => seedJoined(db));
+      final l10n = await _strings(const Locale('en'));
+      await _pumpPage(
+        tester,
+        db,
+        const Locale('en'),
+        size: const Size(1800, 1800),
+      );
+      await openGallery(tester, l10n);
+      await tester.tap(find.text(l10n.galleryTabAnimations));
+      await _settle(tester);
+
+      final card = find.text(l10n.animationPresetZoom);
+      final target = videoClip(l10n, second: true);
+      await tester.ensureVisible(target);
+      await tester.pumpAndSettle();
+      final gesture = await tester.startGesture(tester.getCenter(card));
+      await tester.pump(const Duration(milliseconds: 300));
+      await gesture.moveTo(tester.getCenter(target));
+      await tester.pump();
+      await gesture.moveBy(const Offset(2, 2));
+      await tester.pump();
+      await gesture.up();
+      await _settle(tester);
+
+      final rows = await clipRows(tester, db);
+      expect(rows[1].animIn, 'zoom_in');
+      expect(rows[1].animOut, 'zoom_out');
+      expect(rows[0].animIn, isNull);
+    });
+
+    testWidgets('dragging a card onto a clip gives it to that clip',
+        (tester) async {
+      final db = AppDatabase.inMemory();
+      addTearDown(() => tester.runAsync(db.close));
+      await tester.runAsync(() => seedJoined(db));
+      final l10n = await _strings(const Locale('en'));
+      await _pumpPage(
+        tester,
+        db,
+        const Locale('en'),
+        size: const Size(1800, 1800),
+      );
+      await openGallery(tester, l10n);
+
+      final card = find.text(l10n.transitionDip);
+      final target = videoClip(l10n, second: false);
+      await tester.ensureVisible(target);
+      await tester.pumpAndSettle();
+      final gesture = await tester.startGesture(tester.getCenter(card));
+      await tester.pump(const Duration(milliseconds: 300));
+      await gesture.moveTo(tester.getCenter(target));
+      await tester.pump();
+      await gesture.moveBy(const Offset(2, 2));
+      await tester.pump();
+      await gesture.up();
+      await _settle(tester);
+
+      expect(find.text(l10n.galleryEdgeTitle), findsOneWidget);
+      await tester.tap(find.text(l10n.galleryEdgeEnd));
+      await _settle(tester);
+
+      final rows = await clipRows(tester, db);
+      expect(rows[0].animOut, 'fade');
+      expect(rows[1].animIn, 'fade');
+    });
+
+    testWidgets('a card with no clip selected says what is needed',
+        (tester) async {
+      final db = AppDatabase.inMemory();
+      addTearDown(() => tester.runAsync(db.close));
+      await tester.runAsync(() => seedJoined(db));
+      final l10n = await _strings(const Locale('en'));
+      await _pumpPage(
+        tester,
+        db,
+        const Locale('en'),
+        size: const Size(1800, 1800),
+      );
+      await openGallery(tester, l10n);
+
+      await tester.tap(find.text(l10n.transitionPop));
+      await tester.pump();
+
+      expect(find.text(l10n.galleryNeedsClip), findsOneWidget);
+      expect((await clipRows(tester, db)).every((r) => r.animIn == null), true);
     });
   });
 }

@@ -4,6 +4,7 @@ import 'dart:ui' as ui;
 import 'package:cutter/app/theme/app_theme.dart';
 import 'package:cutter/features/editor/data/engine_timeline.dart';
 import 'package:cutter/features/editor/domain/clip.dart';
+import 'package:cutter/features/editor/domain/clip_placement.dart';
 import 'package:cutter/features/editor/domain/clip_text.dart';
 import 'package:cutter/features/editor/domain/layer.dart';
 import 'package:cutter/features/editor/domain/media_asset.dart';
@@ -17,6 +18,8 @@ import 'package:cutter/features/editor/presentation/timeline/media_previews.dart
 import 'package:cutter/features/editor/presentation/timeline/timeline_geometry.dart';
 import 'package:cutter/features/editor/presentation/timeline/timeline_painters.dart';
 import 'package:cutter/features/editor/presentation/tools/editor_tool.dart';
+import 'package:cutter/features/editor/presentation/tools/gallery_actions.dart';
+import 'package:cutter/features/editor/presentation/tools/gallery_item.dart';
 import 'package:cutter/l10n/app_localizations.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -30,7 +33,14 @@ const double _pictureRowHeight = 56;
 const double _soundRowHeight = 44;
 const double _rowGap = AppSpacing.xs;
 const double _headerWidth = 48;
-const double _handleWidth = 14;
+const double _handleWidth = 20;
+
+/// The small mark drawn where two clips of a layer touch.
+/// A time no clip reaches, for a clip with nothing after it.
+const int _unbounded = 1 << 40;
+
+const double _seamWidth = 3;
+const double _seamHeight = 16;
 const double _clipRadius = 6;
 const double _playheadWidth = 2;
 const double _zoomStep = 1.5;
@@ -56,6 +66,14 @@ class _Edit {
   int inMs = 0;
   int outMs = 0;
   bool snapped = false;
+
+  /// How far the pointer has moved since the edit began, apart from the
+  /// scrolling done meanwhile, and its height among the rows.
+  double pointerDx = 0;
+  double? pointerY;
+
+  /// Where the view was scrolled to when the edit began.
+  double startScroll = 0;
 }
 
 /// The multi-layer timeline: a ruler and one row per layer, starting at the
@@ -85,7 +103,7 @@ class TimelineView extends ConsumerStatefulWidget {
 
 /// State of [TimelineView]; public so keyboard shortcuts can zoom it.
 class TimelineViewState extends ConsumerState<TimelineView>
-    with SingleTickerProviderStateMixin {
+    with TickerProviderStateMixin {
   final ScrollController _scroll = ScrollController();
   final TimelineViewport _viewport = TimelineViewport();
 
@@ -93,6 +111,10 @@ class TimelineViewState extends ConsumerState<TimelineView>
   /// playing; the playhead line listens to it and to the scroll offset.
   final ValueNotifier<int> _playhead = ValueNotifier<int>(0);
   late final Ticker _ticker;
+
+  /// Scrolls the view while a clip or handle is held at its edge.
+  late final Ticker _edgeTicker;
+  Duration? _lastEdgeTick;
   double _zoom = defaultZoom;
   double _viewportWidth = 0;
   bool _userScrolling = false;
@@ -112,6 +134,7 @@ class TimelineViewState extends ConsumerState<TimelineView>
   void initState() {
     super.initState();
     _ticker = createTicker(_onTick);
+    _edgeTicker = createTicker(_onEdgeTick);
     _scroll.addListener(_syncViewport);
     _playhead.value = ref.read(playbackControllerProvider).positionMs;
     WidgetsBinding.instance
@@ -125,6 +148,7 @@ class TimelineViewState extends ConsumerState<TimelineView>
   @override
   void dispose() {
     _ticker.dispose();
+    _edgeTicker.dispose();
     _scroll
       ..removeListener(_syncViewport)
       ..dispose();
@@ -333,8 +357,11 @@ class TimelineViewState extends ConsumerState<TimelineView>
     final playback = ref.read(playbackControllerProvider);
     if (playback.playing) ref.read(playbackControllerProvider.notifier).pause();
     ref.read(editorControllerProvider.notifier).selectClip(clip.id);
+    _lastEdgeTick = null;
+    if (!_edgeTicker.isActive) _edgeTicker.start();
     setState(() {
       _edit = _Edit(kind, clip, layerId)
+        ..startScroll = _scroll.hasClients ? _scroll.offset : 0
         ..startMs = clip.startMs
         ..inMs = clip.inPointMs
         ..outMs = clip.outPointMs;
@@ -350,62 +377,123 @@ class TimelineViewState extends ConsumerState<TimelineView>
   }) {
     final edit = _edit;
     if (edit == null) return;
-    edit.dx = totalDx ?? edit.dx + (delta ?? 0);
+    edit.pointerDx = totalDx ?? edit.pointerDx + (delta ?? 0);
+    if (pointerY != null) edit.pointerY = pointerY;
+    _applyEdit(project);
+  }
+
+  /// Works out the clip's new place from where the pointer is and how far
+  /// the view has scrolled since the edit began, so the clip stays under the
+  /// finger while the view runs along.
+  void _applyEdit(Project project) {
+    final edit = _edit;
+    if (edit == null) return;
+    final scrolled = _scroll.hasClients ? _scroll.offset - edit.startScroll : 0;
+    edit.dx = edit.pointerDx + scrolled;
     final deltaMs = (edit.dx / _zoom).round();
     final clip = edit.clip;
     final playhead = ref.read(playbackControllerProvider).positionMs;
     final targets = snapTargets(project, playhead, clip.id);
+    final home = project.layerById(clip.layerId);
+    final limits = home == null
+        ? (minStartMs: 0, maxEndMs: null as int?)
+        : neighbourLimits(home, clip);
     var snapped = false;
     switch (edit.kind) {
       case _EditKind.trimStart:
         final raw = trimStart(clip, deltaMs);
-        final rawStart =
-            clip.startMs + ((raw.inMs - clip.inPointMs) / clip.speed).round();
+        final rawStart = math.max(
+          limits.minStartMs,
+          clip.startMs + ((raw.inMs - clip.inPointMs) / clip.speed).round(),
+        );
         final snap = snapTime(rawStart, targets, _zoom);
-        final fixed = trimStart(clip, snap.ms - clip.startMs);
+        final at = math.max(limits.minStartMs, snap.ms);
+        final fixed = trimStart(clip, at - clip.startMs);
         edit
           ..inMs = fixed.inMs
           ..outMs = fixed.outMs
           ..startMs = clip.startMs +
               ((fixed.inMs - clip.inPointMs) / clip.speed).round();
-        snapped = snap.snapped;
+        snapped = snap.snapped && at == snap.ms;
       case _EditKind.trimEnd:
         final raw = trimEnd(clip, deltaMs);
-        final rawEnd =
-            clip.startMs + ((raw.outMs - raw.inMs) / clip.speed).round();
+        final rawEnd = math.min(
+          limits.maxEndMs ?? _unbounded,
+          clip.startMs + ((raw.outMs - raw.inMs) / clip.speed).round(),
+        );
         final snap = snapTime(rawEnd, targets, _zoom);
-        final fixed = trimEnd(clip, snap.ms - clip.range.endMs);
+        final at = math.min(
+          limits.maxEndMs ?? _unbounded,
+          snap.ms,
+        );
+        final fixed = trimEnd(clip, at - clip.range.endMs);
         edit
           ..inMs = fixed.inMs
           ..outMs = fixed.outMs;
-        snapped = snap.snapped;
+        snapped = snap.snapped && at == snap.ms;
       case _EditKind.move:
-        final rawStart = math.max(0, clip.startMs + deltaMs);
-        final byStart = snapTime(rawStart, targets, _zoom);
-        final byEnd = snapTime(rawStart + clip.durationMs, targets, _zoom);
-        if (byStart.snapped) {
-          edit.startMs = byStart.ms;
-        } else if (byEnd.snapped) {
-          edit.startMs = byEnd.ms - clip.durationMs;
-        } else {
-          edit.startMs = rawStart;
-        }
-        snapped = byStart.snapped || byEnd.snapped;
+        final pointerY = edit.pointerY;
         if (pointerY != null) {
           final target = _layerAtY(project, pointerY);
           if (target != null && target.kind == clip.kind) {
             edit.layerId = target.id;
           }
         }
+        final rawStart = math.max(0, clip.startMs + deltaMs);
+        final byStart = snapTime(rawStart, targets, _zoom);
+        final byEnd = snapTime(rawStart + clip.durationMs, targets, _zoom);
+        var start = rawStart;
+        if (byStart.snapped) {
+          start = byStart.ms;
+        } else if (byEnd.snapped) {
+          start = byEnd.ms - clip.durationMs;
+        }
+        // The clip slides along the ones it meets instead of being refused
+        // when it is let go on top of them.
+        final layer = project.layerById(edit.layerId);
+        edit.startMs = layer == null
+            ? start
+            : nearestFreeStart(
+                [
+                  for (final other in layer.clips)
+                    if (other.id != clip.id) other.range,
+                ],
+                clip.durationMs,
+                start,
+              );
+        snapped = (byStart.snapped || byEnd.snapped) && edit.startMs == start;
     }
     if (snapped && !edit.snapped) HapticFeedback.selectionClick();
     edit.snapped = snapped;
     setState(() {});
   }
 
+  /// While a clip or handle is held near either edge, the view scrolls that
+  /// way, faster the closer it gets.
+  void _onEdgeTick(Duration elapsed) {
+    final last = _lastEdgeTick;
+    _lastEdgeTick = elapsed;
+    if (_edit == null || last == null || !_scroll.hasClients) return;
+    if (_pointers.length != 1) return;
+    final seconds =
+        (elapsed - last).inMicroseconds / Duration.microsecondsPerSecond;
+    final x = _pointers.values.first.dx - _headerWidth;
+    final speed = edgeScrollSpeed(x, _viewportWidth);
+    if (speed == 0) return;
+    final before = _scroll.offset;
+    final target =
+        (before + speed * seconds).clamp(0.0, _scroll.position.maxScrollExtent);
+    if (target == before) return;
+    _scroll.jumpTo(target);
+    final project = ref.read(editorControllerProvider).valueOrNull?.project;
+    if (project != null) _applyEdit(project);
+  }
+
   Future<void> _endEdit() async {
     final edit = _edit;
     if (edit == null) return;
+    _edgeTicker.stop();
+    _lastEdgeTick = null;
     setState(() => _edit = null);
     final controller = ref.read(editorControllerProvider.notifier);
     final clip = edit.clip;
@@ -483,9 +571,12 @@ class TimelineViewState extends ConsumerState<TimelineView>
         });
         const lead = _lead;
         // Room after the last clip, so its end can be brought to the middle.
+        final dragged = _edit == null ? 0 : _shown(_edit!.clip).range.endMs;
         final contentWidth = math.max(
           _viewportWidth,
-          lead + project.durationMs * _zoom + _viewportWidth / 2,
+          lead +
+              math.max(project.durationMs, dragged) * _zoom +
+              _viewportWidth / 2,
         );
         final pinching = _pinchStartDistance != null;
         return Listener(
@@ -724,6 +815,7 @@ class TimelineViewState extends ConsumerState<TimelineView>
                     zoom: _zoom,
                     selected: clip.id == selectedId,
                     dimmed: movingId == clip.id,
+                    dragEnabled: clip.id == selectedId,
                     onTap: () => _tapClip(clip),
                     onTrimStart: (d) => _handleTrim(
                       _EditKind.trimStart,
@@ -749,29 +841,65 @@ class TimelineViewState extends ConsumerState<TimelineView>
                 positioned(
                   ghost,
                   IgnorePointer(
-                    child: _ClipTile(
-                      viewport: _viewport,
-                      contentLeft: lead + ghost.startMs * _zoom,
-                      clip: ghost,
-                      layer: layer,
-                      zoom: _zoom,
-                      selected: true,
-                      dimmed: false,
-                      onTap: () {},
-                      onTrimStart: (_) {},
-                      onTrimEnd: (_) {},
-                      onTrimDone: () {},
-                      onMoveStart: () {},
-                      onMoveUpdate: (_, __) {},
-                      onMoveEnd: () {},
+                    child: _Lifted(
+                      child: _ClipTile(
+                        viewport: _viewport,
+                        contentLeft: lead + ghost.startMs * _zoom,
+                        clip: ghost,
+                        layer: layer,
+                        zoom: _zoom,
+                        selected: true,
+                        dimmed: false,
+                        dragEnabled: false,
+                        onTap: () {},
+                        onTrimStart: (_) {},
+                        onTrimEnd: (_) {},
+                        onTrimDone: () {},
+                        onMoveStart: () {},
+                        onMoveUpdate: (_, __) {},
+                        onMoveEnd: () {},
+                        badge: formatTimecode(ghost.startMs, tenths: true),
+                      ),
                     ),
                   ),
                 ),
+              ..._seams(project, layer, lead),
             ],
           ),
         ),
       ),
     );
+  }
+
+  /// A small mark where two clips of [layer] touch, so the eye can tell
+  /// where one ends and the next begins.
+  Iterable<Widget> _seams(Project project, Layer layer, double lead) sync* {
+    final edit = _edit;
+    final clips = [...layer.clips]..sort((a, b) => a.startMs - b.startMs);
+    final height = _rowHeight(layer);
+    for (var i = 1; i < clips.length; i++) {
+      final before = clips[i - 1];
+      final after = clips[i];
+      if (after.startMs - before.range.endMs > 1) continue;
+      if (edit != null &&
+          (edit.clip.id == before.id || edit.clip.id == after.id)) {
+        continue;
+      }
+      yield Positioned(
+        left: lead + after.startMs * _zoom - _seamWidth / 2,
+        top: (height - _seamHeight) / 2,
+        width: _seamWidth,
+        height: _seamHeight,
+        child: IgnorePointer(
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.onSurface,
+              borderRadius: BorderRadius.circular(_seamWidth / 2),
+            ),
+          ),
+        ),
+      );
+    }
   }
 
   void _handleTrim(
@@ -1031,8 +1159,18 @@ class _ClipTile extends ConsumerWidget {
     required this.onMoveStart,
     required this.onMoveUpdate,
     required this.onMoveEnd,
+    required this.dragEnabled,
+    this.badge,
     super.key,
   });
+
+  /// Whether a finger can drag this clip at once; unselected clips need a
+  /// long press, so that a swipe over them still scrolls.
+  final bool dragEnabled;
+
+  /// Text for the badge instead of the length, such as the start time while
+  /// the clip is dragged.
+  final String? badge;
 
   final TimelineViewport viewport;
   final double contentLeft;
@@ -1104,7 +1242,7 @@ class _ClipTile extends ConsumerWidget {
       if (clip.volume == 0 || layer.muted) Icons.volume_off,
     ];
     final tile = AnimatedOpacity(
-      opacity: dimmed ? 0.35 : 1,
+      opacity: dimmed ? 0.2 : 1,
       duration: const Duration(milliseconds: 90),
       child: DecoratedBox(
         decoration: BoxDecoration(
@@ -1130,9 +1268,10 @@ class _ClipTile extends ConsumerWidget {
                   left: selected ? _handleWidth + 2 : AppSpacing.xs,
                   top: 2,
                   child: _ClipBadge(
-                    text: selected
-                        ? formatTimecode(clip.durationMs, tenths: true)
-                        : null,
+                    text: badge ??
+                        (selected
+                            ? formatTimecode(clip.durationMs, tenths: true)
+                            : null),
                     icons: badges,
                   ),
                 ),
@@ -1155,6 +1294,26 @@ class _ClipTile extends ConsumerWidget {
         ),
       ),
     );
+    final gestures = GestureDetector(
+      onTap: onTap,
+      onLongPressStart: (_) => onMoveStart(),
+      onLongPressMoveUpdate: (d) =>
+          onMoveUpdate(d.offsetFromOrigin.dx, d.localPosition.dy),
+      onLongPressEnd: (_) => onMoveEnd(),
+      child: _DragMove(
+        touch: dragEnabled,
+        onStart: onMoveStart,
+        onUpdate: onMoveUpdate,
+        onEnd: onMoveEnd,
+        // A hair of space on each side, so clips that touch still read
+        // as two.
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 1),
+          child: tile,
+        ),
+      ),
+    );
+
     // Each clip paints into its own layer: scrolling and the moving
     // playhead then move pictures instead of repainting them.
     return RepaintBoundary(
@@ -1167,17 +1326,31 @@ class _ClipTile extends ConsumerWidget {
               formatTimelineTime(clip.startMs),
               formatTimelineTime(clip.durationMs),
             ),
-        child: GestureDetector(
-          onTap: onTap,
-          onLongPressStart: (_) => onMoveStart(),
-          onLongPressMoveUpdate: (d) =>
-              onMoveUpdate(d.offsetFromOrigin.dx, d.localPosition.dy),
-          onLongPressEnd: (_) => onMoveEnd(),
-          child: _MouseMove(
-            onStart: onMoveStart,
-            onUpdate: onMoveUpdate,
-            onEnd: onMoveEnd,
-            child: tile,
+        child: DragTarget<GalleryItem>(
+          onWillAcceptWithDetails: (_) => galleryAccepts(clip),
+          onAcceptWithDetails: (details) =>
+              giveToClip(context, ref, clip, details.data),
+          builder: (context, hovering, _) => Stack(
+            fit: StackFit.passthrough,
+            children: [
+              gestures,
+              if (hovering.isNotEmpty)
+                Positioned.fill(
+                  child: IgnorePointer(
+                    child: DecoratedBox(
+                      decoration: BoxDecoration(
+                        color: scheme.primary.withValues(alpha: 0.28),
+                        borderRadius: BorderRadius.circular(_clipRadius),
+                        border: Border.all(color: scheme.primary, width: 3),
+                      ),
+                      child: Icon(
+                        Icons.add_circle,
+                        color: scheme.onPrimaryContainer,
+                      ),
+                    ),
+                  ),
+                ),
+            ],
           ),
         ),
       ),
@@ -1193,40 +1366,83 @@ class _ClipTile extends ConsumerWidget {
       };
 }
 
-/// Dragging a clip with a mouse moves it at once; touch needs a long press
-/// so that a swipe still scrolls the timeline.
-class _MouseMove extends StatefulWidget {
-  const _MouseMove({
+/// Dragging a clip moves it at once with a mouse, and with a finger when the
+/// clip is selected; an unselected clip needs a long press so that a swipe
+/// still scrolls the timeline.
+class _DragMove extends StatefulWidget {
+  const _DragMove({
+    required this.touch,
     required this.onStart,
     required this.onUpdate,
     required this.onEnd,
     required this.child,
   });
 
+  /// Whether a finger or stylus may drag, apart from the mouse.
+  final bool touch;
   final VoidCallback onStart;
   final void Function(double totalDx, double localY) onUpdate;
   final VoidCallback onEnd;
   final Widget child;
 
   @override
-  State<_MouseMove> createState() => _MouseMoveState();
+  State<_DragMove> createState() => _DragMoveState();
 }
 
-class _MouseMoveState extends State<_MouseMove> {
+class _DragMoveState extends State<_DragMove> {
+  // Screen coordinates: the clip's own stay put while the view scrolls
+  // under a held finger, so they would count that scroll twice.
   double _startX = 0;
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      supportedDevices: const {PointerDeviceKind.mouse},
+      supportedDevices: widget.touch
+          ? const {
+              PointerDeviceKind.mouse,
+              PointerDeviceKind.touch,
+              PointerDeviceKind.stylus,
+            }
+          : const {PointerDeviceKind.mouse},
       onPanStart: (d) {
-        _startX = d.localPosition.dx;
+        _startX = d.globalPosition.dx;
         widget.onStart();
       },
-      onPanUpdate: (d) =>
-          widget.onUpdate(d.localPosition.dx - _startX, d.localPosition.dy),
+      onPanUpdate: (d) => widget.onUpdate(
+        d.globalPosition.dx - _startX,
+        d.localPosition.dy,
+      ),
       onPanEnd: (_) => widget.onEnd(),
+      onPanCancel: widget.onEnd,
       child: MouseRegion(cursor: SystemMouseCursors.grab, child: widget.child),
+    );
+  }
+}
+
+/// A clip held in the air by a finger: a shadow under it and a touch larger.
+class _Lifted extends StatelessWidget {
+  const _Lifted({required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    return Transform.scale(
+      scaleY: 1.06,
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(_clipRadius),
+          boxShadow: [
+            BoxShadow(
+              color: scheme.shadow.withValues(alpha: 0.4),
+              blurRadius: 10,
+              offset: const Offset(0, 3),
+            ),
+          ],
+        ),
+        child: child,
+      ),
     );
   }
 }
@@ -1253,6 +1469,7 @@ class _TrimHandle extends StatelessWidget {
         cursor: SystemMouseCursors.resizeLeftRight,
         child: GestureDetector(
           behavior: HitTestBehavior.opaque,
+          onHorizontalDragStart: (_) => HapticFeedback.selectionClick(),
           onHorizontalDragUpdate: (d) => onDrag(d.delta),
           onHorizontalDragEnd: (_) => onDone(),
           child: Container(

@@ -1,4 +1,5 @@
 import 'package:cutter/features/editor/domain/clip.dart';
+import 'package:cutter/features/editor/domain/clip_text.dart';
 import 'package:cutter/features/editor/domain/clip_transition.dart';
 import 'package:cutter/features/editor/domain/editor_result.dart';
 import 'package:cutter/features/editor/domain/layer.dart';
@@ -155,25 +156,84 @@ void main() {
       expect(_find(project, 'b').fadeInMs, 1000);
     });
 
-    test('is refused with no neighbour or a bad length', () async {
+    test('at the end it joins the clip after', () async {
+      final repository = InMemoryProjectRepository([
+        _project([_clip('a', 0, 4000), _clip('b', 4000, 3000)]),
+      ]);
+
+      final result = await ApplyTransition(repository)(
+        projectId: 'p',
+        clipId: 'a',
+        kind: TransitionKind.pushLeft,
+        durationMs: 600,
+        edge: TransitionEdge.end,
+      );
+
+      final project = (result as Ok<Project>).value;
+      expect(
+        transitionBetween(_find(project, 'a'), _find(project, 'b')),
+        TransitionKind.pushLeft,
+      );
+    });
+
+    test('at both ends it joins the clips on each side', () async {
+      final repository = InMemoryProjectRepository([
+        _project([
+          _clip('a', 0, 4000),
+          _clip('b', 4000, 3000),
+          _clip('c', 7000, 3000),
+        ]),
+      ]);
+
+      final result = await ApplyTransition(repository)(
+        projectId: 'p',
+        clipId: 'b',
+        kind: TransitionKind.dip,
+        durationMs: 500,
+        edge: TransitionEdge.both,
+      );
+
+      final project = (result as Ok<Project>).value;
+      expect(_find(project, 'a').animOut, 'fade');
+      expect(_find(project, 'b').animIn, 'fade');
+      expect(_find(project, 'b').animOut, 'fade');
+      expect(_find(project, 'c').animIn, 'fade');
+    });
+
+    test('with no neighbour the clip moves alone at that end', () async {
       final repository = InMemoryProjectRepository([
         _project([_clip('a', 0, 3000), _clip('b', 9000, 3000)]),
+      ]);
+      final apply = ApplyTransition(repository);
+
+      final result = await apply(
+        projectId: 'p',
+        clipId: 'b',
+        kind: TransitionKind.pop,
+        durationMs: 500,
+      );
+
+      final project = (result as Ok<Project>).value;
+      expect(_find(project, 'b').animIn, 'pop');
+      expect(_find(project, 'b').animOut, isNull);
+      expect(_find(project, 'a').animOut, isNull);
+    });
+
+    test('is refused on a title or with a bad length', () async {
+      final repository = InMemoryProjectRepository([
+        _project([
+          _clip('a', 0, 3000),
+          _clip('b', 3000, 3000),
+          _clip('t', 20000, 3000, kind: MediaKind.text)
+              .copyWith(text: const ClipText(content: 'Hi')),
+        ]),
       ]);
       final apply = ApplyTransition(repository);
 
       expect(
         await apply(
           projectId: 'p',
-          clipId: 'b',
-          kind: TransitionKind.dip,
-          durationMs: 500,
-        ),
-        isA<Err<Project>>(),
-      );
-      expect(
-        await apply(
-          projectId: 'p',
-          clipId: 'a',
+          clipId: 't',
           kind: TransitionKind.dip,
           durationMs: 500,
         ),
@@ -216,5 +276,35 @@ void main() {
     expect(b.animIn, isNull);
     expect(b.fadeInMs, 0);
     expect(transitionBetween(a, b), isNull);
+  });
+
+  test('RemoveTransition at the end clears that join only', () async {
+    final repository = InMemoryProjectRepository([
+      _project([
+        _clip('a', 0, 4000),
+        _clip('b', 4000, 3000),
+        _clip('c', 7000, 3000),
+      ]),
+    ]);
+    final apply = ApplyTransition(repository);
+    await apply(
+      projectId: 'p',
+      clipId: 'b',
+      kind: TransitionKind.dip,
+      durationMs: 500,
+      edge: TransitionEdge.both,
+    );
+
+    final result = await RemoveTransition(repository)(
+      projectId: 'p',
+      clipId: 'b',
+      edge: TransitionEdge.end,
+    );
+
+    final project = (result as Ok<Project>).value;
+    expect(_find(project, 'b').animOut, isNull);
+    expect(_find(project, 'c').animIn, isNull);
+    expect(_find(project, 'b').animIn, 'fade');
+    expect(_find(project, 'a').animOut, 'fade');
   });
 }
