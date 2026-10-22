@@ -1,11 +1,20 @@
 import 'dart:async';
 
+import 'package:cutter/core/telemetry/error_throttle.dart';
 import 'package:cutter/core/telemetry/telemetry.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:firebase_performance/firebase_performance.dart';
 import 'package:flutter/foundation.dart';
+
+/// Where this build was distributed: `beta` for a release, `dev` otherwise,
+/// or whatever `--dart-define=CHANNEL=...` says. Reports of a developer's
+/// phone and of a tester's then filter apart in the console.
+const String telemetryChannel = String.fromEnvironment(
+  'CHANNEL',
+  defaultValue: kReleaseMode ? 'beta' : 'dev',
+);
 
 /// Starts Crashlytics, Analytics and Performance.
 ///
@@ -21,6 +30,7 @@ Future<Telemetry> startTelemetry({required bool enabled}) async {
       'build_mode',
       kReleaseMode ? 'release' : (kProfileMode ? 'profile' : 'debug'),
     );
+    await crashlytics.setCustomKey('channel', telemetryChannel);
     await FirebaseAnalytics.instance.setAnalyticsCollectionEnabled(true);
     await FirebasePerformance.instance.setPerformanceCollectionEnabled(true);
     return FirebaseTelemetry._();
@@ -36,6 +46,7 @@ class FirebaseTelemetry implements Telemetry {
 
   final FirebaseCrashlytics _crashlytics = FirebaseCrashlytics.instance;
   final FirebaseAnalytics _analytics = FirebaseAnalytics.instance;
+  final ErrorThrottle _throttle = ErrorThrottle();
 
   @override
   String? installId;
@@ -63,6 +74,12 @@ class FirebaseTelemetry implements Telemetry {
     bool fatal = false,
     Map<String, Object>? keys,
   }) async {
+    // A fatal error always goes; a repeat of a non-fatal one waits its turn.
+    if (!fatal && !_throttle.allow(error, stack)) return;
+    if (_throttle.suppressed > 0) {
+      log('${_throttle.suppressed} repeated errors were not sent');
+      _throttle.suppressed = 0;
+    }
     for (final entry in (keys ?? const <String, Object>{}).entries) {
       await _crashlytics.setCustomKey(
         _key(entry.key),

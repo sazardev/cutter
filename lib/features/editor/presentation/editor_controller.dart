@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:cutter/core/engine/media_engine.dart';
+import 'package:cutter/core/telemetry/telemetry.dart';
 import 'package:cutter/features/editor/data/engine_timeline.dart';
 import 'package:cutter/features/editor/domain/animation_preset.dart';
 import 'package:cutter/features/editor/domain/canvas.dart';
@@ -161,6 +162,8 @@ class EditorController extends Notifier<AsyncValue<EditorUiState>> {
     final loaded = state.valueOrNull?.project;
     if (loaded != null) {
       await _repairSourceSizes(loaded);
+      _describeProject(loaded);
+      ref.read(telemetryProvider).log('editor opened');
       await _openCheckpoints(loaded.id);
     }
   }
@@ -1149,3 +1152,16 @@ class EditorController extends Notifier<AsyncValue<EditorUiState>> {
     }
   }
 }
+  /// Gives the crash reports the size of the project (counts only, no
+  /// names), to tell a crash on a big project from one on a small one.
+  void _describeProject(Project project) {
+    final clips = project.layers.fold<int>(0, (n, l) => n + l.clips.length);
+    ref.read(telemetryProvider).setKey(
+          'project',
+          'layers=${project.layers.length} clips=$clips '
+              'canvas=${project.canvas.width}x${project.canvas.height} '
+              'ms=${project.durationMs}',
+        );
+  }
+
+        _describeProject(tidy);

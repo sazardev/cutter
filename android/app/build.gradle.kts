@@ -1,3 +1,5 @@
+import com.google.firebase.crashlytics.buildtools.gradle.CrashlyticsExtension
+
 plugins {
     id("com.android.application")
     // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
@@ -5,6 +7,9 @@ plugins {
     // Reads google-services.json: Firebase Analytics, Crashlytics and
     // Performance get their project and app IDs from it.
     id("com.google.gms.google-services")
+    // Uploads the R8 mapping and the native symbols of every release build,
+    // so Crashlytics shows Java names and Rust function names.
+    id("com.google.firebase.crashlytics")
 }
 
 android {
@@ -44,6 +49,12 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro",
             )
+            extensions.configure<CrashlyticsExtension>("firebaseCrashlytics") {
+                mappingFileUploadEnabled = true
+                // Symbols come from the unstripped libraries, before AGP
+                // strips them for the APK (see `debug` in rust/Cargo.toml).
+                nativeSymbolUploadEnabled = true
+            }
         }
     }
 }

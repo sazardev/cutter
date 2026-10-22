@@ -5,6 +5,7 @@ import 'package:cutter/core/db/app_database.dart';
 import 'package:cutter/core/engine/media_engine.dart';
 import 'package:cutter/core/engine/rust_media_engine.dart';
 import 'package:cutter/core/settings/settings_store.dart';
+import 'package:cutter/core/telemetry/engine_watch.dart';
 import 'package:cutter/core/telemetry/firebase_telemetry.dart';
 import 'package:cutter/core/telemetry/install_id.dart';
 import 'package:cutter/core/telemetry/telemetry.dart';
@@ -25,6 +26,25 @@ const bool _telemetryEnabled = !kDebugMode || bool.fromEnvironment('TELEMETRY');
 
 /// The reporter the startup code uses; replaced as soon as Firebase starts.
 Telemetry _telemetry = const NoopTelemetry();
+
+/// Whether startup finished and the editor is about to show. Before it, an
+/// uncaught error means the app could not start (fatal); after it the app is
+/// still running, so the same error is a non-fatal report and the crash-free
+/// numbers stay true.
+bool _booted = false;
+
+/// Reports an error nobody caught: fatal only while the app is starting.
+void _reportUncaught(Object error, StackTrace stack, String stage) {
+  unawaited(
+    _telemetry.recordError(
+      error,
+      stack,
+      reason: 'uncaught error',
+      fatal: !_booted,
+      keys: {'stage': stage, 'handled': _booted},
+    ),
+  );
+}
 
 /// Opens the database or stops with a clear message: the editor cannot work
 /// without its source of truth.
@@ -56,27 +76,13 @@ void main() {
         );
       };
       PlatformDispatcher.instance.onError = (error, stack) {
-        unawaited(
-          _telemetry.recordError(
-            error,
-            stack,
-            fatal: true,
-            keys: {'stage': 'platform'},
-          ),
-        );
+        _reportUncaught(error, stack, 'platform');
         return true;
       };
       await _start();
     },
     (error, stack) {
-      unawaited(
-        _telemetry.recordError(
-          error,
-          stack,
-          fatal: true,
-          keys: {'stage': 'startup'},
-        ),
-      );
+      _reportUncaught(error, stack, _booted ? 'zone' : 'startup');
       debugPrint('Uncaught error: $error\n$stack');
     },
   );
@@ -112,6 +118,8 @@ Future<void> _start() async {
   final homePreferences =
       await DriftHomePreferencesRepository(settingsStore).load();
 
+  _booted = true;
+  EngineWatch(engine: engine, telemetry: _telemetry).start();
   _telemetry
     ..setKey('stage', 'running')
     ..log('app ready');

@@ -30,6 +30,16 @@ pub enum Level {
     Error,
 }
 
+/// The time of day (UTC) as `HH:MM:SS.mmm`, the start of every log line.
+fn clock() -> String {
+    let ms = SystemTime::now()
+        .duration_since(UNIX_EPOCH)
+        .map(|d| d.as_millis() % 86_400_000)
+        .unwrap_or(0);
+    let (h, m, s, milli) = (ms / 3_600_000, ms / 60_000 % 60, ms / 1000 % 60, ms % 1000);
+    format!("{h:02}:{m:02}:{s:02}.{milli:03}")
+}
+
 /// Records one log line; it also goes to stderr, which `flutter run` shows.
 pub fn log(level: Level, message: impl AsRef<str>) {
     let tag = match level {
@@ -37,18 +47,50 @@ pub fn log(level: Level, message: impl AsRef<str>) {
         Level::Warn => "W",
         Level::Error => "E",
     };
-    let ms = SystemTime::now()
-        .duration_since(UNIX_EPOCH)
-        .map(|d| d.as_millis() % 86_400_000)
-        .unwrap_or(0);
-    let (h, m, s, milli) = (ms / 3_600_000, ms / 60_000 % 60, ms / 1000 % 60, ms % 1000);
-    let line = format!("{h:02}:{m:02}:{s:02}.{milli:03} {tag} {}", message.as_ref());
+    let line = format!("{} {tag} {}", clock(), message.as_ref());
     eprintln!("cutter-engine {line}");
     let mut log = LOG.lock();
     log.push_back(line);
     while log.len() > LOG_LINES {
         log.pop_front();
     }
+}
+
+/// Makes a panic leave a line in the log before the default hook runs. A
+/// panic on one of the engine's own threads (preview, mixer, audio) kills
+/// that thread and nothing else, and on Android stderr goes nowhere: without
+/// this line the Dart side, and so the crash report, never hears of it.
+pub fn install_panic_hook() {
+    static ONCE: std::sync::Once = std::sync::Once::new();
+    ONCE.call_once(|| {
+        let previous = std::panic::take_hook();
+        std::panic::set_hook(Box::new(move |info| {
+            let thread = std::thread::current();
+            let place = info
+                .location()
+                .map(|l| format!("{}:{}", l.file(), l.line()))
+                .unwrap_or_else(|| "unknown place".to_string());
+            let payload = info.payload();
+            let message = payload
+                .downcast_ref::<&str>()
+                .map(|s| s.to_string())
+                .or_else(|| payload.downcast_ref::<String>().cloned())
+                .unwrap_or_default();
+            // `try_lock`: a panic raised while the log is held must not wait
+            // for itself.
+            if let Some(mut log) = LOG.try_lock() {
+                log.push_back(format!(
+                    "{} E thread '{}' panicked at {place}: {message}",
+                    clock(),
+                    thread.name().unwrap_or("unnamed"),
+                ));
+                while log.len() > LOG_LINES {
+                    log.pop_front();
+                }
+            }
+            previous(info);
+        }));
+    });
 }
 
 pub fn info(message: impl AsRef<str>) {
@@ -110,5 +152,31 @@ pub fn snapshot() -> EngineDiagnostics {
         cache_bytes: CACHE_BYTES.load(Ordering::Relaxed).max(0) as u64,
         preview_scale: PREVIEW_SCALE.load(Ordering::Relaxed) as f64 / 1000.0,
         log: LOG.lock().iter().cloned().collect(),
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn a_panic_on_another_thread_leaves_a_line_in_the_log() {
+        install_panic_hook();
+
+        let result = std::thread::Builder::new()
+            .name("probe-thread".into())
+            .spawn(|| panic!("the preview broke"))
+            .unwrap()
+            .join();
+
+        assert!(result.is_err());
+        let line = snapshot()
+            .log
+            .into_iter()
+            .find(|l| l.contains("the preview broke"))
+            .expect("the panic is in the log");
+        assert!(line.contains(" E "), "{line}");
+        assert!(line.contains("thread 'probe-thread' panicked at"), "{line}");
+        assert!(line.contains("diagnostics.rs"), "{line}");
     }
 }

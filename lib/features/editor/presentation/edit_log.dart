@@ -1,6 +1,7 @@
 import 'dart:collection';
 import 'dart:developer' as developer;
 
+import 'package:cutter/core/telemetry/telemetry.dart';
 import 'package:cutter/features/editor/domain/editor_result.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -37,8 +38,16 @@ class EditLogEntry {
 }
 
 /// The latest edits of the session, for the diagnostics panel; each one is
-/// also written to the developer log (`flutter logs`, DevTools).
+/// also written to the developer log (`flutter logs`, DevTools) and left as a
+/// crash-report breadcrumb, so a crash shows the edits that led to it. Only
+/// the kind of edit, its time and its outcome: nothing the user typed.
 class EditLog extends ChangeNotifier {
+  /// Creates the log; edits go to [telemetry] as breadcrumbs.
+  EditLog({this.telemetry = const NoopTelemetry()});
+
+  /// Where the breadcrumbs go.
+  final Telemetry telemetry;
+
   static const _capacity = 200;
 
   final Queue<EditLogEntry> _entries = Queue();
@@ -62,9 +71,12 @@ class EditLog extends ChangeNotifier {
       _entries.removeFirst();
     }
     developer.log(entry.toString(), name: 'cutter.edit');
+    telemetry.log('edit $entry');
     notifyListeners();
   }
 }
 
 /// The edit log of the running app.
-final editLogProvider = ChangeNotifierProvider<EditLog>((ref) => EditLog());
+final editLogProvider = ChangeNotifierProvider<EditLog>(
+  (ref) => EditLog(telemetry: ref.read(telemetryProvider)),
+);
