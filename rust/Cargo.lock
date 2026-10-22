@@ -517,7 +517,7 @@ dependencies = [
 
 [[package]]
 name = "cutter_engine"
-version = "0.5.1"
+version = "0.6.0"
 dependencies = [
  "ab_glyph",
  "anyhow",

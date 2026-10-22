@@ -2,6 +2,30 @@
 
 All notable changes to Cutter. Newest first.
 
+## [0.6.0] - 2026-10-22
+
+### Added
+- Timeline on touch: an Arrange menu on the clip bar (snap to the previous or
+  next clip, send to start, send to end); a selected clip drags at once with a
+  finger, lifted, with its start time; the view scrolls by itself when a clip or
+  trim handle is held near an edge; a moved clip slides along its neighbours and
+  trims stop at them; touching clips show a gap and a seam mark; trim handles
+  are 20 dp.
+- Effects gallery: transitions, filters, effects and animation presets as cards
+  that are tapped or dragged onto any clip; the Animations tab has the user's
+  presets, a whole-layer switch and length sliders; a card held in the air
+  plays its motion. The Filters tool shows its filters as the same cards.
+
+### Changed
+- Imported sound goes to the project's one sound layer, one after another, and
+  a sound layer is made only when there is none; "Add layer" still makes a new
+  one on purpose.
+
+### Fixed
+- The audio output is opened again every second while playing if the device was
+  missing or the stream died, and it reports the device and errors in
+  Rendimiento.
+
 ## [0.5.2] - 2026-10-22
 
 ### Added
